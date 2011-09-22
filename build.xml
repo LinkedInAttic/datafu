@@ -1,0 +1,307 @@
+<project name="datafu" basedir="." default="all"
+         xmlns:ivy="antlib:org.apache.ivy.ant">
+  <property file="build.properties" />
+
+  <property name="name" value="datafu" />
+  <property name="display.name" value="DataFu" />
+  <property name="author" value="Matthew Hayes, Sam Shah" />
+  <property environment="env" />
+  
+  <property name="ivy.jar.dir" value="${basedir}/ivy" />
+	<property name="ivy.jar.file" value="${ivy.jar.dir}/ivy-2.2.0.jar" />
+  
+  <target name="all" depends="clean, jar, test, srcjar, docs" description="Build all artifacts." />
+
+  <!-- TODO need a release target -->
+    
+  <target name="install-ivy" description="install ivy">
+   	<path id="ivy.lib.path">
+   	  <pathelement location="${ivy.jar.file}"/>
+   	</path>
+   	<taskdef resource="org/apache/ivy/ant/antlib.xml"
+             uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+  </target>
+  
+  <target name="ivy-resolve" depends="install-ivy" description="retreive dependencies with ivy">
+    <ivy:retrieve/>
+  </target>
+  
+  <target name="check-licenses" description="checks that source files have license header">
+    <exec executable="./check-license-headers.sh" failonerror="true"/>
+  </target>
+  
+  <target name="clean-cache" depends="install-ivy" description="clean the ivy cache">
+  	<ivy:cleancache />
+  </target>
+  
+  <path id="main-classpath">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <pathelement path="${classes.dir}" />
+  </path>  
+  
+  <path id="cobertura.classpath">
+    <fileset dir="${cobertura.dir}">
+      <include name="cobertura.jar" />
+      <include name="lib/**/*.jar" />
+    </fileset>
+  </path>
+  
+  <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+  
+  <path id="base-test-classpath">    
+    <fileset dir="${lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <fileset dir="${basedir}/otherlibs">
+      <include name="*.jar" />
+    </fileset>
+    <pathelement path="${pigtestclasses.dir}" />
+    <pathelement path="${unittestclasses.dir}" />
+  </path>
+  
+  <path id="test-classpath">
+    <path refid="base-test-classpath" />
+    <!-- Use non-instrumented JARs for normal testing, otherwise it is 15% slower to run the tests -->
+    <fileset dir="${dist.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+  
+  <path id="instrumented-test-classpath">
+    <path refid="base-test-classpath" />
+    <path refid="cobertura.classpath" />
+    <!-- Use instrumented JARs -->
+    <fileset dir="${instrumented.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+  
+  <macrodef name="replace-dir">
+    <attribute name="dir" />
+    <sequential>
+      <delete dir="@{dir}" />
+      <mkdir dir="@{dir}" />
+    </sequential>
+  </macrodef>
+  
+  <target name="clean" description="Delete generated files.">
+    <delete dir="${lib.dir}" />
+    <delete dir="${dist.dir}" />
+    <delete dir="${docs.dir}" />
+    <delete dir="${report.dir}" />
+    <delete dir="${coveragereport.dir}"/>
+    <delete dir="${instrumented.dir}"/>
+    <delete dir="test-output"/>
+    <delete file="cobertura.ser"/>
+  </target>
+  
+  <target name="build" depends="ivy-resolve" description="Compile main source tree java files">
+    <replace-dir dir="${classes.dir}" />
+    <javac destdir="${classes.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
+      <src path="${java.dir}" />
+      <exclude name="datafu/linkedin/**"/>
+      <classpath refid="main-classpath" />
+    </javac>
+  </target>
+  
+  <target name="build-unit-tests" depends="build" description="Compile unit test classes">
+    <replace-dir dir="${unittestclasses.dir}" />
+    <javac destdir="${unittestclasses.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
+      <src path="${unittestsrc.dir}" />
+      <classpath refid="main-classpath" />
+    </javac>
+  </target>
+  
+  <target name="build-pig-tests" depends="build, build-unit-tests" description="Compile pig test classes">
+    <replace-dir dir="${pigtestclasses.dir}" />
+    <copy todir="${pigtestclasses.dir}">
+      <fileset dir="${pigtestsrc.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+    <javac destdir="${pigtestclasses.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
+      <src path="${pigtestsrc.dir}" />
+      <classpath refid="test-classpath" />
+    </javac>
+  </target>
+  
+  <target name="jar-core" depends="build" description="Build the JAR file with the core code from the library">
+    <delete file="${dist.dir}/${name}-${curr.release}.jar" />
+    <jar destfile="${dist.dir}/${name}-${curr.release}.jar">
+      <fileset dir="${classes.dir}">
+        <include name="**/*.*" />
+      </fileset>
+    </jar>
+  </target>
+  
+  <target name="jar-fastutil" depends="jar-core" description="Builds the JAR with fastutil included">
+    <delete file="${dist.dir}/${name}-${curr.release}-orig.jar" />
+    <move file="${dist.dir}/${name}-${curr.release}.jar" tofile="${dist.dir}/${name}-${curr.release}-orig.jar" />
+    <java jar="${tools.dir}/autojar.jar" fork="true">
+      <arg line="-baeq -o ${dist.dir}/${name}-${curr.release}.jar -c ${lib.dir}/fastutil-6.3.jar ${dist.dir}/${name}-${curr.release}-orig.jar" />
+    </java>
+    <delete file="${dist.dir}/${name}-${curr.release}-orig.jar" />
+  </target>
+    
+  <target name="jar" depends="jar-fastutil" description="Builds the final JAR">
+    <delete file="${dist.dir}/${name}-${curr.release}-orig.jar" />
+    <move file="${dist.dir}/${name}-${curr.release}.jar" tofile="${dist.dir}/${name}-${curr.release}-orig.jar" />
+    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="tools/jarjar-1.1.jar"/>
+    <jarjar jarfile="${dist.dir}/${name}-${curr.release}.jar">
+        <zipfileset src="${dist.dir}/${name}-${curr.release}-orig.jar"/>
+        <rule pattern="it.unimi.dsi.fastutil.**" result="datafu.it.unimi.dsi.fastutil.@1"/>
+    </jarjar>
+    <delete file="${dist.dir}/${name}-${curr.release}-orig.jar" />
+  </target>
+    
+  <target name="jar-instrumented" depends="jar" description="Build an instrumented jar">
+    <delete file="cobertura.ser" />
+    <replace-dir dir="${instrumented.dir}" />
+    <cobertura-instrument todir="${instrumented.dir}">
+      <includeClasses regex=".*datafu.*" />
+      <excludeClasses regex=".*fastutil.*" />
+      <excludeClasses regex=".*test.*" />
+      <!-- Code coverage on LinkedIn specific code is not a priority right now -->
+      <excludeClasses regex=".*linkedin.*"/>
+      <instrumentationClasspath>
+        <pathelement location="${dist.dir}"/>
+      </instrumentationClasspath>
+    </cobertura-instrument>
+    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="tools/jarjar-1.1.jar"/>
+    <delete file="${instrumented.dir}/${name}-${curr.release}.jar" />
+    <!-- Classes are now instrumented, but we need to merge back with original JAR to get back what was lost, since
+         we don't instrument everything and therefore classes are missing form the instrumented directory. -->
+    <jarjar jarfile="${instrumented.dir}/${name}-${curr.release}.jar">      
+      <zipfileset src="${dist.dir}/${name}-${curr.release}.jar"/>        
+      <!-- Classes in instrumented directory come last so they take precedence over the classes in the JAR.
+           We need to include the JAR so we get the fastutil classes.  The fastutil classes are not instrumented (by design),
+           so they are not in the instrumented directory. -->
+      <fileset dir="${instrumented.dir}" />
+    </jarjar>
+  </target>
+  
+  <target name="test-unit" depends="build-unit-tests, jar" description="Runs the unit tests">
+    <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
+    <testng classpathref="test-classpath"
+            outputDir="${report.unit.dir}" >
+      <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
+      <classfileset dir="${unittestclasses.dir}" includes="**/*.class" />
+    </testng>
+  </target>
+  
+  <target name="test-pig" depends="build-pig-tests, jar" description="Runs the pig tests">
+    <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
+    <testng classpathref="test-classpath"
+            outputDir="${report.pig.dir}" verbose="2">
+      <jvmarg value="-Xmx1G" />
+      <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
+      <classfileset dir="${pigtestclasses.dir}" includes="**/*.class" />
+    </testng>
+  </target>
+  
+  <target name="test-instrumented" depends="build-pig-tests, build-unit-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
+    <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
+    <testng classpathref="instrumented-test-classpath"
+            outputDir="${report.unit.dir}" >
+      <jvmarg value="-Xmx1G" />
+      <sysproperty key="datafu.jar.dir" value="${instrumented.dir}" />
+      <classfileset dir="${pigtestclasses.dir}" includes="**/*.class" />
+      <classfileset dir="${unittestclasses.dir}" includes="**/*.class" />
+    </testng>
+  </target>
+  
+  <target name="coverage" depends="test-instrumented" description="Generates the code coverage report">
+    <replace-dir dir="${coveragereport.dir}" />
+    <cobertura-report format="html" destdir="${coveragereport.dir}">
+      <fileset dir="${java.dir}">
+        <include name="**/*.java" />
+      </fileset>
+    </cobertura-report>
+    
+    <!-- Build a WAR containing the coverage report which can be deployed to tomcat -->
+    <mkdir dir="${dist.dir}" />
+    <war destfile="${dist.dir}/${name}-coverage.war"  needxmlfile="false">
+      <fileset dir="${coveragereport.dir}" />
+    </war>
+  </target>
+  
+  <target name="test" depends="test-unit, test-pig" description="Runs all tests">
+  </target>
+  
+  <target name="srcjar" description="Build source jar file">
+    <mkdir dir="${dist.dir}" />
+    <jar destfile="${dist.dir}/${name}-${curr.release}-sources.jar">
+      <fileset dir="${java.dir}">
+        <include name="**/*.java" />
+      </fileset>
+    </jar>
+  </target>
+  
+  <macrodef name="make-javadocs">
+    <attribute name="dir" />
+    <attribute name="packagenames" />
+    <attribute name="javadir" />
+    <sequential>
+      <replace-dir dir="@{dir}" />
+      <javadoc sourcepath="@{javadir}" destdir="@{dir}" windowtitle="${display.name}" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}">
+        <doctitle>${display.name}</doctitle>
+        <bottom>${author}</bottom>
+        <classpath refid="main-classpath" />
+      </javadoc>
+    </sequential>
+  </macrodef>
+  
+  <target name="docs" description="Create complete Javadoc documentation">
+    <delete dir="${javadoc.dir}" />
+    <make-javadocs dir="${javadoc.dir}" packagenames="*" javadir="${java.dir}"/>
+    
+    <!-- Make javadoc JAR -->    
+    <mkdir dir="${dist.dir}" />
+    <jar destfile="${dist.dir}/${name}-${curr.release}-javadoc.jar">
+      <fileset dir="${javadoc.dir}">
+        <include name="**/*.*" />
+      </fileset>
+    </jar>
+    
+    <!-- Make a WAR for the docs so can be deployed to tomcat -->
+    <mkdir dir="${dist.dir}" />
+    <war destfile="${dist.dir}/${name}-docs.war"  needxmlfile="false">
+      <fileset dir="${javadoc.dir}" />
+    </war>
+  </target>
+    
+  <macrodef name="create-release-artifacts">
+    <attribute name="version" />
+    <sequential>
+    <antcall target="all"/>
+    <zip destfile="${dist.dir}/${name}-@{version}.zip">
+      <zipfileset dir="." prefix="${name}-@{version}" includes="**">
+        <exclude name="${dist.dir}/classes/**"/>
+		<exclude name="${dist.dir}/pigtestclasses/**"/>
+		<exclude name="${dist.dir}/unittestclasses/**"/>
+        <exclude name=".git*/**"/>
+		<exclude name="input"/>
+		<exclude name="pigunit-input-overriden.txt"/>
+      </zipfileset>
+    </zip>
+    <tar destfile="${dist.dir}/${name}-@{version}.tar.gz" compression="gzip" longfile="gnu">
+      <tarfileset dir="." prefix="${name}-@{version}" includes="**">
+        <exclude name="${dist.dir}/classes/**"/>
+		<exclude name="${dist.dir}/pigtestclasses/**"/>
+		<exclude name="${dist.dir}/unittestclasses/**"/>
+        <exclude name="${dist.dir}/*.zip"/>
+        <exclude name=".git*/**"/>
+		<exclude name="input"/>
+		<exclude name="pigunit-input-overriden.txt"/>
+      </tarfileset>
+    </tar>
+    </sequential>
+  </macrodef>
+
+  <target name="release" description="Create a release zip file with everything pre-built.">
+    <create-release-artifacts version="${curr.release}" />
+  </target>
+
+</project>

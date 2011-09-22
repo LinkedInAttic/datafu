@@ -1,0 +1,8 @@
+dist/
+docs/
+input
+lib/
+report/
+test-output/
+.pigunit-input-overriden.txt.crc
+pigunit-input-overriden.txt

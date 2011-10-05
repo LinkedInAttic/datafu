@@ -98,6 +98,42 @@ public class BagTests extends PigTests
     
     test.assertOutput("data",input,"data4",output);
   }
+  
+  @Test
+  public void unorderedPairsTest2() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/unorderedPairsTests2.pig");
+        
+    this.writeLinesToFile("input", "1\t{(1),(2),(3),(4),(5)}");
+    
+    String[] output = {
+        "(1,2)",
+        "(1,3)",
+        "(1,4)",
+        "(1,5)",
+        "(2,3)",
+        "(2,4)",
+        "(2,5)",
+        "(3,4)",
+        "(3,5)",
+        "(4,5)"
+      };
+    
+    test.runScript();
+    this.getLinesForAlias(test, "data3");
+    
+    this.assertOutput(test, "data3",
+                      "(1,(1),(2))",
+                      "(1,(1),(3))",
+                      "(1,(1),(4))",
+                      "(1,(1),(5))",
+                      "(1,(2),(3))",
+                      "(1,(2),(4))",
+                      "(1,(2),(5))",
+                      "(1,(3),(4))",
+                      "(1,(3),(5))",
+                      "(1,(4),(5))");    
+  }
  
   @Test
   public void bagSplitTest() throws Exception

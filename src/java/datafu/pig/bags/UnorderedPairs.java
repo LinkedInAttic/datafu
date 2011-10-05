@@ -97,11 +97,32 @@ public class UnorderedPairs extends EvalFunc<DataBag>
   public Schema outputSchema(Schema input)
   {
     try {
-      Schema tupleSchema = new Schema();
-      tupleSchema.add(new Schema.FieldSchema("elem1", input.getField(0).schema));
-      tupleSchema.add(new Schema.FieldSchema("elem2", input.getField(0).schema));
+      if (input.size() != 1)
+      {
+        throw new RuntimeException("Expected input to have only a single field");
+      }
+      
+      Schema.FieldSchema inputFieldSchema = input.getField(0);
+
+      if (inputFieldSchema.type != DataType.BAG)
+      {
+        throw new RuntimeException("Expected a BAG as input");
+      }
+      
+      Schema inputBagSchema = inputFieldSchema.schema;
+
+      if (inputBagSchema.getField(0).type != DataType.TUPLE)
+      {
+        throw new RuntimeException(String.format("Expected input bag to contain a TUPLE, but instead found %s",
+                                                 DataType.findTypeName(inputBagSchema.getField(0).type)));
+      }      
+      
+      Schema ouputTupleSchema = new Schema();
+      ouputTupleSchema.add(new Schema.FieldSchema("elem1", inputBagSchema.getField(0).schema.clone(), DataType.TUPLE));
+      ouputTupleSchema.add(new Schema.FieldSchema("elem2", inputBagSchema.getField(0).schema.clone(), DataType.TUPLE));
       return new Schema(new Schema.FieldSchema(getSchemaName(this.getClass().getName().toLowerCase(), input),
-              tupleSchema, DataType.BAG));
+                                               ouputTupleSchema, 
+                                               DataType.BAG));
     }
     catch (Exception e) {
       return null;

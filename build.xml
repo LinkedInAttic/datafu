@@ -10,7 +10,7 @@
   <property name="ivy.jar.dir" value="${basedir}/ivy" />
 	<property name="ivy.jar.file" value="${ivy.jar.dir}/ivy-2.2.0.jar" />
   
-  <target name="all" depends="clean, jar, test, srcjar, docs" description="Build all artifacts." />
+  <target name="all" depends="clean, jar, srcjar, docs, coverage" description="Build all artifacts." />
 
   <!-- TODO need a release target -->
     

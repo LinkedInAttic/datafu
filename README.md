@@ -8,9 +8,11 @@ DataFu is a collection of user-defined functions for working with large-scale da
 * Convenience bag functions (e.g., set operations, enumerating bags, etc)
 * Convenience utility functions (e.g., assertions, easier writing of
 EvalFuncs)
-* and [more](http://localhost/~mhayes/sna/datafu/javadoc/0.0.1/)...
+* and [more](http://sna-projects.com/datafu/javadoc/0.0.1/)...
 
 Each function is unit tested and code coverage is being tracked for the entire library.
+
+[http://sna-projects.com/datafu/](http://sna-projects.com/datafu/)
 
 ## What can you do with it?
 

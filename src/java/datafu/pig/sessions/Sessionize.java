@@ -46,7 +46,7 @@ import com.google.common.collect.ImmutableList;
  * 
  * %declare TIME_WINDOW  30m
  * 
- * define Sessionize com.linkedin.pig.date.Sessionize('$TIME_WINDOW');
+ * define Sessionize datafu.pig.sessions.Sessionize('$TIME_WINDOW');
  *
  * -- sessionize the visit stream
  * VIEWS = group VIEWS by member_id;

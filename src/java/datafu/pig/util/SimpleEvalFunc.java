@@ -30,7 +30,7 @@ import org.apache.pig.data.Tuple;
   this:
   <pre>
   {@code
-package com.linkedin.pig;
+package datafu.pig.util;
 
 import java.io.IOException;
 
@@ -69,7 +69,7 @@ public class TRIM extends EvalFunc<String>
   checking and exception wrapping for you. So your code would be:
   <pre>
   {@code
-package com.linkedin.pig;
+package datafu.pig.util;
 
 public class TRIM2 extends SimpleEvalFunc<String> 
 {
@@ -89,10 +89,10 @@ grunt> a = load 'test' as (x:chararray, y:chararray); dump a;
 grunt> b = foreach a generate TRIM2(x); dump b;
   (1)
 grunt> c = foreach a generate TRIM2((int)x); dump c;
-  com.linkedin.pig.TRIM2(java.lang.String): argument type 
+  datafu.pig.util.TRIM2(java.lang.String): argument type 
   mismatch [#1]; expected java.lang.String, got java.lang.Integer
 grunt> d = foreach a generate TRIM2(x, y); dump d;
-  com.linkedin.pig.TRIM2(java.lang.String): got 2 arguments, 
+  datafu.pig.util.TRIM2(java.lang.String): got 2 arguments, 
   expected 1.
 }
   </pre>

@@ -44,7 +44,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * -- the Wilsonian binomial proportion confidence interval for scoring
  * %declare WILSON_ALPHA 0.10
  *
- * define WilsonBinConf      com.linkedin.pig.WilsonBinConf('$WILSON_ALPHA'); 
+ * define WilsonBinConf      datafu.pig.stats.WilsonBinConf('$WILSON_ALPHA'); 
  *
  * bar = FOREACH foo GENERATE WilsonBinConf(successes, totals).lower as score;
  * quux = ORDER bar BY score DESC;

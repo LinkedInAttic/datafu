@@ -136,6 +136,19 @@ public class BagTests extends PigTests
   }
  
   @Test
+  public void bagDistinctTest() throws Exception
+  { 
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagDistinctTest.pig");
+
+     writeLinesToFile("input", "{(1),(1),(2),(),()}");
+
+     test.runScript();
+
+     assertOutput(test, "data2",
+                  "({(),(1),(2)})");
+  }
+ 
+  @Test
   public void bagSplitTest() throws Exception
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagSplitTest.pig",

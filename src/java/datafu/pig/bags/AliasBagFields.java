@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 LinkedIn, Inc
+ * Copyright 2011 LinkedIn, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,83 +13,66 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
- 
+
 package datafu.pig.bags;
 
 import java.io.IOException;
+import java.util.HashMap;
 
-import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
-import org.apache.pig.data.Tuple;
-import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
+import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Enumerate through a bag, replacing each (elem) with (elem, idx). For example:
- * <pre>
- *   {(A),(B),(C),(D)} => {(A,0),(B,1),(C,2),(D,3)}
- * </pre>
- * The first constructor parameter (optional) dictates the starting index of the counting.
- * <p>
+ * Re-alias the fields inside of a bag.  For example:
+ * 
  * Example:
  * <pre>
  * {@code
- * define Enumerate datafu.pig.bags.Enumerate('1');
- *
+ * define AliasBagFields datafu.pig.bags.AliasBagFields();
+ * 
  * -- input:
- * -- ({(100),(200),(300),(400)})
- * input = LOAD 'input' as (B: bag{T: tuple(v2:INT)});
- *
- * -- output:
- * -- ({(100,1),(200,2),(300,3),(400,4)})
- * output = FOREACH input GENERATE Enumerate(B);
- * }
+ * -- ({(a, 1),(b, 2),(c, 3),(d, 4)})
+ * input = LOAD 'input' AS (B: bag {T: tuple(alpha:CHARARRAY, numeric:INT)});
+ * 
+ * output = FOREACH input GENERATE AliasBagFields('[alpha#letter,numeric#decimal]')
+ * 
+ * output schema => (B: bag {T: tuple(letter:CHARARRAY, decimal:INT)});
+ * } 
  * </pre>
+ * 
+ * @param map A string in Pig map format [key1#value1,key2#value2]
  */
-public class Enumerate extends SimpleEvalFunc<DataBag>
+public class AliasBagFields extends SimpleEvalFunc<DataBag>
 {
-  private final int start;
-  private Boolean reverse = false;
-
-  public Enumerate()
+  private final HashMap<String, String> aliasMap = new HashMap<String, String>();
+  
+  public AliasBagFields(String map)
   {
-    this.start = 0;
-  }
-
-  public Enumerate(String start)
-  {
-    this.start = Integer.parseInt(start);
+    if (map == null || map.length() < 2) {
+      throw new RuntimeException("Malformed map string");
+    } else {
+      String fieldString = map.substring(1, map.length()-1);
+      for (String pair : fieldString.split(",")) {
+        String[] tokens = pair.split("#");
+        if (tokens.length != 2) {
+          throw new RuntimeException("Malformed map string");
+        } else {
+          aliasMap.put(tokens[0].replaceAll(" ", ""), tokens[1].replaceAll(" ", ""));
+        }
+      }
+    }
   }
   
-  public Enumerate(String start, String reverse)
-  {
-    this(start);
-    if (reverse != null) this.reverse = Boolean.valueOf(reverse);
-  }
-
   public DataBag call(DataBag inputBag) throws IOException
   {
-    DataBag outputBag = BagFactory.getInstance().newDefaultBag();
-    long i = start;
-    if (reverse) i = inputBag.size() - 1 + start;
-
-    for (Tuple t : inputBag) {
-      Tuple t1 = TupleFactory.getInstance().newTuple(t.getAll());
-      t1.append(i);
-      outputBag.add(t1);
-      if (reverse)
-        i--;
-      else
-        i++;
-    }
-
-    return outputBag;
+    return inputBag;
   }
-
+  
   @Override
   public Schema outputSchema(Schema input)
   {
@@ -115,9 +98,12 @@ public class Enumerate extends SimpleEvalFunc<DataBag>
       }
       
       Schema inputTupleSchema = inputBagSchema.getField(0).schema;
-      
       Schema outputTupleSchema = inputTupleSchema.clone();
-      outputTupleSchema.add(new Schema.FieldSchema("i", DataType.LONG));
+      for (FieldSchema fieldSchema : outputTupleSchema.getFields()) {
+        if (aliasMap.containsKey(fieldSchema.alias)) {
+          fieldSchema.alias = aliasMap.get(fieldSchema.alias);
+        }
+      }
       
       return new Schema(new Schema.FieldSchema(
             getSchemaName(this.getClass().getName().toLowerCase(), input),

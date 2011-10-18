@@ -169,6 +169,28 @@ public class BagTests extends PigTests
   }
   
   @Test
+  public void enumerateWithReverseTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateWithReverseTest.pig");
+       
+    writeLinesToFile("input", 
+                     "10\t{(1),(2),(3)}",
+                     "20\t{(4),(5),(6)}",
+                     "30\t{(7),(8)}",
+                     "40\t{(9),(10),(11)}",
+                     "50\t{(12),(13),(14),(15)}");
+    
+    test.runScript();
+    
+    assertOutput(test, "data4",
+                 "(10,{(1),(2),(3)},5)",
+                 "(20,{(4),(5),(6)},4)",
+                 "(30,{(7),(8)},3)",
+                 "(40,{(9),(10),(11)},2)",
+                 "(50,{(12),(13),(14),(15)},1)");
+  }
+  
+  @Test
   public void enumerateWithStartTest() throws Exception
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateWithStartTest.pig");
@@ -234,5 +256,27 @@ public class BagTests extends PigTests
                  // bag #2
                  "(D,4.0,2)",
                  "(E,5.0,2)");
+  }
+  
+  @Test
+  public void aliasBagFieldsTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/aliasBagFieldsTest.pig");
+    
+    writeLinesToFile("input",
+                     "A\t1\t0",
+                     "B\t2\t0",
+                     "C\t3\t0",
+                     "D\t4\t0",                     
+                     "E\t5\t0");
+    
+    test.runScript();
+    
+    assertOutput(test, "data5",
+                 "(A,1)",
+                 "(B,2)",
+                 "(C,3)",
+                 "(D,4)",
+                 "(E,5)");
   }
 }

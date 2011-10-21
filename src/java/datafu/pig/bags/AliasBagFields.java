@@ -33,13 +33,13 @@ import datafu.pig.util.SimpleEvalFunc;
  * Example:
  * <pre>
  * {@code
- * define AliasBagFields datafu.pig.bags.AliasBagFields();
+ * define AliasBagFields datafu.pig.bags.AliasBagFields('[alpha#letter,numeric#decimal]');
  * 
  * -- input:
  * -- ({(a, 1),(b, 2),(c, 3),(d, 4)})
  * input = LOAD 'input' AS (B: bag {T: tuple(alpha:CHARARRAY, numeric:INT)});
  * 
- * output = FOREACH input GENERATE AliasBagFields('[alpha#letter,numeric#decimal]')
+ * output = FOREACH input GENERATE AliasBagFields(B);
  * 
  * output schema => (B: bag {T: tuple(letter:CHARARRAY, decimal:INT)});
  * } 

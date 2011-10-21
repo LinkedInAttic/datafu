@@ -279,4 +279,32 @@ public class BagTests extends PigTests
                  "(D,4)",
                  "(E,5)");
   }
+
+  @Test
+  public void distinctByTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/distinctByTest.pig");
+    
+    writeLinesToFile("input",
+                     "Z\t1\t0",
+                     "A\t1\t0",
+                     "A\t1\t0",
+                     "B\t2\t0",
+                     "B\t22\t1",
+                     "C\t3\t0",
+                     "D\t4\t0",                     
+                     "E\t5\t0");
+    
+    test.runScript();
+    
+    assertOutput(test, "data3", "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
+    /*
+                 "(A,1)",
+                 "(B,2)",
+                 "(C,3)",
+                 "(D,4)",
+                 "(E,5)");
+                 */
+  }
+
 }

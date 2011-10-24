@@ -30,6 +30,21 @@ import datafu.pig.util.SimpleEvalFunc;
 
 /**
  *
+ * <p>
+ * Example:
+ * <pre>
+ * {@code
+ *
+ * define Quantile datafu.pig.stats.StreamingQuantile(3);
+
+ * -- input: 9,10,2,3,5,8,1,4,6,7
+ * input = LOAD 'input' AS (val:int);
+ *
+ * grouped = GROUP input ALL;
+ *
+ * -- produces: (1,5.5,10)
+ * quantiles = FOREACH grouped generate Quantile(input);
+ * </pre></p>
  *
  */
 public class StreamingQuantile extends SimpleEvalFunc<Tuple> {

@@ -29,20 +29,39 @@ import com.google.common.collect.Lists;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- *
+ * Computes approximate quantiles for a (not necessarily sorted) input bag, using the
+ * Munro-Paterson algorithm described here:
+ * 
+ * <a href="www.cs.ucsb.edu/~suri/cs290/MunroPat.pdf">http://www.cs.ucsb.edu/~suri/cs290/MunroPat.pdf</a>
+ * 
+ * <br>The implementation is based on the one in Sawzall, available here:
+ * <a href="http://szl.googlecode.com/svn-history/r41/trunk/src/emitters/szlquantile.cc">szlquantile.cc</a>
+ * 
+ * <p>
+ * Note that unlike datafu's standard Quantile algorithm, the Munro-Paterson algorithm gives
+ * <b>approximate</b> quantiles and does not require the input bag to be sorted. The constructor takes
+ * a single integer argument that specifies the number of evenly-spaced quantiles to compute, e.g.,
+ * 
+ * <ul>
+ *   <li>StreamingQuantile('3') yields the min, the median, and the max
+ *   <li>StreamingQuantile('5') yields the min, the 25th, 50th, 75th percentiles, and the max
+ *   <li>StreamingQuantile('101') yields the min, the max, and all 99 percentiles.
+ * </ul>
+ * 
+ * <br>The error on the approximation goes down as the number of buckets computed goes up.
  * <p>
  * Example:
  * <pre>
  * {@code
  *
- * define Quantile datafu.pig.stats.StreamingQuantile(3);
+ * define Quantile datafu.pig.stats.StreamingQuantile('5');
 
  * -- input: 9,10,2,3,5,8,1,4,6,7
  * input = LOAD 'input' AS (val:int);
  *
  * grouped = GROUP input ALL;
  *
- * -- produces: (1,5.5,10)
+ * -- produces: (1.0,3.0,5.0,8.0,10.0)
  * quantiles = FOREACH grouped generate Quantile(input);
  * </pre></p>
  *

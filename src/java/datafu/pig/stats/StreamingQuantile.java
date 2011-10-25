@@ -70,68 +70,60 @@ import datafu.pig.util.SimpleEvalFunc;
 public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumulator<Tuple> {
 
   private final int numQuantiles;
-  private final QuantileEstimator accumEstimator;
+  private final QuantileEstimator estimator;
  
   public StreamingQuantile(String numQuantiles)
   {
     this.numQuantiles = Integer.valueOf(numQuantiles);
-    this.accumEstimator = new QuantileEstimator(this.numQuantiles);
+    this.estimator = new QuantileEstimator(this.numQuantiles);
   }
 
   @Override
   public void accumulate(Tuple b) throws IOException
   {
-    addTo(accumEstimator, b);
+    DataBag bag = (DataBag) b.get(0);
+    if (bag == null || bag.size() == 0)
+      return;
+
+    for (Tuple t : bag) {
+      Object o = t.get(0);
+      if (!(o instanceof Number)) {
+        throw new IllegalStateException("bag must have numerical values (and be non-null)");
+      }
+      estimator.add(((Number) o).doubleValue());
+    }
   }
 
   @Override
   public void cleanup()
   {
-    accumEstimator.clear();
+    estimator.clear();
   }
 
   @Override
   public Tuple getValue()
   {
+    Tuple t = TupleFactory.getInstance().newTuple(numQuantiles);
+    int j = 0;
     try {
-      return getValue(accumEstimator);
+      for (double quantile : estimator.getQuantiles()) {
+        t.set(j, quantile);
+        j++;
+      }
     } catch (IOException e) {
       return null;
     }
-  }
-
-  public Tuple call(DataBag bag) throws IOException
-  {
-    if (bag == null || bag.size() == 0)
-      return null;
-    
-    QuantileEstimator estimator = new QuantileEstimator(numQuantiles);
-    for (Tuple t : bag) {
-      addTo(estimator, t);
-    }
-    return getValue(estimator);  
-  }
-
-  private void addTo(QuantileEstimator estimator, Tuple t) throws IOException
-  {
-    Object o = t.get(0);
-    if (!(o instanceof Number)) {
-      throw new IllegalStateException("bag must have numerical values (and be non-null)");
-    }
-    estimator.add(((Number) o).doubleValue());
-  }
- 
-  private Tuple getValue(QuantileEstimator estimator) throws IOException
-  { 
-    Tuple t = TupleFactory.getInstance().newTuple(numQuantiles);
-    int j = 0;
-    for (double quantile : estimator.getQuantiles()) {
-      t.set(j, quantile);
-      j++;
-    }
     return t;
   }
- 
+
+  public Tuple call(Tuple t) throws IOException
+  {
+    accumulate(t);
+    Tuple ret = getValue();
+    cleanup();
+    return ret;
+  }
+
   @Override
   public Schema outputSchema(Schema input)
   {

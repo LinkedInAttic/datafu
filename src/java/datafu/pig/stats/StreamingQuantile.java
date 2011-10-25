@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.pig.Accumulator;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
@@ -66,13 +67,37 @@ import datafu.pig.util.SimpleEvalFunc;
  * </pre></p>
  *
  */
-public class StreamingQuantile extends SimpleEvalFunc<Tuple> {
+public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumulator<Tuple> {
 
   private final int numQuantiles;
-  
+  private final QuantileEstimator accumEstimator;
+ 
   public StreamingQuantile(String numQuantiles)
   {
     this.numQuantiles = Integer.valueOf(numQuantiles);
+    this.accumEstimator = new QuantileEstimator(this.numQuantiles);
+  }
+
+  @Override
+  public void accumulate(Tuple b) throws IOException
+  {
+    addTo(accumEstimator, b);
+  }
+
+  @Override
+  public void cleanup()
+  {
+    accumEstimator.clear();
+  }
+
+  @Override
+  public Tuple getValue()
+  {
+    try {
+      return getValue(accumEstimator);
+    } catch (IOException e) {
+      return null;
+    }
   }
 
   public Tuple call(DataBag bag) throws IOException
@@ -82,13 +107,22 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> {
     
     QuantileEstimator estimator = new QuantileEstimator(numQuantiles);
     for (Tuple t : bag) {
-      Object o = t.get(0);
-      if (!(o instanceof Number)) {
-        throw new IllegalStateException("bag must have numerical values (and be non-null)");
-      }
-      estimator.add(((Number) o).doubleValue());
+      addTo(estimator, t);
     }
-    
+    return getValue(estimator);  
+  }
+
+  private void addTo(QuantileEstimator estimator, Tuple t) throws IOException
+  {
+    Object o = t.get(0);
+    if (!(o instanceof Number)) {
+      throw new IllegalStateException("bag must have numerical values (and be non-null)");
+    }
+    estimator.add(((Number) o).doubleValue());
+  }
+ 
+  private Tuple getValue(QuantileEstimator estimator) throws IOException
+  { 
     Tuple t = TupleFactory.getInstance().newTuple(numQuantiles);
     int j = 0;
     for (double quantile : estimator.getQuantiles()) {
@@ -97,7 +131,7 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> {
     }
     return t;
   }
-  
+ 
   @Override
   public Schema outputSchema(Schema input)
   {

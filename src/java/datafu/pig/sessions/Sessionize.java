@@ -18,6 +18,7 @@ package datafu.pig.sessions;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.apache.pig.Accumulator;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -61,7 +62,7 @@ import com.google.common.collect.ImmutableList;
  * }
  * </pre>
  */
-public class Sessionize extends EvalFunc<DataBag>
+public class Sessionize extends EvalFunc<DataBag> implements Accumulator<DataBag>
 {
   private final long millis;
 
@@ -87,7 +88,7 @@ public class Sessionize extends EvalFunc<DataBag>
     return outputBag;
   }
 
-  //@Override
+  @Override
   public void accumulate(Tuple input) throws IOException
   {
     for (Tuple t : (DataBag) input.get(0)) {
@@ -109,13 +110,13 @@ public class Sessionize extends EvalFunc<DataBag>
     }
   }
 
-  //@Override
+  @Override
   public DataBag getValue()
   {
     return outputBag;
   }
 
-  //@Override
+  @Override
   public void cleanup()
   {
     this.last_date = null;

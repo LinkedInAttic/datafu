@@ -30,8 +30,6 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
-import com.google.common.collect.ImmutableList;
-
 /**
  * Sessionizes an input stream.
  *
@@ -166,22 +164,5 @@ public class Sessionize extends EvalFunc<DataBag> implements Accumulator<DataBag
     catch (FrontendException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  public static void main(String[] args) throws IOException
-  {
-    TupleFactory tupleFactory = TupleFactory.getInstance();
-    BagFactory bagFactory = BagFactory.getInstance();
-
-    DataBag bag = bagFactory.newDefaultBag();
-
-    bag.add(tupleFactory.newTuple(ImmutableList.of("2010-01-01T01:00:00Z", 1234)));
-    bag.add(tupleFactory.newTuple(ImmutableList.of("2010-01-01T01:15:00Z", 1234)));
-    bag.add(tupleFactory.newTuple(ImmutableList.of("2010-01-01T01:31:00Z", 1234)));
-    bag.add(tupleFactory.newTuple(ImmutableList.of("2010-01-01T01:35:00Z", 1234)));
-    bag.add(tupleFactory.newTuple(ImmutableList.of("2010-01-01T02:30:00Z", 1234)));
-
-    EvalFunc fn = new Sessionize("30m");
-    System.out.println(fn.exec(tupleFactory.newTuple(bag)));
   }
 }

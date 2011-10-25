@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.pig.Accumulator;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -67,7 +68,7 @@ import datafu.linkanalysis.PageRank.ProgressIndicator;
  * }
  * </pre> 
  */
-public class PageRank extends EvalFunc<DataBag>
+public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
 {
   private final datafu.linkanalysis.PageRank graph = new datafu.linkanalysis.PageRank();
 
@@ -77,6 +78,7 @@ public class PageRank extends EvalFunc<DataBag>
   private int maxIters = 150;
   private boolean useEdgeDiskStorage = false;
   private boolean enableDanglingNodeHandling = false;
+  private boolean aborted = false;
 
   TupleFactory tupleFactory = TupleFactory.getInstance();
   BagFactory bagFactory = BagFactory.getInstance();
@@ -155,53 +157,69 @@ public class PageRank extends EvalFunc<DataBag>
   }
 
   @Override
-  public DataBag exec(Tuple input) throws IOException
+  public void accumulate(Tuple t) throws IOException
   {
-    this.graph.clear();
-
-    System.out.println("Beginning ranking");
-
-    try
+    if (aborted)
     {
-      DataBag dataBag = (DataBag)input.get(0);
-      for (Tuple sourceTuple : dataBag)
+      return;
+    }
+    
+    DataBag bag = (DataBag) t.get(0);
+    if (bag == null || bag.size() == 0)
+      return;
+    
+    for (Tuple sourceTuple : bag) 
+    {
+      Integer sourceId = (Integer)sourceTuple.get(0);
+      DataBag edges = (DataBag)sourceTuple.get(1);
+
+      ArrayList<Map<String,Object>> edgesMapList = new ArrayList<Map<String, Object>>();
+
+      for (Tuple edgeTuple : edges)
       {
-        Integer sourceId = (Integer)sourceTuple.get(0);
-        DataBag edges = (DataBag)sourceTuple.get(1);
-
-        ArrayList<Map<String,Object>> edgesMapList = new ArrayList<Map<String, Object>>();
-
-        for (Tuple edgeTuple : edges)
-        {
-          Integer destId = (Integer)edgeTuple.get(0);
-          Double weight = (Double)edgeTuple.get(1);
-          HashMap<String,Object> edgeMap = new HashMap<String, Object>();
-          edgeMap.put("dest",destId);
-          edgeMap.put("weight",weight);
-          edgesMapList.add(edgeMap);
-        }
-
-        graph.addEdges(sourceId, edgesMapList);
-
-        if (graph.nodeCount() + graph.edgeCount() > maxNodesAndEdges)
-        {
-          System.out.println(String.format("There are too many nodes and edges (%d + %d > %d). Aborting.", graph.nodeCount(), graph.edgeCount(), maxNodesAndEdges));
-          return null;
-        }
-
-        reporter.progress();
+        Integer destId = (Integer)edgeTuple.get(0);
+        Double weight = (Double)edgeTuple.get(1);
+        HashMap<String,Object> edgeMap = new HashMap<String, Object>();
+        edgeMap.put("dest",destId);
+        edgeMap.put("weight",weight);
+        edgesMapList.add(edgeMap);
       }
-    }
-    finally
-    {
-      System.out.println(String.format("Nodes: %d, Edges: %d", graph.nodeCount(), graph.edgeCount()));
-    }
 
+      graph.addEdges(sourceId, edgesMapList);
+
+      if (graph.nodeCount() + graph.edgeCount() > maxNodesAndEdges)
+      {
+        System.out.println(String.format("There are too many nodes and edges (%d + %d > %d). Aborting.", graph.nodeCount(), graph.edgeCount(), maxNodesAndEdges));
+        aborted = true;
+      }
+
+      reporter.progress();
+    }
+  }
+
+  @Override
+  public DataBag getValue()
+  {
+    if (aborted)
+    {
+      return null;
+    }
+    
+    System.out.println(String.format("Nodes: %d, Edges: %d", graph.nodeCount(), graph.edgeCount()));
+    
+    ProgressIndicator progressIndicator = getProgressIndicator();
     System.out.println("Finished loading graph.");
     long startTime = System.nanoTime();
-    ProgressIndicator progressIndicator = getProgressIndicator();
     System.out.println("Initializing.");
-    graph.init(progressIndicator);
+    try
+    {
+      graph.init(progressIndicator);
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
+      return null;
+    }
     System.out.println(String.format("Done, took %f ms", (System.nanoTime() - startTime)/10.0e6));
 
     float totalDiff;
@@ -212,7 +230,15 @@ public class PageRank extends EvalFunc<DataBag>
     do
     {
       // TODO log percentage complete every 5 minutes
-      totalDiff = graph.nextIteration(progressIndicator);
+      try
+      {
+        totalDiff = graph.nextIteration(progressIndicator);
+      }
+      catch (IOException e)
+      {
+        e.printStackTrace();
+        return null;
+      }
       iter++;
     } while(iter < maxIters && totalDiff > tolerance);
     System.out.println(String.format("Done, %d iterations took %f ms", iter, (System.nanoTime() - startTime)/10.0e6));
@@ -232,6 +258,35 @@ public class PageRank extends EvalFunc<DataBag>
     return output;
   }
 
+  @Override
+  public void cleanup()
+  {
+    try
+    {
+      aborted = false;
+      this.graph.clear();
+    }
+    catch (IOException e)
+    { 
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public DataBag exec(Tuple input) throws IOException
+  {
+    try
+    {
+      accumulate(input);
+      
+      return getValue();
+    }
+    finally
+    {
+      cleanup();
+    }
+  }
+
   private ProgressIndicator getProgressIndicator()
   {
     return new ProgressIndicator()
@@ -242,7 +297,6 @@ public class PageRank extends EvalFunc<DataBag>
             reporter.progress();
           }
         };
-
   }
 
   @Override

@@ -116,9 +116,9 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
     return t;
   }
 
-  public Tuple call(Tuple t) throws IOException
+  public Tuple call(DataBag b) throws IOException
   {
-    accumulate(t);
+    accumulate(TupleFactory.getInstance().newTuple(b));
     Tuple ret = getValue();
     cleanup();
     return ret;

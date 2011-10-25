@@ -41,6 +41,19 @@ public class BagTests extends PigTests
                  "(1,{(1),(2),(3),(4)})",
                  "(2,{(10),(20),(30),(40),(50),(60)})");
   }
+
+   @Test
+  public void firstTupleFromBagTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/firstTupleFromBagTest.pig");
+
+    writeLinesToFile("input", "1\t{(4),(9),(16)}");
+
+    test.runScript();
+
+    assertOutput(test, "data2", "(1,(4))");
+  }
+
   
   @Test
   public void prependToBagTest() throws Exception

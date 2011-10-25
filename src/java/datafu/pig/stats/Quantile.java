@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.pig.Accumulator;
+import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
@@ -59,10 +61,12 @@ import datafu.pig.util.SimpleEvalFunc;
  *
  * @see Median
  */
-public class Quantile extends SimpleEvalFunc<Tuple>
+public class Quantile extends SimpleEvalFunc<Tuple> implements Accumulator<Tuple>
 {
   List<Double> quantiles;
-
+  Map<Long, Double> d = new HashMap<Long, Double>();
+  long i;
+  
   private static class Pair<T1,T2>
   {
     public T1 first;
@@ -80,6 +84,7 @@ public class Quantile extends SimpleEvalFunc<Tuple>
     for (String s : k) { 
       quantiles.add(Double.parseDouble(s));
     }
+    cleanup();
   }
 
   private static Pair<Long, Long> getIndexes(double k, long N)
@@ -90,46 +95,65 @@ public class Quantile extends SimpleEvalFunc<Tuple>
 
     return new Pair<Long, Long>(i1, i2);
   }
-  
-  public Tuple call(DataBag bag) throws IOException
+
+  @Override
+  public void accumulate(Tuple b) throws IOException
   {
+    DataBag bag = (DataBag) b.get(0);
     if (bag == null || bag.size() == 0)
-      return null;
-
-    Map<Long, Double> d = new HashMap<Long, Double>();
-    long N = bag.size(), max_id = 1;
-    
-    for (double k : this.quantiles) {
-      Pair<Long, Long> idx = getIndexes(k, N);
-
-      d.put(idx.first, null);
-      d.put(idx.second, null);
-      max_id = Math.max(max_id, idx.second);
-    }
-
-    long i = 1;
+      return;
+        
     for (Tuple t : bag) {
-      if (i > max_id)
-        break;
 
-      if (d.containsKey(i)) {
-        Object o = t.get(0);
-        if (!(o instanceof Number))
-          throw new IllegalStateException("bag must have numerical values (and be non-null)");
-        d.put(i, ((Number) o).doubleValue());
-      }
+      Object o = t.get(0);
+      if (!(o instanceof Number))
+        throw new IllegalStateException("bag must have numerical values (and be non-null)");
+      d.put(i, ((Number) o).doubleValue());
+      
       i++;
     }
+  }
 
+  @Override
+  public Tuple getValue()
+  {
     Tuple t = TupleFactory.getInstance().newTuple(this.quantiles.size());
     int j = 0;
     for (double k : this.quantiles) {
-      Pair<Long, Long> p = getIndexes(k, N);
+      Pair<Long, Long> p = getIndexes(k,i-1);
       double quantile = (d.get(p.first) + d.get(p.second)) / 2;
-      t.set(j, quantile);
+      try
+      {
+        t.set(j, quantile);
+      }
+      catch (ExecException e)
+      {        
+        e.printStackTrace();
+        return null;
+      }
       j++;
     }
     return t;
+  }
+
+  @Override
+  public void cleanup()
+  {    
+    i = 1;   
+    d.clear();
+  }
+  
+  public Tuple call(DataBag bag) throws IOException
+  {
+    try
+    {
+      accumulate(TupleFactory.getInstance().newTuple(bag));
+      return getValue();
+    }
+    finally
+    {
+      cleanup();
+    }
   }
 
   @Override

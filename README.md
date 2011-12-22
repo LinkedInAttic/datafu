@@ -126,28 +126,26 @@ Run PageRank on a large number of independent graphs:
       topic, source, rank;
     
 This implementation stores the nodes and edges (mostly) in memory. It is therefore best suited when one needs to compute PageRank on many reasonably sized graphs in parallel.
-
-## Getting started
-
-Build the JAR:
-
-    ant jar
-
-Run all tests:
-
-    ant test
-
-Compute code coverage:
-
-    ant coverage
     
 ## How To
+
+### Build the JAR
+
+    ant jar
+    
+### Run all tests
+
+    ant test
 
 ### Run specific tests
 
 Override `testclasses.pattern`, which defaults to `**/*.class`.  For example, to run all tests defined in `QuantileTests`:
 
     ant test -Dtestclasses.pattern=**/QuantileTests.class
+
+### Compute code coverage
+
+    ant coverage
 
 ## Contribute
 

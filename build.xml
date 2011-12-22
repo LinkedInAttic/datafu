@@ -182,21 +182,13 @@
     </jarjar>
   </target>
   
-  <target name="test-unit" depends="build-unit-tests, jar" description="Runs the unit tests">
+  <target name="test" depends="build-pig-tests, build-unit-tests, jar" description="Runs the pig tests">
     <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
     <testng classpathref="test-classpath"
-            outputDir="${report.unit.dir}" >
-      <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
-      <classfileset dir="${unittestclasses.dir}" includes="**/*.class" />
-    </testng>
-  </target>
-  
-  <target name="test-pig" depends="build-pig-tests, jar" description="Runs the pig tests">
-    <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
-    <testng classpathref="test-classpath"
-            outputDir="${report.pig.dir}" verbose="2">
+            outputDir="${report.dir}" verbose="2">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
+      <classfileset dir="${unittestclasses.dir}" includes="**/*.class" />
       <classfileset dir="${pigtestclasses.dir}" includes="**/*.class" />
     </testng>
   </target>
@@ -204,7 +196,7 @@
   <target name="test-instrumented" depends="build-pig-tests, build-unit-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
     <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
     <testng classpathref="instrumented-test-classpath"
-            outputDir="${report.unit.dir}" >
+            outputDir="${report.dir}" >
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${instrumented.dir}" />
       <classfileset dir="${pigtestclasses.dir}" includes="**/*.class" />
@@ -225,9 +217,6 @@
     <war destfile="${dist.dir}/${name}-coverage.war"  needxmlfile="false">
       <fileset dir="${coveragereport.dir}" />
     </war>
-  </target>
-  
-  <target name="test" depends="test-unit, test-pig" description="Runs all tests">
   </target>
   
   <target name="srcjar" description="Build source jar file">

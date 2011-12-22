@@ -188,8 +188,8 @@
             outputDir="${report.dir}" verbose="2">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
-      <classfileset dir="${unittestclasses.dir}" includes="**/*.class" />
-      <classfileset dir="${pigtestclasses.dir}" includes="**/*.class" />
+      <classfileset dir="${unittestclasses.dir}" includes="${testclasses.pattern}" />
+      <classfileset dir="${pigtestclasses.dir}" includes="${testclasses.pattern}" />
     </testng>
   </target>
   
@@ -199,8 +199,8 @@
             outputDir="${report.dir}" >
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${instrumented.dir}" />
-      <classfileset dir="${pigtestclasses.dir}" includes="**/*.class" />
-      <classfileset dir="${unittestclasses.dir}" includes="**/*.class" />
+      <classfileset dir="${pigtestclasses.dir}" includes="${testclasses.pattern}" />
+      <classfileset dir="${unittestclasses.dir}" includes="${testclasses.pattern}" />
     </testng>
   </target>
   

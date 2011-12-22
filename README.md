@@ -140,6 +140,14 @@ Run all tests:
 Compute code coverage:
 
     ant coverage
+    
+## How To
+
+### Run specific tests
+
+Override `testclasses.pattern`, which defaults to `**/*.class`.  For example, to run all tests defined in `QuantileTests`:
+
+    ant test -Dtestclasses.pattern=**/QuantileTests.class
 
 ## Contribute
 

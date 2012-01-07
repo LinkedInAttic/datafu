@@ -33,17 +33,28 @@ import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * Computes approximate quantiles for a (not necessarily sorted) input bag, using the
- * Munro-Paterson algorithm described here:
+ * Munro-Paterson algorithm.
  * 
+ * <p>
+ * The algorithm is described here:
  * <a href="www.cs.ucsb.edu/~suri/cs290/MunroPat.pdf">http://www.cs.ucsb.edu/~suri/cs290/MunroPat.pdf</a>
+ * </p>
  * 
- * <br>The implementation is based on the one in Sawzall, available here:
+ * <p>
+ * The implementation is based on the one in Sawzall, available here:
  * <a href="http://szl.googlecode.com/svn-history/r41/trunk/src/emitters/szlquantile.cc">szlquantile.cc</a>
+ * </p>
  * 
  * <p>
  * Note that unlike datafu's standard Quantile algorithm, the Munro-Paterson algorithm gives
- * <b>approximate</b> quantiles and does not require the input bag to be sorted. The constructor takes
- * a single integer argument that specifies the number of evenly-spaced quantiles to compute, e.g.,
+ * <b>approximate</b> quantiles and does not require the input bag to be sorted.  Because it implements
+ * accumulate, StreamingQuantile can be much more efficient than Quantile for large amounts of data which
+ * do not fit in memory.  Quantile must spill to disk when the input data is too large, which will contribute
+ * to longer runtimes.
+ * </p>
+ * 
+ * <p>The constructor takes a single integer argument that specifies the number of evenly-spaced 
+ * quantiles to compute, e.g.,</p>
  * 
  * <ul>
  *   <li>StreamingQuantile('3') yields the min, the median, and the max
@@ -51,7 +62,36 @@ import datafu.pig.util.SimpleEvalFunc;
  *   <li>StreamingQuantile('101') yields the min, the max, and all 99 percentiles.
  * </ul>
  * 
- * <br>The error on the approximation goes down as the number of buckets computed goes up.
+ * <p>Alternatively the constructor can take the explicit list of quantiles to compute, e.g.</p>
+ *
+ * <ul>
+ *   <li>StreamingQuantile('0.0','0.5','1.0') yields the min, the median, and the max
+ *   <li>StreamingQuantile('0.0','0.25','0.5','0.75','1.0') yields the min, the 25th, 50th, 75th percentiles, and the max
+ * </ul>
+ *
+ * <p>The list of quantiles need not span the entire range from 0.0 to 1.0, nor do they need to be evenly spaced, e.g.</p>
+ * 
+ * <ul>
+ *   <li>StreamingQuantile('0.5','0.90','0.95','0.99') yields the median, the 90th, 95th, and the 99th percentiles
+ *   <li>StreamingQuantile('0.0013','0.0228','0.1587','0.5','0.8413','0.9772','0.9987') yields the 0.13th, 2.28th, 15.87th, 50th, 84.13th, 97.72nd, and 99.87th percentiles
+ * </ul>
+ *
+ * <p>Be aware when specifying the list of quantiles in this way that more quantiles may be computed internally than are actually returned.
+ * The GCD of the quantiles is found and this determines the number of evenly spaced quantiles to compute.  The requested quantiles
+ * are then returned from this set.  For instance:
+ * 
+ * <ul>
+ *   <li>If the quantiles 0.2 and 0.6 are requested then the quantiles 0.0, 0.2, 0.4, 0.6, 0.8, and 1.0 are computed 
+ *       because 0.2 is the GCD of 0.2, 0.6, and 1.0.</li>  
+ *   <li>If 0.2 and 0.7 are requested then the quantiles 0.0, 0.1, 0.2, ... , 0.9, 1.0 are computed because 0.1 is the 
+ *       GCD of 0.2, 0.7, and 1.0.</li>
+ *   <li>If 0.999 is requested the quantiles 0.0, 0.001, 0.002, ... , 0.998, 0.999, 1.0 are computed because 0.001 is
+ *       the GCD of 0.999 and 1.0.</li> 
+ *  </p>  
+ * </ul>
+ * 
+ * <p>The error on the approximation goes down as the number of buckets computed goes up.</p>
+ * 
  * <p>
  * Example:
  * <pre>
@@ -66,6 +106,7 @@ import datafu.pig.util.SimpleEvalFunc;
  *
  * -- produces: (1.0,3.0,5.0,8.0,10.0)
  * quantiles = FOREACH grouped generate Quantile(input);
+ * }
  * </pre></p>
  *
  */

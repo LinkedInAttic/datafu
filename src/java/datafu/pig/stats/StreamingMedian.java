@@ -1,9 +1,8 @@
 package datafu.pig.stats;
 
 /**
- * Computes approximate median for a (not necessarily sorted) input bag, using the
- * Munro-Paterson algorithm for approximating quantiles.  This is just a wrapper
- * around StreamingQuantile.
+ * Computes the approximate median for a (not necessarily sorted) input bag, using the
+ * Munro-Paterson algorithm.  This is a convenience wrapper around StreamingQuantile.
  *
  * @see StreamingQuantile
  */

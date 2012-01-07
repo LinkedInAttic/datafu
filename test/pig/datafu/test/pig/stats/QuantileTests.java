@@ -31,7 +31,7 @@ public class QuantileTests  extends PigTests
   }
   
   @Test
-  public void quantileTilesTest() throws Exception
+  public void quantile2Test() throws Exception
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/stats/quantileTest.pig",
                                  "QUANTILES='5'");
@@ -130,5 +130,49 @@ public class QuantileTests  extends PigTests
     
     assertEquals(output.size(),1);
     assertEquals(output.get(0).toString(), "(70.0,30.0,370.0,1000.0,1.0)");
+  }
+  
+  @Test
+  public void streamingQuantile4Test() throws Exception {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/streamingQuantileTest.pig",
+                                 "QUANTILES='0.0013','0.0228','0.1587','0.5','0.8413','0.9772','0.9987'");
+
+    List<String> input = new ArrayList<String>();
+    for (int i=100000; i>=0; i--)
+    {
+      input.add(Integer.toString(i));
+    }
+    
+    writeLinesToFile("input", input.toArray(new String[0]));
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(130.0,2280.0,15870.0,50000.0,84130.0,97720.0,99870.0)");
+  }
+  
+
+  
+  @Test
+  public void quantile3Test() throws Exception {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/quantileTest.pig",
+                                 "QUANTILES='0.0013','0.0228','0.1587','0.5','0.8413','0.9772','0.9987'");
+
+    List<String> input = new ArrayList<String>();
+    for (int i=100000; i>=0; i--)
+    {
+      input.add(Integer.toString(i));
+    }
+    
+    writeLinesToFile("input", input.toArray(new String[0]));
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(130.0,2280.0,15870.0,50000.0,84130.0,97720.0,99870.0)");
   }
 }

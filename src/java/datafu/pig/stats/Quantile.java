@@ -30,13 +30,45 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Computes one or more k-th {@link <a href="http://en.wikipedia.org/wiki/Quantile" target="_blank">quantiles</a>} of a sorted bag, 
- * where 0 <= k <= 1.0.  Uses type R-2 estimation.
+ * Computes {@link <a href="http://en.wikipedia.org/wiki/Quantile" target="_blank">quantiles</a>} 
+ * for a <b>sorted</b> input bag, using type R-2 estimation.
  *
- * The constructor argument takes the quantiles to compute. <b>The input bag must be sorted.</b> N.B., all the data
- * is pushed to a single reducer per key, so make sure some partitioning is done (e.g., group by 'day') if the data is too large.
- * That is, this isn't distributed quantiles.
+ * <p>
+ * N.B., all the data is pushed to a single reducer per key, so make sure some partitioning is 
+ * done (e.g., group by 'day') if the data is too large.  That is, this isn't distributed quantiles.
+ * </p>
+ * 
+ * <p>
+ * Note that unlike datafu's StreamingQuantile algorithm, this implementation gives
+ * <b>exact</b> quantiles.  But, it requires that the input bag to be sorted.  Quantile must spill to 
+ * disk when the input data is too large to fit in memory, which will contribute to longer runtimes. 
+ * Because StreamingQuantile implements accumulate it can be much more efficient than Quantile for 
+ * large input bags which do not fit well in memory.
+ * </p>
+ * 
+ * <p>The constructor takes a single integer argument that specifies the number of evenly-spaced 
+ * quantiles to compute, e.g.,</p>
+ * 
+ * <ul>
+ *   <li>Quantile('3') yields the min, the median, and the max
+ *   <li>Quantile('5') yields the min, the 25th, 50th, 75th percentiles, and the max
+ *   <li>Quantile('101') yields the min, the max, and all 99 percentiles.
+ * </ul>
+ * 
+ * <p>Alternatively the constructor can take the explicit list of quantiles to compute, e.g.</p>
  *
+ * <ul>
+ *   <li>Quantile('0.0','0.5','1.0') yields the min, the median, and the max
+ *   <li>Quantile('0.0','0.25','0.5','0.75','1.0') yields the min, the 25th, 50th, 75th percentiles, and the max
+ * </ul>
+ *
+ * <p>The list of quantiles need not span the entire range from 0.0 to 1.0, nor do they need to be evenly spaced, e.g.</p>
+ * 
+ * <ul>
+ *   <li>Quantile('0.5','0.90','0.95','0.99') yields the median, the 90th, 95th, and the 99th percentiles
+ *   <li>Quantile('0.0013','0.0228','0.1587','0.5','0.8413','0.9772','0.9987') yields the 0.13th, 2.28th, 15.87th, 50th, 84.13th, 97.72nd, and 99.87th percentiles
+ * </ul>
+ * 
  * <p>
  * Example:
  * <pre>
@@ -57,6 +89,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * }</pre></p>
  *
  * @see Median
+ * @see StreamingQuantile
  */
 public class Quantile extends SimpleEvalFunc<Tuple>
 {

@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Computes {@link <a href="http://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Wilson_score_interval" target="_blank">Wilsonian binomial proportion confidence interval</a>}
+ * Computes the {@link <a href="http://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Wilson_score_interval" target="_blank">Wilsonian binomial proportion confidence interval</a>}
  * <p>
  * Constructor requires the confidence interval (alpha) parameter, and the
  * parameters are the number of positive (success) outcomes and the total

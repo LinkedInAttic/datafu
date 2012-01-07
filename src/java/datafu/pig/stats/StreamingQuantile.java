@@ -32,25 +32,30 @@ import com.google.common.collect.Lists;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Computes approximate quantiles for a (not necessarily sorted) input bag, using the
- * Munro-Paterson algorithm.
+ * Computes approximate {@link <a href="http://en.wikipedia.org/wiki/Quantile" target="_blank">quantiles</a>} 
+ * for a (not necessarily sorted) input bag, using the Munro-Paterson algorithm.
  * 
  * <p>
  * The algorithm is described here:
- * <a href="www.cs.ucsb.edu/~suri/cs290/MunroPat.pdf">http://www.cs.ucsb.edu/~suri/cs290/MunroPat.pdf</a>
+ * {@link <a href="www.cs.ucsb.edu/~suri/cs290/MunroPat.pdf">http://www.cs.ucsb.edu/~suri/cs290/MunroPat.pdf</a>}
  * </p>
  * 
  * <p>
  * The implementation is based on the one in Sawzall, available here:
- * <a href="http://szl.googlecode.com/svn-history/r41/trunk/src/emitters/szlquantile.cc">szlquantile.cc</a>
+ * {@link <a href="http://szl.googlecode.com/svn-history/r41/trunk/src/emitters/szlquantile.cc">szlquantile.cc</a>}
+ * </p>
+ * 
+ * <p>
+ * N.B., all the data is pushed to a single reducer per key, so make sure some partitioning is 
+ * done (e.g., group by 'day') if the data is too large.  That is, this isn't distributed quantiles.
  * </p>
  * 
  * <p>
  * Note that unlike datafu's standard Quantile algorithm, the Munro-Paterson algorithm gives
  * <b>approximate</b> quantiles and does not require the input bag to be sorted.  Because it implements
  * accumulate, StreamingQuantile can be much more efficient than Quantile for large amounts of data which
- * do not fit in memory.  Quantile must spill to disk when the input data is too large, which will contribute
- * to longer runtimes.
+ * do not fit in memory.  Quantile must spill to disk when the input data is too large to fit in memory, 
+ * which will contribute to longer runtimes.
  * </p>
  * 
  * <p>The constructor takes a single integer argument that specifies the number of evenly-spaced 
@@ -78,7 +83,7 @@ import datafu.pig.util.SimpleEvalFunc;
  *
  * <p>Be aware when specifying the list of quantiles in this way that more quantiles may be computed internally than are actually returned.
  * The GCD of the quantiles is found and this determines the number of evenly spaced quantiles to compute.  The requested quantiles
- * are then returned from this set.  For instance:
+ * are then returned from this set.  For instance:</p>
  * 
  * <ul>
  *   <li>If the quantiles 0.2 and 0.6 are requested then the quantiles 0.0, 0.2, 0.4, 0.6, 0.8, and 1.0 are computed 
@@ -109,6 +114,8 @@ import datafu.pig.util.SimpleEvalFunc;
  * }
  * </pre></p>
  *
+ * @see StreamingMedian
+ * @see Quantile
  */
 public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumulator<Tuple> {
 

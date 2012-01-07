@@ -33,7 +33,7 @@ import com.google.common.collect.ImmutableList;
 
 
 /**
- * The UDF accepts a bag of tuples, with user supplied ordering, and generates pairs that can be used for
+ * Accepts a bag of tuples, with user supplied ordering, and generates pairs that can be used for
  * a Markov chain analysis. For example, if you had {(1), (4), (7)}, using the default lookahead of 1, you
  * get the pairs {
  *                ((1),(4)),

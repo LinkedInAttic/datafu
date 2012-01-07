@@ -17,12 +17,13 @@
 package datafu.pig.stats;
 
 /**
- * Computes the {@link <a href="http://en.wikipedia.org/wiki/Median" target="_blank">median</a>} of a sorted bag, 
- * where 0 <= k <= 1.0.  Uses type R-2 estimation.
+ * Computes the {@link <a href="http://en.wikipedia.org/wiki/Median" target="_blank">median</a>} 
+ * for a <b>sorted</b> input bag, using type R-2 estimation.  This is a convenience wrapper around Quantile.
  *
- *<b>The input bag must be sorted.</b> N.B., all the data
- * is pushed to a single reducer per key, so make sure some partitioning is done (e.g., group by 'day') if the data is too large.
- * That is, this isn't distributed median.
+ * <p>
+ * N.B., all the data is pushed to a single reducer per key, so make sure some partitioning is 
+ * done (e.g., group by 'day') if the data is too large.  That is, this isn't distributed median.
+ * </p>
  * 
  * @see Quantile
  */

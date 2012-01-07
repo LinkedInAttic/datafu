@@ -1,6 +1,6 @@
 register $JAR_PATH
 
-define Quantile datafu.pig.stats.Quantile('0.0','0.25','0.5','0.75','1.0');
+define Quantile datafu.pig.stats.Quantile($QUANTILES);
 
 data_in = LOAD 'input' as (val:int);
 

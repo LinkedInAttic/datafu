@@ -1,6 +1,6 @@
 register $JAR_PATH
 
-define Quantile datafu.pig.stats.StreamingQuantile('5');
+define Quantile datafu.pig.stats.StreamingQuantile($QUANTILES);
 
 data_in = LOAD 'input' as (val:int);
 

@@ -1,6 +1,6 @@
 register $JAR_PATH
 
-define Quantile datafu.pig.stats.Quantile('5');
+define Median datafu.pig.stats.StreamingMedian();
 
 data_in = LOAD 'input' as (val:int);
 
@@ -12,9 +12,9 @@ data_out = GROUP data_in ALL;
 
 data_out = FOREACH data_out {
   sorted = ORDER data_in BY val;
-  GENERATE Quantile(sorted) as quantiles;
+  GENERATE Median(sorted) as medians;
 }
-data_out = FOREACH data_out GENERATE FLATTEN(quantiles);
+data_out = FOREACH data_out GENERATE FLATTEN(medians);
 
 /*describe data_out;*/
 

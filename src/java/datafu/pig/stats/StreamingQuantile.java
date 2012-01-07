@@ -15,7 +15,9 @@
 package datafu.pig.stats;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.pig.Accumulator;
@@ -71,11 +73,54 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
 
   private final int numQuantiles;
   private final QuantileEstimator estimator;
+  private List<Double> quantiles;
  
-  public StreamingQuantile(String numQuantiles)
+  public StreamingQuantile(String... k)
   {
-    this.numQuantiles = Integer.valueOf(numQuantiles);
+    this.quantiles = QuantileUtil.getQuantilesFromParams(k);
+    this.numQuantiles = getNumQuantiles(this.quantiles);
     this.estimator = new QuantileEstimator(this.numQuantiles);
+  }
+  
+  private static int getNumQuantiles(List<Double> quantiles)
+  {
+    quantiles = new ArrayList<Double>(quantiles);
+    Collections.sort(quantiles);
+    int start = 0;
+    int end = quantiles.size()-1;
+    while (quantiles.get(start) == 0.0) start++;
+    while (quantiles.get(end) == 1.0) end--;
+    double gcd = 1.0;
+    for (int i=end; i>=start; i--)
+    {
+      gcd = gcd(gcd,quantiles.get(i));
+    }
+    int numQuantiles = (int)(1/gcd) + 1;
+    return numQuantiles;
+  }
+  
+  private static double gcd(double a, double b)
+  {
+    if (round(a) == 0.0)
+    {
+      throw new IllegalArgumentException("Quantiles are smaller than the allowed precision");
+    }
+    if (round(b) == 0.0)
+    {
+      throw new IllegalArgumentException("Quantiles are smaller than the allowed precision");
+    }
+    while (round(b) != 0.0)
+    {
+      double t = b;
+      b = a % b;
+      a = t;
+    }
+    return round(a);
+  }
+  
+  private static double round(double d)
+  {
+    return Math.round(d*100000.0)/100000.0;
   }
 
   @Override
@@ -103,11 +148,19 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
   @Override
   public Tuple getValue()
   {
-    Tuple t = TupleFactory.getInstance().newTuple(numQuantiles);
-    int j = 0;
+    Tuple t = TupleFactory.getInstance().newTuple(this.quantiles.size());
     try {
-      for (double quantile : estimator.getQuantiles()) {
-        t.set(j, quantile);
+      HashMap<Double,Double> quantileValues = new HashMap<Double,Double>(this.quantiles.size());
+      double quantileKey = 0.0;
+      for (double quantileValue : estimator.getQuantiles()) {
+        quantileValues.put(round(quantileKey), quantileValue);
+        quantileKey += 1.0/(this.numQuantiles-1);
+      }
+      int j = 0;
+      for (double d : this.quantiles)
+      {
+        Double quantileValue = quantileValues.get(round(d));
+        t.set(j, quantileValue);
         j++;
       }
     } catch (IOException e) {

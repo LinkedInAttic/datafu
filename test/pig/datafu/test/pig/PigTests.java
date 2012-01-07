@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.pig.data.Tuple;
@@ -46,7 +47,22 @@ public abstract class PigTests
     {
       theArgs.add(arg);
     }
-    return new PigTest(getLinesFromFile(scriptPath),theArgs.toArray(new String[0]));
+    
+    String[] lines = getLinesFromFile(scriptPath);
+    
+    for (String arg : theArgs)
+    {
+      String[] parts = arg.split("=",2);
+      if (parts.length == 2)
+      {
+        for (int i=0; i<lines.length; i++)
+        {
+          lines[i] = lines[i].replaceAll(Pattern.quote("$" + parts[0]), parts[1]);
+        }
+      }
+    }
+    
+    return new PigTest(lines);
   }
   
   protected PigTest createPigTest(String scriptPath) throws IOException

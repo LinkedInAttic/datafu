@@ -32,7 +32,7 @@ Compute the [median](http://en.wikipedia.org/wiki/Median) of sequence of sorted 
     -- produces median of 3
     medians = FOREACH grouped {
       sorted = ORDER input BY val;
-      GENERATE Median(sorted);
+      GENERATE Median(sorted.val);
     }
   
 Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quantile):
@@ -47,7 +47,7 @@ Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quanti
     -- produces: (1,5.5,10)
     quantiles = FOREACH grouped {
       sorted = ORDER input BY val;
-      GENERATE Quantile(sorted);
+      GENERATE Quantile(sorted.val);
     }
 
 ### Set Operations

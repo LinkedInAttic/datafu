@@ -11,6 +11,7 @@
   <property name="version" value="${datafu.version}-SNAPSHOT" />
   <property name="final.name" value="${name}-${version}" />
   
+  <!-- directories -->
   <property name="src.dir" value="${basedir}/src" />
   <property name="java.dir" value="${src.dir}/java" />
   <property name="test.dir" value="${basedir}/test" />
@@ -50,6 +51,10 @@
   <target name="all" depends="clean, jar, sources-jar, javadoc-jar, coverage" description="Build all artifacts." />
 
   <!-- TODO need a release target -->
+    
+  <target name="init" depends="ivy-resolve">
+    <mkdir dir="${dist.dir}" />
+  </target>
     
   <target name="maven-ant-tasks-jar-download" description="Download maven tasks jar">
     <mkdir dir="${ivy.jar.dir}"/>
@@ -151,7 +156,7 @@
     <delete file="cobertura.ser"/>
   </target>
   
-  <target name="build" depends="ivy-resolve" description="Compile main source tree java files">
+  <target name="build" depends="init" description="Compile main source tree java files">
     <replace-dir dir="${classes.dir}" />
     <javac destdir="${classes.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
       <src path="${java.dir}" />
@@ -266,14 +271,12 @@
     </cobertura-report>
     
     <!-- Build a WAR containing the coverage report which can be deployed to tomcat -->
-    <mkdir dir="${dist.dir}" />
     <war destfile="${dist.dir}/${name}-coverage.war"  needxmlfile="false">
       <fileset dir="${coveragereport.dir}" />
     </war>
   </target>
   
   <target name="sources-jar" description="Build source jar file">
-    <mkdir dir="${dist.dir}" />
     <jar destfile="${output.jarfile.sources}">
       <fileset dir="${java.dir}">
         <include name="**/*.java" />
@@ -300,7 +303,6 @@
     <make-javadocs dir="${javadoc.dir}" packagenames="*" javadir="${java.dir}"/>
     
     <!-- Make javadoc JAR -->    
-    <mkdir dir="${dist.dir}" />
     <jar destfile="${output.jarfile.javadoc}">
       <fileset dir="${javadoc.dir}">
         <include name="**/*.*" />

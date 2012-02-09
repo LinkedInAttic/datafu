@@ -1,28 +1,82 @@
 <project name="datafu" basedir="." default="all"
-         xmlns:ivy="antlib:org.apache.ivy.ant">
+         xmlns:ivy="antlib:org.apache.ivy.ant"
+         xmlns:artifact="antlib:org.apache.maven.artifact.ant">
   <property file="build.properties" />
 
   <property name="name" value="datafu" />
   <property name="display.name" value="DataFu" />
   <property name="author" value="Matthew Hayes, Sam Shah" />
   <property environment="env" />
+  <property name="datafu.version" value="0.0.4" />
+  <property name="version" value="${datafu.version}-SNAPSHOT" />
+  <property name="final.name" value="${name}-${version}" />
   
+  <property name="src.dir" value="${basedir}/src" />
+  <property name="java.dir" value="${src.dir}/java" />
+  <property name="test.dir" value="${basedir}/test" />
+  <property name="unittestsrc.dir" value="${test.dir}/unit" />
+  <property name="pigtestsrc.dir" value="${test.dir}/pig" />
+  <property name="dist.dir" value="${basedir}/dist" />
+  <property name="tools.dir" value="${basedir}/tools" />
+  <property name="lib.dir" value="${basedir}/lib" />
+  <property name="classes.dir" value="${dist.dir}/classes" />
+  <property name="report.dir" value="${basedir}/report" />
+  <property name="report.unit.dir" value="${report.dir}/unit" />
+  <property name="report.pig.dir" value="${report.dir}/pig" />
+  <property name="docs.dir" value="${basedir}/docs" />
+  <property name="javadoc.dir" value="${docs.dir}/javadoc" />
+  <property name="cobertura.dir" value="${basedir}/cobertura" />
+  <property name="coveragereport.dir" value="${basedir}/coverage-report" />
+  <property name="instrumented.dir" value="${basedir}/instrumented" />
+  <property name="unittestclasses.dir" value="${dist.dir}/unittestclasses" />
+  <property name="pigtestclasses.dir" value="${dist.dir}/pigtestclasses" />
+  
+  <!-- output names -->
+  <property name="output.jarfile" value="${dist.dir}/${final.name}.jar" />
+  <property name="output.jarfile.sources" value="${dist.dir}/${final.name}-sources.jar" />
+  <property name="output.jarfile.javadoc" value="${dist.dir}/${final.name}-javadoc.jar" />
+  
+  <property name="testclasses.pattern" value="**/*.class" />
+      
+  <property name="ivy.jar.version" value="2.2.0" />
+  <property name="maven.jar.version" value="2.1.3" />
   <property name="ivy.jar.dir" value="${basedir}/ivy" />
-	<property name="ivy.jar.file" value="${ivy.jar.dir}/ivy-2.2.0.jar" />
+  <property name="mvnrepo" value="http://repo2.maven.org/maven2"/>
+  <property name="maven.jar.repo.url" value="${mvnrepo}/org/apache/maven/maven-ant-tasks/${maven.jar.version}/maven-ant-tasks-${maven.jar.version}.jar"/>
+  <property name="ivy.jar.repo.url" value="${mvnrepo}/org/apache/ivy/ivy/${ivy.jar.version}/ivy-${ivy.jar.version}.jar"/>
+	<property name="ivy.jar" value="${ivy.jar.dir}/ivy-${ivy.jar.version}.jar" />
+	<property name="maven.jar" location="${ivy.jar.dir}/maven-ant-tasks-${maven.jar.version}.jar"/>
   
-  <target name="all" depends="clean, jar, srcjar, docs, coverage" description="Build all artifacts." />
+  <target name="all" depends="clean, jar, sources-jar, javadoc-jar, coverage" description="Build all artifacts." />
 
   <!-- TODO need a release target -->
     
-  <target name="install-ivy" description="install ivy">
+  <target name="maven-ant-tasks-jar-download" description="Download maven tasks jar">
+    <mkdir dir="${ivy.jar.dir}"/>
+    <get src="${maven.jar.repo.url}" dest="${maven.jar}" usetimestamp="true"/>
+  </target>
+  
+  <target name="maven-taskdef" depends="maven-ant-tasks-jar-download">
+    <path id="mvn-ant-task.classpath" path="${ant_task.jar}"/>
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+        uri="urn:maven-artifact-ant"
+        classpathref="mvn-ant-task.classpath"/>
+  </target>
+  
+  <target name="ivy-jar-download" description="Download ivy jar">
+    <mkdir dir="${ivy.jar.dir}"/>
+    <get src="${ivy.jar.repo.url}" dest="${ivy.jar}" usetimestamp="true"/>
+  </target>
+    
+  <target name="ivy-taskdef" depends="ivy-jar-download" description="install ivy">
    	<path id="ivy.lib.path">
-   	  <pathelement location="${ivy.jar.file}"/>
+   	  <pathelement location="${ivy.jar}"/>
    	</path>
    	<taskdef resource="org/apache/ivy/ant/antlib.xml"
              uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
   </target>
   
-  <target name="ivy-resolve" depends="install-ivy" description="retreive dependencies with ivy">
+  <target name="ivy-resolve" depends="ivy-taskdef" description="retreive dependencies with ivy">
     <ivy:retrieve/>
   </target>
   
@@ -30,7 +84,7 @@
     <exec executable="./check-license-headers.sh" failonerror="true"/>
   </target>
   
-  <target name="clean-cache" depends="install-ivy" description="clean the ivy cache">
+  <target name="clean-cache" depends="ivy-taskdef" description="clean the ivy cache">
   	<ivy:cleancache />
   </target>
   
@@ -126,34 +180,33 @@
       <classpath refid="test-classpath" />
     </javac>
   </target>
-  
-  <target name="jar-core" depends="build" description="Build the JAR file with the core code from the library">
-    <delete file="${dist.dir}/${name}-${curr.release}.jar" />
-    <jar destfile="${dist.dir}/${name}-${curr.release}.jar">
+    
+  <target name="jar" depends="build" description="Builds the final JAR">
+    <!-- build the core jar -->
+    <delete file="${dist.dir}/${name}-${datafu.version}.jar" />
+    <jar destfile="${dist.dir}/${name}-${datafu.version}.jar">
       <fileset dir="${classes.dir}">
         <include name="**/*.*" />
       </fileset>
     </jar>
-  </target>
-  
-  <target name="jar-fastutil" depends="jar-core" description="Builds the JAR with fastutil included">
-    <delete file="${dist.dir}/${name}-${curr.release}-orig.jar" />
-    <move file="${dist.dir}/${name}-${curr.release}.jar" tofile="${dist.dir}/${name}-${curr.release}-orig.jar" />
-    <java jar="${tools.dir}/autojar.jar" fork="true">
-      <arg line="-baeq -o ${dist.dir}/${name}-${curr.release}.jar -c ${lib.dir}/fastutil-6.3.jar ${dist.dir}/${name}-${curr.release}-orig.jar" />
-    </java>
-    <delete file="${dist.dir}/${name}-${curr.release}-orig.jar" />
-  </target>
     
-  <target name="jar" depends="jar-fastutil" description="Builds the final JAR">
-    <delete file="${dist.dir}/${name}-${curr.release}-orig.jar" />
-    <move file="${dist.dir}/${name}-${curr.release}.jar" tofile="${dist.dir}/${name}-${curr.release}-orig.jar" />
+    <!-- add fastutil classese to the core jar -->
+    <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    <move file="${dist.dir}/${name}-${datafu.version}.jar" tofile="${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    <java jar="${tools.dir}/autojar.jar" fork="true">
+      <arg line="-baeq -o ${dist.dir}/${name}-${datafu.version}.jar -c ${lib.dir}/fastutil-6.3.jar ${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    </java>
+    <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    
+    <!-- build the final jar -->
+    <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    <move file="${dist.dir}/${name}-${datafu.version}.jar" tofile="${dist.dir}/${name}-${datafu.version}-orig.jar" />
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="tools/jarjar-1.1.jar"/>
-    <jarjar jarfile="${dist.dir}/${name}-${curr.release}.jar">
-        <zipfileset src="${dist.dir}/${name}-${curr.release}-orig.jar"/>
+    <jarjar jarfile="${dist.dir}/${name}-${datafu.version}.jar">
+        <zipfileset src="${dist.dir}/${name}-${datafu.version}-orig.jar"/>
         <rule pattern="it.unimi.dsi.fastutil.**" result="datafu.it.unimi.dsi.fastutil.@1"/>
     </jarjar>
-    <delete file="${dist.dir}/${name}-${curr.release}-orig.jar" />
+    <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
   </target>
     
   <target name="jar-instrumented" depends="jar" description="Build an instrumented jar">
@@ -170,11 +223,11 @@
       </instrumentationClasspath>
     </cobertura-instrument>
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="tools/jarjar-1.1.jar"/>
-    <delete file="${instrumented.dir}/${name}-${curr.release}.jar" />
+    <delete file="${instrumented.dir}/${name}-${datafu.version}.jar" />
     <!-- Classes are now instrumented, but we need to merge back with original JAR to get back what was lost, since
          we don't instrument everything and therefore classes are missing form the instrumented directory. -->
-    <jarjar jarfile="${instrumented.dir}/${name}-${curr.release}.jar">      
-      <zipfileset src="${dist.dir}/${name}-${curr.release}.jar"/>        
+    <jarjar jarfile="${instrumented.dir}/${name}-${datafu.version}.jar">      
+      <zipfileset src="${dist.dir}/${name}-${datafu.version}.jar"/>        
       <!-- Classes in instrumented directory come last so they take precedence over the classes in the JAR.
            We need to include the JAR so we get the fastutil classes.  The fastutil classes are not instrumented (by design),
            so they are not in the instrumented directory. -->
@@ -219,9 +272,9 @@
     </war>
   </target>
   
-  <target name="srcjar" description="Build source jar file">
+  <target name="sources-jar" description="Build source jar file">
     <mkdir dir="${dist.dir}" />
-    <jar destfile="${dist.dir}/${name}-${curr.release}-sources.jar">
+    <jar destfile="${output.jarfile.sources}">
       <fileset dir="${java.dir}">
         <include name="**/*.java" />
       </fileset>
@@ -242,23 +295,17 @@
     </sequential>
   </macrodef>
   
-  <target name="docs" description="Create complete Javadoc documentation">
+  <target name="javadoc-jar" description="Create complete Javadoc documentation">
     <delete dir="${javadoc.dir}" />
     <make-javadocs dir="${javadoc.dir}" packagenames="*" javadir="${java.dir}"/>
     
     <!-- Make javadoc JAR -->    
     <mkdir dir="${dist.dir}" />
-    <jar destfile="${dist.dir}/${name}-${curr.release}-javadoc.jar">
+    <jar destfile="${output.jarfile.javadoc}">
       <fileset dir="${javadoc.dir}">
         <include name="**/*.*" />
       </fileset>
     </jar>
-    
-    <!-- Make a WAR for the docs so can be deployed to tomcat -->
-    <mkdir dir="${dist.dir}" />
-    <war destfile="${dist.dir}/${name}-docs.war"  needxmlfile="false">
-      <fileset dir="${javadoc.dir}" />
-    </war>
   </target>
     
   <macrodef name="create-release-artifacts">
@@ -290,7 +337,7 @@
   </macrodef>
 
   <target name="release" description="Create a release zip file with everything pre-built.">
-    <create-release-artifacts version="${curr.release}" />
+    <create-release-artifacts version="${datafu.version}" />
   </target>
 
 </project>

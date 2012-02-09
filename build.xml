@@ -207,7 +207,7 @@
     <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
     <move file="${dist.dir}/${name}-${datafu.version}.jar" tofile="${dist.dir}/${name}-${datafu.version}-orig.jar" />
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="tools/jarjar-1.1.jar"/>
-    <jarjar jarfile="${dist.dir}/${name}-${datafu.version}.jar">
+    <jarjar jarfile="${dist.dir}/${final.name}.jar">
         <zipfileset src="${dist.dir}/${name}-${datafu.version}-orig.jar"/>
         <rule pattern="it.unimi.dsi.fastutil.**" result="datafu.it.unimi.dsi.fastutil.@1"/>
     </jarjar>

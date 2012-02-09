@@ -269,11 +269,6 @@
         <include name="**/*.java" />
       </fileset>
     </cobertura-report>
-    
-    <!-- Build a WAR containing the coverage report which can be deployed to tomcat -->
-    <war destfile="${dist.dir}/${name}-coverage.war"  needxmlfile="false">
-      <fileset dir="${coveragereport.dir}" />
-    </war>
   </target>
   
   <target name="sources-jar" description="Build source jar file">

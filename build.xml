@@ -45,10 +45,12 @@
   
   <property name="testclasses.pattern" value="**/*.class" />
       
-  <property name="datafu.pom" value="${basedir}/pom.xml" />
+  <property name="ivy.jar.dir" value="${basedir}/ivy" />
+  <property name="datafu.pom.name" value="pom.xml" />
+  <property name="datafu.pomfile" value="${ivy.jar.dir}/${datafu.pom.name}" />
+  <property name="datafu.pomfile.template" value="${ivy.jar.dir}/pom-template.xml" />
   <property name="ivy.jar.version" value="2.2.0" />
   <property name="maven.jar.version" value="2.0.8" />
-  <property name="ivy.jar.dir" value="${basedir}/ivy" />
   <property name="mvnrepo" value="http://repo2.maven.org/maven2"/>
   <property name="maven.jar.repo.url" value="${mvnrepo}/org/apache/maven/maven-ant-tasks/${maven.jar.version}/maven-ant-tasks-${maven.jar.version}.jar"/>
   <property name="ivy.jar.repo.url" value="${mvnrepo}/org/apache/ivy/ivy/${ivy.jar.version}/ivy-${ivy.jar.version}.jar"/>
@@ -346,14 +348,14 @@
     <create-release-artifacts version="${datafu.version}" />
   </target>
  
-  <target name="deploy" depends="sign">
-    <artifact:pom file="${datafu.pom}" id="datafu-pom"/>
+  <target name="deploy" depends="clean,jar,sources-jar,javadoc-jar,set-version,sign">
+    <artifact:pom file="${datafu.pomfile}" id="datafu-pom"/>
     <artifact:install-provider artifactId="wagon-ssh" version="${wagon-http.version}"/>
     <artifact:deploy file="${output.jarfile}">
       <remoteRepository id="${maven-staging-repository-id}" url="${maven-staging-repository-url}"/>
       <pom refid="datafu-pom"/>
       <attach file="${output.jarfile}.asc" type="jar.asc"/>
-      <attach file="${datafu.pom}.asc" type="pom.asc"/>
+      <attach file="${datafu.pomfile}.asc" type="pom.asc"/>
       <attach file="${output.jarfile.sources}.asc" type="jar.asc" classifier="sources" />
       <attach file="${output.jarfile.sources}" classifier="sources" />
     	<attach file="${output.jarfile.javadoc}.asc" type="jar.asc" classifier="javadoc" />
@@ -379,7 +381,19 @@
    <sign-artifact input.file="${output.jarfile}"/>
    <sign-artifact input.file="${output.jarfile.sources}"/>
    <sign-artifact input.file="${output.jarfile.javadoc}"/>
-   <sign-artifact input.file="${datafu.pom}"/>
+   <sign-artifact input.file="${datafu.pomfile}"/>
+  </target>
+
+  <target name="set-version">
+    <delete file="${datafu.pomfile}"/>
+    <copy file="${datafu.pomfile.template}" tofile="${datafu.pomfile}"/>
+    <replaceregexp byline="true">
+      <regexp pattern="@version"/>
+      <substitution expression="${datafu.version}"/>
+      <fileset dir="${ivy.jar.dir}">
+        <include name="${datafu.pom.name}"/>
+      </fileset>
+    </replaceregexp>
   </target>
 
   <target name="clean-sign" description="Clean.  Delete .asc files">

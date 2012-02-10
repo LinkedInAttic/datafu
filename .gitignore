@@ -4,6 +4,7 @@ input
 lib/
 report/
 ivy/*.jar
+ivy/pom.xml
 test-output/
 .pigunit-input-overriden.txt.crc
 pigunit-input-overriden.txt

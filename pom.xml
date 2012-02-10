@@ -4,7 +4,7 @@
   <artifactId>datafu</artifactId>
   <packaging>jar</packaging>
   <name>DataFu</name>
-  <version>0.0.4</version>
+  <version>0.0.5</version>
   <description>A collection of user-defined functions for working with large-scale data in Hadoop and Pig.</description>
   <url>http://sna-projects.com/datafu/</url>
   <licenses>

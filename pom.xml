@@ -1,0 +1,103 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.linkedin.datafu</groupId>
+  <artifactId>datafu</artifactId>
+  <packaging>jar</packaging>
+  <name>DataFu</name>
+  <version>0.0.4</version>
+  <description>A collection of user-defined functions for working with large-scale data in Hadoop and Pig.</description>
+  <url>http://sna-projects.com/datafu/</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>git@github.com:linkedin/datafu.git</url>
+    <connection>scm:git:git@github.com:linkedin/datafu.git</connection>
+    <developerConnection>scm:git:git@github.com:linkedin/datafu.git</developerConnection>
+  </scm>
+  <developers>
+    <developer>
+      <id>mhayes</id>
+      <name>Matthew Hayes</name>
+      <email>mhayes@linkedin.com</email>
+      <organization>LinkedIn</organization>
+      <organizationUrl>http://www.linkedin.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>samshah</id>
+      <name>Sam Shah</name>
+      <email>samshah@linkedin.com</email>
+      <organization>LinkedIn</organization>
+      <organizationUrl>http://www.linkedin.com</organizationUrl>
+    </developer>
+  </developers>
+  <contributors>
+    <contributor>
+      <name>Josh Wills</name>
+      <organization>Cloudera</organization>
+      <organizationUrl>http://www.cloudera.com</organizationUrl>
+    </contributor>
+    <contributor>
+      <name>Mitul Tiwari</name>
+      <email>mtiwari@linkedin.com</email>
+      <organization>LinkedIn</organization>
+      <organizationUrl>http://www.linkedin.com</organizationUrl>
+    </contributor>
+    <contributor>
+      <name>William Vaughan</name>
+      <email>wvaughan@linkedin.com</email>
+      <organization>LinkedIn</organization>
+      <organizationUrl>http://www.linkedin.com</organizationUrl>
+    </contributor>
+    <contributor>
+      <name>Azarias Reda</name>
+      <url>http://www.eecs.umich.edu/~azarias/</url>
+    </contributor>
+  </contributors>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.pig</groupId>
+      <artifactId>pig</artifactId>
+      <version>0.9.0</version>
+    </dependency>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>1.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math</artifactId>
+      <version>2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>0.20.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>r06</version>
+    </dependency>
+  </dependencies>
+</project>

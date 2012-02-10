@@ -3,7 +3,8 @@ docs/
 input
 lib/
 report/
-ivy/
+ivy/*.jar
 test-output/
 .pigunit-input-overriden.txt.crc
 pigunit-input-overriden.txt
+*.asc

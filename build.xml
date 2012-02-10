@@ -11,6 +11,12 @@
   <property name="version" value="${datafu.version}-SNAPSHOT" />
   <property name="final.name" value="${name}-${version}" />
   
+  <!-- maven snapshots and staging repository id and url -->
+  <property name="maven-snapshots-repository-id" value="sonatype-nexus-snapshots" />
+  <property name="maven-snapshots-repository-url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+  <property name="maven-staging-repository-id" value="sonatype-nexus-staging" />
+  <property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2" />
+  
   <!-- directories -->
   <property name="src.dir" value="${basedir}/src" />
   <property name="java.dir" value="${src.dir}/java" />
@@ -39,14 +45,17 @@
   
   <property name="testclasses.pattern" value="**/*.class" />
       
+  <property name="datafu.pom" value="${basedir}/pom.xml" />
   <property name="ivy.jar.version" value="2.2.0" />
-  <property name="maven.jar.version" value="2.1.3" />
+  <property name="maven.jar.version" value="2.0.8" />
   <property name="ivy.jar.dir" value="${basedir}/ivy" />
   <property name="mvnrepo" value="http://repo2.maven.org/maven2"/>
   <property name="maven.jar.repo.url" value="${mvnrepo}/org/apache/maven/maven-ant-tasks/${maven.jar.version}/maven-ant-tasks-${maven.jar.version}.jar"/>
   <property name="ivy.jar.repo.url" value="${mvnrepo}/org/apache/ivy/ivy/${ivy.jar.version}/ivy-${ivy.jar.version}.jar"/>
 	<property name="ivy.jar" value="${ivy.jar.dir}/ivy-${ivy.jar.version}.jar" />
 	<property name="maven.jar" location="${ivy.jar.dir}/maven-ant-tasks-${maven.jar.version}.jar"/>
+  
+  <loadproperties srcfile="${ivy.jar.dir}/libraries.properties"/>
   
   <target name="all" depends="clean, jar, sources-jar, javadoc-jar, coverage" description="Build all artifacts." />
 
@@ -62,7 +71,7 @@
   </target>
   
   <target name="maven-taskdef" depends="maven-ant-tasks-jar-download">
-    <path id="mvn-ant-task.classpath" path="${ant_task.jar}"/>
+    <path id="mvn-ant-task.classpath" path="${maven.jar}"/>
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
         uri="urn:maven-artifact-ant"
         classpathref="mvn-ant-task.classpath"/>
@@ -336,5 +345,46 @@
   <target name="release" description="Create a release zip file with everything pre-built.">
     <create-release-artifacts version="${datafu.version}" />
   </target>
+ 
+  <target name="deploy" depends="sign">
+    <artifact:pom file="${datafu.pom}" id="datafu-pom"/>
+    <artifact:install-provider artifactId="wagon-ssh" version="${wagon-http.version}"/>
+    <artifact:deploy file="${output.jarfile}">
+      <remoteRepository id="${maven-staging-repository-id}" url="${maven-staging-repository-url}"/>
+      <pom refid="datafu-pom"/>
+      <attach file="${output.jarfile}.asc" type="jar.asc"/>
+      <attach file="${datafu.pom}.asc" type="pom.asc"/>
+      <attach file="${output.jarfile.sources}.asc" type="jar.asc" classifier="sources" />
+      <attach file="${output.jarfile.sources}" classifier="sources" />
+    	<attach file="${output.jarfile.javadoc}.asc" type="jar.asc" classifier="javadoc" />
+    	<attach file="${output.jarfile.javadoc}" classifier="javadoc" />
+    </artifact:deploy>
+ </target>
+ 
+ <target name="sign" depends="clean-sign">
+   <macrodef name="sign-artifact" description="Signs the artifact">
+     <attribute name="input.file"/>
+     <attribute name="output.file" default="@{input.file}.asc"/>
+     <sequential>
+       <echo>Signing @{input.file} Sig File: @{output.file}</echo>
+       <exec executable="gpg" >
+         <arg value="--armor"/>
+         <arg value="--output"/>
+         <arg value="@{output.file}"/>
+         <arg value="--detach-sig"/>
+         <arg value="@{input.file}"/>
+       </exec>
+     </sequential>
+   </macrodef>
+   <sign-artifact input.file="${output.jarfile}"/>
+   <sign-artifact input.file="${output.jarfile.sources}"/>
+   <sign-artifact input.file="${output.jarfile.javadoc}"/>
+   <sign-artifact input.file="${datafu.pom}"/>
+  </target>
 
+  <target name="clean-sign" description="Clean.  Delete .asc files">
+    <delete>
+      <fileset dir="." includes="**/**/*.asc"/>
+    </delete>
+  </target>
 </project>

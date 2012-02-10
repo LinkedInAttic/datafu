@@ -127,7 +127,27 @@ Run PageRank on a large number of independent graphs:
     
 This implementation stores the nodes and edges (mostly) in memory. It is therefore best suited when one needs to compute PageRank on many reasonably sized graphs in parallel.
     
+## Start Using It
+
+The JAR can be found [here](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.linkedin.datafu%22) in the Maven central repository.  The GroupId and ArtifactId are `com.linkedin.datafu` and `datafu`, respectively.
+
+If you are using Ivy:
+
+    <dependency org="com.linkedin.datafu" name="datafu" rev="0.0.4"/>
+    
+If you are using Maven:
+
+    <dependency>
+      <groupId>com.linkedin.datafu</groupId>
+      <artifactId>datafu</artifactId>
+      <version>0.0.4</version>
+    </dependency>
+    
+Or you can download one of the packages from the [downloads](https://github.com/linkedin/datafu/downloads) section.    
+
 ## How To
+
+Here are some common tasks when working with the source code.
 
 ### Build the JAR
 

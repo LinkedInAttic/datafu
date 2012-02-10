@@ -145,7 +145,7 @@ If you are using Maven:
     
 Or you can download one of the packages from the [downloads](https://github.com/linkedin/datafu/downloads) section.    
 
-## How To
+## Working with the source code
 
 Here are some common tasks when working with the source code.
 

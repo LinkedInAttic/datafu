@@ -59,12 +59,15 @@ public class BagConcat extends EvalFunc<DataBag>
     try {
       for (int i=0; i < input.size(); i++) {
         Object o = input.get(i);
-        if (!(o instanceof DataBag))
-          throw new RuntimeException("parameters must be databags");
+        if (o != null)
+        {
+          if (!(o instanceof DataBag))
+            throw new RuntimeException(String.format("parameters must be databags (actual: %s)",o.getClass().getName()));
 
-        DataBag inputBag = (DataBag) o;
-        for (Tuple elem : inputBag) 
-          outputBag.add(elem);
+          DataBag inputBag = (DataBag) o;
+          for (Tuple elem : inputBag) 
+            outputBag.add(elem);
+        }
       }
 
       return outputBag;

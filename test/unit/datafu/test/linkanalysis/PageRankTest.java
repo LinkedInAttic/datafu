@@ -193,7 +193,7 @@ public class PageRankTest
     
     for (Map.Entry<Integer, ArrayList<Map<String,Object>>> e : nodeEdgesMap.entrySet())
     {
-      graph.addEdges(e.getKey(), e.getValue());
+      graph.addNode(e.getKey(), e.getValue());
     }
     
     return nodeIdsMap;

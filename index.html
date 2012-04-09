@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="DataFu : Hadoop library for large-scale data processing" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>DataFu</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/linkedin/datafu">Fork Me on GitHub</a>
+
+          <h1 id="project_title">DataFu</h1>
+          <h2 id="project_tagline">Hadoop library for large-scale data processing</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/linkedin/datafu/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/linkedin/datafu/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>DataFu</h1>
+
+<p>DataFu is a collection of user-defined functions for working with large-scale data in Hadoop and Pig. This library was born out of the need for a stable, well-tested library of UDFs for data mining and statistics. It is used at LinkedIn in many of our off-line workflows for data derived products like "People You May Know" and "Skills". It contains functions for:</p>
+
+<ul>
+<li>PageRank</li>
+<li>Quantiles (median), variance, etc.</li>
+<li>Sessionization</li>
+<li>Convenience bag functions (e.g., set operations, enumerating bags, etc)</li>
+<li>Convenience utility functions (e.g., assertions, easier writing of
+EvalFuncs)</li>
+<li>and <a href="http://sna-projects.com/datafu/javadoc/0.0.4/">more</a>...</li>
+</ul><p>Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against pig 0.9.</p>
+
+<p><a href="http://sna-projects.com/datafu/">http://sna-projects.com/datafu/</a></p>
+
+<h2>What can you do with it?</h2>
+
+<p>Here's a taste of what you can do in Pig.</p>
+
+<h3>Statistics</h3>
+
+<p>Compute the <a href="http://en.wikipedia.org/wiki/Median">median</a> of sequence of sorted bags:</p>
+
+<pre><code>define Median datafu.pig.stats.Median();
+
+-- input: 3,5,4,1,2
+input = LOAD 'input' AS (val:int);
+
+grouped = GROUP input ALL;
+
+-- produces median of 3
+medians = FOREACH grouped {
+  sorted = ORDER input BY val;
+  GENERATE Median(sorted.val);
+}
+</code></pre>
+
+<p>Similarly, compute any arbitrary <a href="http://en.wikipedia.org/wiki/Quantile">quantiles</a>:</p>
+
+<pre><code>define Quantile datafu.pig.stats.Quantile('0.0','0.5','1.0');
+
+-- input: 9,10,2,3,5,8,1,4,6,7
+input = LOAD 'input' AS (val:int);
+
+grouped = GROUP input ALL;
+
+-- produces: (1,5.5,10)
+quantiles = FOREACH grouped {
+  sorted = ORDER input BY val;
+  GENERATE Quantile(sorted.val);
+}
+</code></pre>
+
+<h3>Set Operations</h3>
+
+<p>Treat sorted bags as sets and compute their intersection:</p>
+
+<pre><code>define SetIntersect datafu.pig.bags.sets.SetIntersect();
+
+-- ({(3),(4),(1),(2),(7),(5),(6)},{(0),(5),(10),(1),(4)})
+input = LOAD 'input' AS (B1:bag{T:tuple(val:int)},B2:bag{T:tuple(val:int)});
+
+-- ({(1),(4),(5)})
+intersected = FOREACH input {
+  sorted_b1 = ORDER B1 by val;
+  sorted_b2 = ORDER B2 by val;
+  GENERATE SetIntersect(sorted_b1,sorted_b2);
+}
+</code></pre>
+
+<p>Compute the set union:</p>
+
+<pre><code>define SetUnion datafu.pig.bags.sets.SetUnion();
+
+-- ({(3),(4),(1),(2),(7),(5),(6)},{(0),(5),(10),(1),(4)})
+input = LOAD 'input' AS (B1:bag{T:tuple(val:int)},B2:bag{T:tuple(val:int)});
+
+-- ({(3),(4),(1),(2),(7),(5),(6),(0),(10)})
+unioned = FOREACH input GENERATE SetUnion(B1,B2);
+</code></pre>
+
+<p>Operate on several bags even:</p>
+
+<pre><code>intersected = FOREACH input GENERATE SetUnion(B1,B2,B3);
+</code></pre>
+
+<h3>Bag operations</h3>
+
+<p>Concatenate two or more bags:</p>
+
+<pre><code>define BagConcat datafu.pig.bags.BagConcat();
+
+-- ({(1),(2),(3)},{(4),(5)},{(6),(7)})
+input = LOAD 'input' AS (B1: bag{T: tuple(v:INT)}, B2: bag{T: tuple(v:INT)}, B3: bag{T: tuple(v:INT)});
+
+-- ({(1),(2),(3),(4),(5),(6),(7)})
+output = FOREACH input GENERATE BagConcat(B1,B2,B3);
+</code></pre>
+
+<p>Append a tuple to a bag:</p>
+
+<pre><code>define AppendToBag datafu.pig.bags.AppendToBag();
+
+-- ({(1),(2),(3)},(4))
+input = LOAD 'input' AS (B: bag{T: tuple(v:INT)}, T: tuple(v:INT));
+
+-- ({(1),(2),(3),(4)})
+output = FOREACH input GENERATE AppendToBag(B,T);
+</code></pre>
+
+<h3>PageRank</h3>
+
+<p>Run PageRank on a large number of independent graphs:</p>
+
+<pre><code>define PageRank datafu.pig.linkanalysis.PageRank('dangling_nodes','true');
+
+topic_edges = LOAD 'input_edges' as (topic:INT,source:INT,dest:INT,weight:DOUBLE);
+
+topic_edges_grouped = GROUP topic_edges by (topic, source) ;
+topic_edges_grouped = FOREACH topic_edges_grouped GENERATE
+  group.topic as topic,
+  group.source as source,
+  topic_edges.(dest,weight) as edges;
+
+topic_edges_grouped_by_topic = GROUP topic_edges_grouped BY topic; 
+
+topic_ranks = FOREACH topic_edges_grouped_by_topic GENERATE
+  group as topic,
+  FLATTEN(PageRank(topic_edges_grouped.(source,edges))) as (source,rank);
+
+skill_ranks = FOREACH skill_ranks GENERATE
+  topic, source, rank;
+</code></pre>
+
+<p>This implementation stores the nodes and edges (mostly) in memory. It is therefore best suited when one needs to compute PageRank on many reasonably sized graphs in parallel.</p>
+
+<h2>Start Using It</h2>
+
+<p>The JAR can be found <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.linkedin.datafu%22">here</a> in the Maven central repository.  The GroupId and ArtifactId are <code>com.linkedin.datafu</code> and <code>datafu</code>, respectively.</p>
+
+<p>If you are using Ivy:</p>
+
+<pre><code>&lt;dependency org="com.linkedin.datafu" name="datafu" rev="0.0.4"/&gt;
+</code></pre>
+
+<p>If you are using Maven:</p>
+
+<pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;com.linkedin.datafu&lt;/groupId&gt;
+  &lt;artifactId&gt;datafu&lt;/artifactId&gt;
+  &lt;version&gt;0.0.4&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<p>Or you can download one of the packages from the <a href="https://github.com/linkedin/datafu/downloads">downloads</a> section.    </p>
+
+<h2>Working with the source code</h2>
+
+<p>Here are some common tasks when working with the source code.</p>
+
+<h3>Build the JAR</h3>
+
+<pre><code>ant jar
+</code></pre>
+
+<h3>Run all tests</h3>
+
+<pre><code>ant test
+</code></pre>
+
+<h3>Run specific tests</h3>
+
+<p>Override <code>testclasses.pattern</code>, which defaults to <code>**/*.class</code>.  For example, to run all tests defined in <code>QuantileTests</code>:</p>
+
+<pre><code>ant test -Dtestclasses.pattern=**/QuantileTests.class
+</code></pre>
+
+<h3>Compute code coverage</h3>
+
+<pre><code>ant coverage
+</code></pre>
+
+<h2>Contribute</h2>
+
+<p>The source code is available under the Apache 2.0 license.  </p>
+
+<p>For help please see the <a href="http://groups.google.com/group/datafu">discussion group</a>.  Bugs and feature requests can be filed <a href="http://linkedin.jira.com/browse/DATAFU">here</a>.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">DataFu maintained by <a href="https://github.com/linkedin">linkedin</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-30533336-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>

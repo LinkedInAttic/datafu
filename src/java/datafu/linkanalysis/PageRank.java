@@ -48,13 +48,14 @@ public class PageRank
   private long nodeCount;
   
   // the damping factor
-  private static float ALPHA = 0.85f;
+  private float alpha = 0.85f;
   
   // edge weights (which are doubles) are multiplied by this value so they can be stored as integers internally
   private static float EDGE_WEIGHT_MULTIPLIER = 100000;
     
   private final Int2IntOpenHashMap nodeIndices = new Int2IntOpenHashMap();
-  private final FloatArrayList nodeData = new FloatArrayList(); // rank, total weight, contribution, (repeat)
+  private final FloatArrayList nodeData = new FloatArrayList(); // rank, total weight, contribution, bias(optional), (repeat)
+  private int nodeFieldCount = 3; // unless biasing is enabled
   
   private final IntArrayList danglingNodes = new IntArrayList();
   
@@ -63,6 +64,7 @@ public class PageRank
   private boolean shouldHandleDanglingNodes = false;
   private boolean shouldCacheEdgesOnDisk = false;
   private long edgeCachingThreshold;
+  private boolean nodeBiasingEnabled = false;
   
   private File edgesFile;
   private DataOutputStream edgeDataOutputStream;
@@ -93,6 +95,42 @@ public class PageRank
     this.usingEdgeDiskCache = false;
     this.edgesFile = null;
   }
+  
+  /**
+    * Gets the page rank alpha value.
+    * @return alpha
+    */
+   public float getAlpha()
+   {
+     return alpha;
+   }
+   
+   /**
+    * Sets the page rank alpha value (default is 0.85);
+    * @param alpha 
+    */
+   public void setAlpha(float alpha)
+   {
+     this.alpha = alpha;
+   }
+   
+   public boolean isNodeBiasingEnabled()
+   {
+     return this.nodeBiasingEnabled;
+   }
+   
+   public void enableNodeBiasing()
+   {
+     this.nodeBiasingEnabled = true;
+     this.nodeFieldCount = 4;
+   }
+   
+   public void disableNodeBiasing()
+   {
+     this.nodeBiasingEnabled = false;
+     this.nodeFieldCount = 3;
+   }
+   
   
   /**
    * Gets whether disk is being used to cache edges.
@@ -201,17 +239,60 @@ public class PageRank
       this.nodeData.add(0.0f); // total weight
       this.nodeData.add(0.0f); // contribution
       
+      if (this.nodeBiasingEnabled)
+      {
+        this.nodeData.add(0.0f); // bias
+      }      
+      
       this.nodeIndices.put(nodeId, index);
       
       this.nodeCount++;
     }
   }
   
-  public void addEdges(Integer sourceId, ArrayList<Map<String,Object>> sourceEdges) throws IOException
+  public float getNodeBias(int nodeId)
+  {
+    if (!this.nodeBiasingEnabled)
+    {
+      throw new IllegalArgumentException("Node biasing not enable");
+    }
+    int nodeIndex = this.nodeIndices.get(nodeId);
+    return this.nodeData.get(nodeIndex+3);
+  }
+  
+  public void setNodeBias(int nodeId, float bias)
+  {
+    if (!this.nodeBiasingEnabled)
+    {
+      throw new IllegalArgumentException("Node biasing not enable");
+    }
+    
+    int nodeIndex = this.nodeIndices.get(nodeId);
+    this.nodeData.set(nodeIndex+3, bias);
+  }
+  
+  public void addNode(Integer sourceId, ArrayList<Map<String,Object>> sourceEdges) throws IOException
+  {
+    // with bias of 1.0, all nodes have an equal bias (that is, no bias)
+    addNode(sourceId, sourceEdges, 1.0f);
+  }
+  
+  public void addNode(Integer sourceId, ArrayList<Map<String,Object>> sourceEdges, float bias) throws IOException
   {
     int source = sourceId.intValue();
    
     maybeCreateNode(source);
+    
+    if (this.nodeBiasingEnabled)
+    {
+      setNodeBias(source, bias);
+    }
+    else if (bias != 1.0f)
+    {
+      // with node biasing disabled, all nodes implicitly have a bias of 1.0, which means no bias, so if anything else was specified
+      // it won't take effect.
+      throw new IllegalArgumentException("Bias was specified but node biasing not enabled");
+    }
     
     if (this.shouldCacheEdgesOnDisk && !usingEdgeDiskCache && (sourceEdges.size() + this.edgeCount) >= this.edgeCachingThreshold)
     {
@@ -263,11 +344,28 @@ public class PageRank
     
     // initialize all nodes to an equal share of the total rank (1.0)
     float nodeRank = 1.0f / this.nodeCount;        
-    for (int j=0; j<this.nodeData.size(); j+=3)
+    float totalBias = 0.0f;
+    for (int j=0; j<this.nodeData.size(); j+=this.nodeFieldCount)
     {
       nodeData.set(j, nodeRank);      
       progressIndicator.progress();
+      if (this.nodeBiasingEnabled) 
+      {
+        totalBias += nodeData.getFloat(j+3);
+      }
     }      
+    
+    // if node biasing enabled, need to normalize the bias by the total bias across all nodes so it represents
+    // the share of bias.
+    if (this.nodeBiasingEnabled)
+    {
+      for (int j=0; j<this.nodeData.size(); j+=this.nodeFieldCount)
+      {
+        float bias = nodeData.getFloat(j+3);
+        bias /= totalBias;
+        nodeData.set(j+3,bias);
+      }
+    }
     
     Iterator<Integer> edgeData = getEdgeData();
     
@@ -358,7 +456,7 @@ public class PageRank
       // distribute the dangling node ranks to all the nodes in the graph
       // note: the alpha factor is applied in the commit stage
       float contributionIncrease = totalRank / this.nodeCount;
-      for (int i=2; i<nodeData.size(); i += 3)
+      for (int i=2; i<nodeData.size(); i += this.nodeFieldCount)
       {
         float contribution = nodeData.getFloat(i);
         contribution += contributionIncrease;
@@ -371,12 +469,23 @@ public class PageRank
   {
     this.totalRankChange = 0.0f;
     
-    for (int id : nodeIndices.keySet())
-    {
-      int nodeIndex = this.nodeIndices.get(id);
+    float oneMinusAlpha = (1.0f - this.alpha);
+    float oneMinusAlphaOverNodeCount = oneMinusAlpha / nodeCount;
+    
+    for (int nodeIndex=0; nodeIndex<this.nodeData.size(); nodeIndex += this.nodeFieldCount)
+    {      
+      float oldRank = this.nodeData.get(nodeIndex+2);
+      float newRank;
       
-      float alpha = datafu.linkanalysis.PageRank.ALPHA;
-      float newRank = (1.0f - alpha)/nodeCount + alpha * this.nodeData.get(nodeIndex+2);
+      if (this.nodeBiasingEnabled)
+      {
+        float bias = this.nodeData.get(nodeIndex+3);
+        newRank = bias * oneMinusAlpha + alpha * oldRank;
+      }
+      else
+      {
+        newRank = oneMinusAlphaOverNodeCount + alpha * oldRank;
+      }
       
       this.nodeData.set(nodeIndex+2, 0.0f);
       

@@ -72,15 +72,20 @@ public abstract class PigTests
   
   protected String getJarPath()
   {
-    String jarDir = "dist";
+    System.out.println("Getting jar path");
+    
+    String jarDir = null;
+    
     if (System.getProperty("datafu.jar.dir") != null)
     {
       jarDir = System.getProperty("datafu.jar.dir");
     }
+    else
+    {
+      jarDir = new File(System.getProperty("user.dir"), "dist").getAbsolutePath();
+    }  
     
-    String jarDirPath = new File(System.getProperty("user.dir"), jarDir).getAbsolutePath();
-            
-    File userDir = new File(jarDirPath);
+    File userDir = new File(jarDir);
     
     String[] files = userDir.list(new FilenameFilter() {
 
@@ -92,7 +97,7 @@ public abstract class PigTests
       
     });
     
-    if (files.length == 0)
+    if (files == null || files.length == 0)
     {
       throw new RuntimeException("Could not find JAR file");
     }

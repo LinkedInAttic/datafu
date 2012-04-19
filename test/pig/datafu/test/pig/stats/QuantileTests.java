@@ -30,6 +30,38 @@ public class QuantileTests  extends PigTests
     assertEquals(output.get(0).toString(), "(1.0,3.0,5.5,8.0,10.0)");
   }
   
+  @Test 
+  public void applyQuantilesTest() throws Exception {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/applyQuantilesTest.pig",
+                                 "QUANTILES='0.0','0.25','0.5','0.75','1.0'");
+
+    // should yield quantiles (1.0,3.0,5.5,8.0,10.0)
+    
+    String[] input1 = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input1", input1);
+    
+    String[] input2 = {"1.0","2.0","3.0","4.0","5.0","5.5","6.0","7.0","8.0","9.0","9.99","10.0"};
+    writeLinesToFile("input2", input2);
+    
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "test_data", true);
+    
+    assertEquals(output.size(),12);
+    assertEquals(output.get(0).toString(), "(0.0)");
+    assertEquals(output.get(1).toString(), "(0.0)");
+    assertEquals(output.get(2).toString(), "(0.25)");
+    assertEquals(output.get(3).toString(), "(0.25)");
+    assertEquals(output.get(4).toString(), "(0.25)");
+    assertEquals(output.get(5).toString(), "(0.5)");
+    assertEquals(output.get(6).toString(), "(0.5)");
+    assertEquals(output.get(7).toString(), "(0.5)");
+    assertEquals(output.get(8).toString(), "(0.75)");
+    assertEquals(output.get(9).toString(), "(0.75)");
+    assertEquals(output.get(10).toString(), "(0.75)");
+    assertEquals(output.get(11).toString(), "(1.0)");
+  }
+  
   @Test
   public void quantile2Test() throws Exception
   {

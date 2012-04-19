@@ -40,26 +40,20 @@ public class QuantileTests  extends PigTests
     String[] input1 = {"1","2","3","4","10","5","6","7","8","9"};
     writeLinesToFile("input1", input1);
     
-    String[] input2 = {"1.0","2.0","3.0","4.0","5.0","5.5","6.0","7.0","8.0","9.0","9.99","10.0"};
+    String[] input2 = {"0.9", "1.0", "1.1","2.0","3.0","4.0","5.0","5.49", "5.5", "5.51", "6.0","7.0","8.0","9.0","9.99","10.0","10.1"};
     writeLinesToFile("input2", input2);
     
     test.runScript();
     
     List<Tuple> output = getLinesForAlias(test, "test_data", true);
     
-    assertEquals(output.size(),12);
-    assertEquals(output.get(0).toString(), "(0.0)");
-    assertEquals(output.get(1).toString(), "(0.0)");
-    assertEquals(output.get(2).toString(), "(0.25)");
-    assertEquals(output.get(3).toString(), "(0.25)");
-    assertEquals(output.get(4).toString(), "(0.25)");
-    assertEquals(output.get(5).toString(), "(0.5)");
-    assertEquals(output.get(6).toString(), "(0.5)");
-    assertEquals(output.get(7).toString(), "(0.5)");
-    assertEquals(output.get(8).toString(), "(0.75)");
-    assertEquals(output.get(9).toString(), "(0.75)");
-    assertEquals(output.get(10).toString(), "(0.75)");
-    assertEquals(output.get(11).toString(), "(1.0)");
+    String[] expected = {"(0.0)", "(0.0)", "(0.0)", "(0.0)", "(0.25)", "(0.25)", "(0.25)", "(0.25)", "(0.5)", "(0.5)", "(0.5)", "(0.5)", "(0.75)", "(0.75)", "(0.75)", "(1.0)", "(1.0)"};
+    
+    assertEquals(output.size(),expected.length);
+    for (int i=0; i<expected.length; i++)
+    {
+      assertEquals(output.get(i).toString(), expected[i]);
+    }
   }
   
   @Test

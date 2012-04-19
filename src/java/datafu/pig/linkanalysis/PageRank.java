@@ -78,7 +78,9 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
   private int maxIters = 150;
   private boolean useEdgeDiskStorage = false;
   private boolean enableDanglingNodeHandling = false;
+  private boolean enableNodeBiasing = false;
   private boolean aborted = false;
+  private float alpha = 0.85f;
 
   TupleFactory tupleFactory = TupleFactory.getInstance();
   BagFactory bagFactory = BagFactory.getInstance();
@@ -123,6 +125,14 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
       {
         enableDanglingNodeHandling = Boolean.parseBoolean(value);
       }
+      else if (parameterName.equals("node_biasing"))
+      {
+        enableNodeBiasing = Boolean.parseBoolean(value);
+      }
+      else if (parameterName.equals("alpha"))
+      {
+        alpha = Float.parseFloat(value);
+      }
     }
 
     initialize();
@@ -130,11 +140,6 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
 
   private void initialize()
   {
-    long heapSize = Runtime.getRuntime().totalMemory();
-    long heapMaxSize = Runtime.getRuntime().maxMemory();
-    long heapFreeSize = Runtime.getRuntime().freeMemory();
-//    System.out.println(String.format("Heap size: %d, Max heap size: %d, Heap free size: %d", heapSize, heapMaxSize, heapFreeSize));
-
     if (useEdgeDiskStorage)
     {
       this.graph.enableEdgeDiskCaching();
@@ -152,8 +157,18 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
     {
       this.graph.disableDanglingNodeHandling();
     }
+    
+    if (enableNodeBiasing)
+    {
+      this.graph.enableNodeBiasing();
+    }
+    else
+    {
+      this.graph.disableNodeBiasing();
+    }
 
     this.graph.setEdgeCachingThreshold(maxEdgesInMemory);
+    this.graph.setAlpha(alpha);
   }
 
   @Override
@@ -172,6 +187,11 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
     {
       Integer sourceId = (Integer)sourceTuple.get(0);
       DataBag edges = (DataBag)sourceTuple.get(1);
+      Double nodeBias = null;
+      if (enableNodeBiasing)
+      {
+        nodeBias = (Double)sourceTuple.get(2);
+      }
 
       ArrayList<Map<String,Object>> edgesMapList = new ArrayList<Map<String, Object>>();
 
@@ -185,7 +205,14 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
         edgesMapList.add(edgeMap);
       }
 
-      graph.addEdges(sourceId, edgesMapList);
+      if (enableNodeBiasing)
+      {
+        graph.addNode(sourceId, edgesMapList, nodeBias.floatValue());
+      }
+      else
+      {
+        graph.addNode(sourceId, edgesMapList);
+      }
 
       if (graph.nodeCount() + graph.edgeCount() > maxNodesAndEdges)
       {
@@ -321,6 +348,21 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
       
       Schema inputTupleSchema = inputBagSchema.getField(0).schema;
       
+      if (!this.enableNodeBiasing)
+      {
+        if (inputTupleSchema.size() != 2)
+        {
+          throw new RuntimeException("Expected two fields for the node data");
+        }
+      }
+      else
+      {
+        if (inputTupleSchema.size() != 3)
+        {
+          throw new RuntimeException("Expected three fields for the node data");
+        }
+      }
+      
       if (inputTupleSchema.getField(0).type != DataType.INTEGER)
       {
         throw new RuntimeException(String.format("Expected source to be an INTEGER, but instead found %s",
@@ -330,6 +372,12 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
       if (inputTupleSchema.getField(1).type != DataType.BAG)
       {
         throw new RuntimeException(String.format("Expected edges to be represented with a BAG"));
+      }
+      
+      if (this.enableNodeBiasing && inputTupleSchema.getField(2).type != DataType.DOUBLE)
+      {
+        throw new RuntimeException(String.format("Expected node bias to be a DOUBLE, but instead found %s",
+                                                 DataType.findTypeName(inputTupleSchema.getField(2).type)));
       }
 
       Schema.FieldSchema edgesFieldSchema = inputTupleSchema.getField(1);
@@ -341,6 +389,11 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
       }
       
       Schema edgesTupleSchema = edgesFieldSchema.schema.getField(0).schema;
+      
+      if (edgesTupleSchema.size() != 2)
+      {
+        throw new RuntimeException("Expected two fields for the edge data");
+      }
       
       if (edgesTupleSchema.getField(0).type != DataType.INTEGER)
       {

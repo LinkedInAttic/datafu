@@ -14,10 +14,12 @@ quantiles = FOREACH data_grouped {
 
 /*describe data_out;*/
 
-test_data = LOAD 'input2' as (val:double);
+test_data = LOAD 'input2' as (val:double,id:int);
+
+test_data = FOREACH test_data GENERATE TOTUPLE(val,id) as vals;
 
 test_data = CROSS test_data, quantiles;
 
-test_data = FOREACH test_data GENERATE ApplyQuantile((double)$0,$1);
+test_data = FOREACH test_data GENERATE FLATTEN(ApplyQuantile($0,$1)) as (qval,id);
 
 STORE test_data INTO 'output';

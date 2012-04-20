@@ -7,13 +7,18 @@ import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
+import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
+import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * Given a set of pre-computed quantiles, converts a value to the quantile it belongs to.
+ * It accepts two parameters.  The first is a tuple, where the first element is the value to
+ * convert.  The second is a tuple of computed quantiles.  It returns the first tuple, with
+ * the value to convert being replaced by the quantile it belongs to.
  * <p>
  * Quantiles can be computed with either Quantile or StreamingQuantile.
  * </p>
@@ -23,7 +28,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * @see Quantile
  * @see StreamingQuantile
  */
-public class ApplyQuantile extends SimpleEvalFunc<Double>
+public class ApplyQuantile extends SimpleEvalFunc<Tuple>
 {
   private List<Double> quantiles;
   
@@ -32,14 +37,18 @@ public class ApplyQuantile extends SimpleEvalFunc<Double>
     this.quantiles = QuantileUtil.getQuantilesFromParams(k);
   }
   
-  public Double call(Double value, Tuple quantilesComputed) throws IOException
+  public Tuple call(Tuple value, Tuple quantilesComputed) throws IOException
   {
     if (quantilesComputed.size() != quantiles.size())
     {
       throw new IOException("Expected computed quantiles to have size " + quantiles.size()
                             + " but found quantiles with size " + quantilesComputed.size());
     }
-    return findQuantile(value,quantilesComputed);
+    
+    Double quantileValue = findQuantile((Double)value.get(0),quantilesComputed);
+    value.set(0, quantileValue);
+    
+    return value;
   }
   
   private Double findQuantile(Double value, Tuple quantilesComputed) throws ExecException
@@ -74,6 +83,30 @@ public class ApplyQuantile extends SimpleEvalFunc<Double>
       {
         min = middle;
       }
+    }
+  }
+
+  @Override
+  public Schema outputSchema(Schema input)
+  {
+    try
+    {
+      FieldSchema fieldSchema = input.getField(0);
+      if (fieldSchema.type != DataType.TUPLE)
+      {
+        throw new RuntimeException("Expected a tuple");
+      }
+      
+      if (fieldSchema.schema.getField(0).type != DataType.DOUBLE)
+      {
+        throw new RuntimeException("Expected a double");
+      }
+      
+      return fieldSchema.schema;
+    }
+    catch (FrontendException e)
+    {
+      throw new RuntimeException(e);
     }
   }
 }

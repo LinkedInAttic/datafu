@@ -74,17 +74,25 @@ public class Enumerate extends SimpleEvalFunc<DataBag>
   public DataBag call(DataBag inputBag) throws IOException
   {
     DataBag outputBag = BagFactory.getInstance().newDefaultBag();
-    long i = start;
+    long i = start, count = 0;
     if (reverse) i = inputBag.size() - 1 + start;
 
     for (Tuple t : inputBag) {
       Tuple t1 = TupleFactory.getInstance().newTuple(t.getAll());
       t1.append(i);
       outputBag.add(t1);
+
+      if (count % 1000000 == 0) {
+        outputBag.spill();
+        count = 0;
+      }
+
       if (reverse)
         i--;
       else
         i++;
+
+      count++;
     }
 
     return outputBag;

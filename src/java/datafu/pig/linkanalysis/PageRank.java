@@ -398,13 +398,13 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
       if (edgesTupleSchema.getField(0).type != DataType.INTEGER)
       {
         throw new RuntimeException(String.format("Expected destination edge ID to an INTEGER, but instead found %s",
-                                                 DataType.findTypeName(edgesFieldSchema.schema.getField(0).type)));
+                                                 DataType.findTypeName(edgesTupleSchema.getField(0).type)));
       }
 
       if (edgesTupleSchema.getField(1).type != DataType.DOUBLE)
       {
         throw new RuntimeException(String.format("Expected destination edge weight to a DOUBLE, but instead found %s",
-                                                 DataType.findTypeName(edgesFieldSchema.schema.getField(1).type)));
+                                                 DataType.findTypeName(edgesTupleSchema.getField(1).type)));
       }
 
       Schema tupleSchema = new Schema();

@@ -1,14 +1,22 @@
 <ivy-module version="2.0">
     <info organisation="datafu" module="datafu"/>
     <dependencies>
-        <dependency org="org.apache.pig" name="pig" rev="0.9.0"/>
+      
+        <dependency org="org.apache.pig" name="pig" rev="0.10.0">
+          <!-- pig 0.10.0 pom lists wrong version of avro -->
+          <exclude org="org.apache.hadoop" name="avro" />
+        </dependency>
+        
+        <!-- use the right avro version which pig 0.10.0 was built against -->
+        <dependency org="org.apache.avro" name="avro" rev="1.5.3"/>
+        
         <dependency org="it.unimi.dsi" name="fastutil" rev="6.3"/>
         <dependency org="joda-time" name="joda-time" rev="1.6"/>
         <dependency org="org.apache.commons" name="commons-math" rev="2.1"/>
         <dependency org="commons-io" name="commons-io" rev="1.4"/>
         <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2"/>
         <dependency org="org.testng" name="testng" rev="6.2"/>
-        <dependency org="com.google.guava" name="guava" rev="r06" />
+        <dependency org="com.google.guava" name="guava" rev="11.0" />
           
         <!-- needed for pigunit to work -->
         <dependency org="log4j" name="log4j" rev="1.2.14" />

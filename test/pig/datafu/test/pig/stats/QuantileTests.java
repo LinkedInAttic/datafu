@@ -9,6 +9,7 @@ import org.apache.pig.data.Tuple;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
+import datafu.pig.stats.QuantileUtil;
 import datafu.test.pig.PigTests;
 
 public class QuantileTests  extends PigTests
@@ -71,6 +72,74 @@ public class QuantileTests  extends PigTests
     
     assertEquals(output.size(),1);
     assertEquals(output.get(0).toString(), "(1.0,3.0,5.5,8.0,10.0)");
+  }
+  
+  @Test
+  public void quantile4aTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/quantileTest.pig",
+                                 "QUANTILES='4'");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,4.0,7.0,10.0)");
+  }
+  
+  @Test
+  public void quantile4bTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/quantileTest.pig",
+                                 "QUANTILES='0.0','0.333','0.666','1.0'");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,4.0,7.0,10.0)");
+  }
+  
+  @Test
+  public void quantile5aTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/quantileTest.pig",
+                                 "QUANTILES='10'");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)");
+  }
+  
+  @Test
+  public void quantile5bTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/quantileTest.pig",
+                                 "QUANTILES='0.0','0.111','0.222','0.333','0.444','0.555','0.666','0.777','0.888','1.0'");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)");
   }
   
   @Test
@@ -179,8 +248,70 @@ public class QuantileTests  extends PigTests
     assertEquals(output.get(0).toString(), "(130.0,2280.0,15870.0,50000.0,84130.0,97720.0,99870.0)");
   }
   
+  @Test
+  public void streamingQuantile5aTest() throws Exception {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/streamingQuantileTest.pig",
+                                 "QUANTILES='10'");
 
+    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)");
+  }
   
+  @Test
+  public void streamingQuantile5bTest() throws Exception {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/streamingQuantileTest.pig",
+                                 "QUANTILES='0.0','0.111','0.222','0.333','0.444','0.555','0.666','0.777','0.888','1.0'");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)");
+  }
+  
+  @Test
+  public void streamingQuantile6Test() throws Exception {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/streamingQuantileTest.pig",
+                                 "QUANTILES='0.0','0.333','0.666','1.0'");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,4.0,7.0,10.0)");
+  }
+  
+  @Test
+  public void streamingQuantile7Test() throws Exception {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/streamingQuantileTest.pig",
+                                 "QUANTILES='4'");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,4.0,7.0,10.0)");
+  }
+
   @Test
   public void quantile3Test() throws Exception {
     PigTest test = createPigTest("test/pig/datafu/test/pig/stats/quantileTest.pig",
@@ -200,5 +331,76 @@ public class QuantileTests  extends PigTests
     
     assertEquals(output.size(),1);
     assertEquals(output.get(0).toString(), "(130.0,2280.0,15870.0,50000.0,84130.0,97720.0,99870.0)");
+  }
+  
+  @Test
+  public void quantileParamsTest() throws Exception {
+    List<Double> quantiles = QuantileUtil.getQuantilesFromParams("5");
+    
+    assertEquals(quantiles.size(),5);
+    assertAboutEqual(quantiles.get(0), 0.0);
+    assertAboutEqual(quantiles.get(1), 0.25);
+    assertAboutEqual(quantiles.get(2), 0.5);
+    assertAboutEqual(quantiles.get(3), 0.75);
+    assertAboutEqual(quantiles.get(4), 1.0);
+  }
+  
+  @Test
+  public void quantileParamsTest2() throws Exception {
+    List<Double> quantiles = QuantileUtil.getQuantilesFromParams("2");
+    
+    assertEquals(quantiles.size(),2);
+    assertAboutEqual(quantiles.get(0), 0.0);
+    assertAboutEqual(quantiles.get(1), 1.0);
+  }
+  
+  @Test
+  public void quantileParamsTest3() throws Exception {
+    List<Double> quantiles = QuantileUtil.getQuantilesFromParams("11");
+    
+    assertEquals(quantiles.size(),11);
+    assertAboutEqual(quantiles.get(0), 0.0);
+    assertAboutEqual(quantiles.get(1), 0.1);
+    assertAboutEqual(quantiles.get(2), 0.2);
+    assertAboutEqual(quantiles.get(3), 0.3);
+    assertAboutEqual(quantiles.get(4), 0.4);
+    assertAboutEqual(quantiles.get(5), 0.5);
+    assertAboutEqual(quantiles.get(6), 0.6);
+    assertAboutEqual(quantiles.get(7), 0.7);
+    assertAboutEqual(quantiles.get(8), 0.8);
+    assertAboutEqual(quantiles.get(9), 0.9);
+    assertAboutEqual(quantiles.get(10), 1.0);
+  }
+  
+  @Test
+  public void quantileParamsTest4() throws Exception {
+    List<Double> quantiles = QuantileUtil.getQuantilesFromParams("10");
+    
+    assertEquals(quantiles.size(),10);
+    assertAboutEqual(quantiles.get(0), 0.0);
+    assertAboutEqual(quantiles.get(1), 0.11111);
+    assertAboutEqual(quantiles.get(2), 0.22222);
+    assertAboutEqual(quantiles.get(3), 0.33333);
+    assertAboutEqual(quantiles.get(4), 0.44444);
+    assertAboutEqual(quantiles.get(5), 0.55555);
+    assertAboutEqual(quantiles.get(6), 0.66666);
+    assertAboutEqual(quantiles.get(7), 0.77777);
+    assertAboutEqual(quantiles.get(8), 0.88888);
+    assertAboutEqual(quantiles.get(9), 1.0);
+  }
+  
+  @Test
+  public void quantileParamsTest5() throws Exception {
+    List<Double> quantiles = QuantileUtil.getQuantilesFromParams("4");
+    
+    assertEquals(quantiles.size(),4);
+    assertAboutEqual(quantiles.get(0), 0.0);
+    assertAboutEqual(quantiles.get(1), 0.333);
+    assertAboutEqual(quantiles.get(2), 0.666);
+    assertAboutEqual(quantiles.get(3), 1.0);
+  }
+  
+  private void assertAboutEqual(double actual, double expected) {
+    assertTrue(Math.abs(actual-expected) < 0.001);
   }
 }

@@ -125,8 +125,15 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
  
   public StreamingQuantile(String... k)
   {
-    this.quantiles = QuantileUtil.getQuantilesFromParams(k);
-    this.numQuantiles = getNumQuantiles(this.quantiles);
+    if (k.length == 1 && Double.parseDouble(k[0]) > 1.0) 
+    {
+      this.numQuantiles = Integer.parseInt(k[0]);
+    }
+    else
+    {
+      this.quantiles = QuantileUtil.getQuantilesFromParams(k);
+      this.numQuantiles = getNumQuantiles(this.quantiles);
+    }
     this.estimator = new QuantileEstimator(this.numQuantiles);
   }
   
@@ -196,20 +203,32 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
   @Override
   public Tuple getValue()
   {
-    Tuple t = TupleFactory.getInstance().newTuple(this.quantiles.size());
+    Tuple t = TupleFactory.getInstance().newTuple(this.quantiles != null ? this.quantiles.size() : this.numQuantiles);
     try {
-      HashMap<Double,Double> quantileValues = new HashMap<Double,Double>(this.quantiles.size());
-      double quantileKey = 0.0;
-      for (double quantileValue : estimator.getQuantiles()) {
-        quantileValues.put(round(quantileKey), quantileValue);
-        quantileKey += 1.0/(this.numQuantiles-1);
-      }
-      int j = 0;
-      for (double d : this.quantiles)
+      if (this.quantiles == null)
       {
-        Double quantileValue = quantileValues.get(round(d));
-        t.set(j, quantileValue);
-        j++;
+        int j = 0;
+        for (double quantileValue : estimator.getQuantiles()) 
+        {
+          t.set(j, quantileValue);
+          j++;
+        }
+      }
+      else
+      {
+        HashMap<Double,Double> quantileValues = new HashMap<Double,Double>(this.quantiles.size());
+        double quantileKey = 0.0;
+        for (double quantileValue : estimator.getQuantiles()) {
+          quantileValues.put(round(quantileKey), quantileValue);
+          quantileKey += 1.0/(this.numQuantiles-1);
+        }
+        int j = 0;
+        for (double d : this.quantiles)
+        {
+          Double quantileValue = quantileValues.get(round(d));
+          t.set(j, quantileValue);
+          j++;
+        }
       }
     } catch (IOException e) {
       return null;

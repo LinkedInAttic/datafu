@@ -20,9 +20,11 @@ public class QuantileUtil
       }
       
       quantiles = new ArrayList<Double>(numQuantiles);
-      for (double d = 0.0; d <= 1.0; d += 1.0/(numQuantiles-1))
+      int divisor = numQuantiles-1;
+      for (int q = 0; q <= divisor; q++)
       {
-        quantiles.add(d);
+        double quantile = ((double)q)/divisor;
+        quantiles.add(quantile);
       }
     }
     else

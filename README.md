@@ -10,9 +10,9 @@ DataFu is a collection of user-defined functions for working with large-scale da
 EvalFuncs)
 * and [more](http://sna-projects.com/datafu/javadoc/0.0.4/)...
 
-Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against pig 0.9.
+Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against pig 0.10.
 
-[http://sna-projects.com/datafu/](http://sna-projects.com/datafu/)
+[http://data.linkedin.com/opensource/datafu](http://data.linkedin.com/opensource/datafu)
 
 ## What can you do with it?
 

@@ -190,11 +190,11 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
       if (t.isNull() || t.isNull(0)) {
         warn("Ignored NULL inside bag", PigWarning.UDF_WARNING_1);
       } else {
-      Object o = t.get(0);
-      if (!(o instanceof Number)) {
-        throw new IllegalStateException("bag must have numerical values");
-      }
-      estimator.add(((Number) o).doubleValue());
+        Object o = t.get(0);
+        if (!(o instanceof Number)) {
+          throw new IllegalStateException("bag must have numerical values");
+        }
+        estimator.add(((Number) o).doubleValue());
       }
     }
   }

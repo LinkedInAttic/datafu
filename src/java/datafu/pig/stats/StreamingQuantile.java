@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.pig.Accumulator;
+import org.apache.pig.PigWarning;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
@@ -186,11 +187,15 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
       return;
 
     for (Tuple t : bag) {
-      Object o = t.get(0);
-      if (!(o instanceof Number)) {
-        throw new IllegalStateException("bag must have numerical values (and be non-null)");
+      if (t.isNull() || t.isNull(0)) {
+        warn("Ignored NULL inside bag", PigWarning.UDF_WARNING_1);
+      } else {
+        Object o = t.get(0);
+        if (!(o instanceof Number)) {
+          throw new IllegalStateException("bag must have numerical values");
+        }
+        estimator.add(((Number) o).doubleValue());
       }
-      estimator.add(((Number) o).doubleValue());
     }
   }
 

@@ -146,10 +146,10 @@ public class Quantile extends SimpleEvalFunc<Tuple>
         if (t.isNull() || t.isNull(0)) {
           warn("Ignored NULL inside bag", PigWarning.UDF_WARNING_1);
         } else {
-        Object o = t.get(0);
-        if (!(o instanceof Number))
-          throw new IllegalStateException("bag must have numerical values");
-        d.put(i, ((Number) o).doubleValue());
+          Object o = t.get(0);
+          if (!(o instanceof Number))
+            throw new IllegalStateException("bag must have numerical values");
+          d.put(i, ((Number) o).doubleValue());
         }
       }
       i++;

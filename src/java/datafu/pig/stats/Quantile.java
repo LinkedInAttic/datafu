@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.pig.PigWarning;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
@@ -142,10 +143,14 @@ public class Quantile extends SimpleEvalFunc<Tuple>
         break;
 
       if (d.containsKey(i)) {
+        if (t.isNull() || t.isNull(0)) {
+          warn("Ignored NULL inside bag", PigWarning.UDF_WARNING_1);
+        } else {
         Object o = t.get(0);
         if (!(o instanceof Number))
-          throw new IllegalStateException("bag must have numerical values (and be non-null)");
+          throw new IllegalStateException("bag must have numerical values");
         d.put(i, ((Number) o).doubleValue());
+        }
       }
       i++;
     }

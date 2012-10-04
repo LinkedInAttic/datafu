@@ -16,10 +16,9 @@ public class MarkovPairTests extends PigTests
   public void markovPairDefaultTest() throws Exception
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/stats/markovPairDefault.pig",
-                                 "schema=(val:int)");
+                                 "schema=(data: bag {t: tuple(val:int)})");
     
-    String[] input = {"10","20","30","40","50","60"};
-    writeLinesToFile("input", input);
+    writeLinesToFile("input", "{(10),(20),(30),(40),(50),(60)}");
     
     String[] expectedOutput = {
         "({((10),(20)),((20),(30)),((30),(40)),((40),(50)),((50),(60))})"
@@ -36,10 +35,9 @@ public class MarkovPairTests extends PigTests
   public void markovPairMultipleInput() throws Exception
   {    
     PigTest test = createPigTest("test/pig/datafu/test/pig/stats/markovPairDefault.pig",
-                                 "schema=(val1:int,val2:int)");
+                                 "schema=(data: bag {t: tuple(val1:int,val2:int)})");
     
-    String[] input = {"10\t100","20\t200","30\t300","40\t400","50\t500","60\t600"};    
-    writeLinesToFile("input", input);
+    writeLinesToFile("input", "{(10,100),(20,200),(30,300),(40,400),(50,500),(60,600)}");
     
     String[] expectedOutput = {
         "({((10,100),(20,200)),((20,200),(30,300)),((30,300),(40,400)),((40,400),(50,500)),((50,500),(60,600))})"
@@ -57,11 +55,10 @@ public class MarkovPairTests extends PigTests
   public void markovPairLookaheadTest() throws Exception
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/stats/markovPairLookahead.pig", 
-                                 "schema=(val:int)",
+                                 "schema=(data: bag {t: tuple(val:int)})",
                                  "lookahead=3");
     
-    String[] input = {"10","20","30","40","50"};
-    writeLinesToFile("input", input);
+    writeLinesToFile("input", "{(10),(20),(30),(40),(50)}");
     
     String[] expectedOutput = {
         "({((10),(20)),((10),(30)),((10),(40)),((20),(30)),((20),(40)),((20),(50)),((30),(40)),((30),(50)),((40),(50))})"

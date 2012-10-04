@@ -187,11 +187,7 @@ public class BagTests extends PigTests
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateWithReverseTest.pig");
        
     writeLinesToFile("input", 
-                     "10\t{(1),(2),(3)}",
-                     "20\t{(4),(5),(6)}",
-                     "30\t{(7),(8)}",
-                     "40\t{(9),(10),(11)}",
-                     "50\t{(12),(13),(14),(15)}");
+                     "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})");
     
     test.runScript();
     
@@ -209,11 +205,7 @@ public class BagTests extends PigTests
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateWithStartTest.pig");
        
     writeLinesToFile("input", 
-                     "10\t{(1),(2),(3)}",
-                     "20\t{(4),(5),(6)}",
-                     "30\t{(7),(8)}",
-                     "40\t{(9),(10),(11)}",
-                     "50\t{(12),(13),(14),(15)}");
+                     "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})");
     
     test.runScript();
     
@@ -230,12 +222,8 @@ public class BagTests extends PigTests
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateTest.pig");
        
-    writeLinesToFile("input", 
-                     "10\t{(1),(2),(3)}",
-                     "20\t{(4),(5),(6)}",
-                     "30\t{(7),(8)}",
-                     "40\t{(9),(10),(11)}",
-                     "50\t{(12),(13),(14),(15)}");
+    writeLinesToFile("input",
+                     "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})");
     
     test.runScript();
     
@@ -252,12 +240,8 @@ public class BagTests extends PigTests
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/comprehensiveBagSplitAndEnumerate.pig");
     
-    writeLinesToFile("input", 
-                     "A\t1.0",
-                     "B\t2.0",
-                     "C\t3.0",
-                     "D\t4.0",
-                     "E\t5.0");
+    writeLinesToFile("input",
+                     "({(A,1.0),(B,2.0),(C,3.0),(D,4.0),(E,5.0)})");
     
     test.runScript();
     
@@ -277,15 +261,11 @@ public class BagTests extends PigTests
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/aliasBagFieldsTest.pig");
     
     writeLinesToFile("input",
-                     "A\t1\t0",
-                     "B\t2\t0",
-                     "C\t3\t0",
-                     "D\t4\t0",                     
-                     "E\t5\t0");
+                     "({(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
     
     test.runScript();
     
-    assertOutput(test, "data5",
+    assertOutput(test, "data4",
                  "(A,1)",
                  "(B,2)",
                  "(C,3)",
@@ -299,25 +279,12 @@ public class BagTests extends PigTests
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/distinctByTest.pig");
     
     writeLinesToFile("input",
-                     "Z\t1\t0",
-                     "A\t1\t0",
-                     "A\t1\t0",
-                     "B\t2\t0",
-                     "B\t22\t1",
-                     "C\t3\t0",
-                     "D\t4\t0",                     
-                     "E\t5\t0");
+                     "({(Z,1,0),(A,1,0),(A,1,0),(B,2,0),(B,22,1),(C,3,0),(D,4,0),(E,5,0)})");
     
     test.runScript();
     
-    assertOutput(test, "data3", "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
-    /*
-                 "(A,1)",
-                 "(B,2)",
-                 "(C,3)",
-                 "(D,4)",
-                 "(E,5)");
-                 */
+    assertOutput(test, "data2",
+                 "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
   }
 
 }

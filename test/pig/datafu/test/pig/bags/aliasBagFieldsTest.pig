@@ -2,25 +2,19 @@ register $JAR_PATH
 
 define AliasBagFields datafu.pig.bags.AliasBagFields('[a#alpha,b#numeric]');
 
-data = LOAD 'input' AS (a:CHARARRAY, b:INT, c:INT);
+data = LOAD 'input' AS (data: bag {T: tuple(a:CHARARRAY, b:INT, c:INT)});
 
-describe data;
-
-data2 = GROUP data ALL; 
+data2 = FOREACH data GENERATE AliasBagFields(data) as data;
 
 describe data2;
 
-data3 = FOREACH data2 GENERATE AliasBagFields(data) as data;
+data3 = FOREACH data2 GENERATE FLATTEN(data);
 
 describe data3;
 
-data4 = FOREACH data3 GENERATE FLATTEN(data);
+data4 = FOREACH data3 GENERATE data::alpha, data::numeric;
 
 describe data4;
 
-data5 = FOREACH data4 GENERATE data::alpha, data::numeric;
-
-describe data5;
-
-STORE data5 INTO 'output';
+STORE data4 INTO 'output';
 

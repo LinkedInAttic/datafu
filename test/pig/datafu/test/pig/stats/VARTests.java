@@ -92,4 +92,36 @@ public class VARTests  extends PigTests
     assertEquals(output.size(),1);
     assertEquals(output.get(0).toString(), "(8.25)");
   }
+
+  @Test
+  public void varTestOneData() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/varTestDouble.pig");
+
+    String[] input = {"5.0"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(0.0)");
+  }
+  
+  
+  @Test
+  public void varTestZeroData() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/varTestLong.pig");
+
+    String[] input = {};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),0);
+  }
  }

@@ -23,7 +23,7 @@ import org.apache.pig.backend.executionengine.ExecException;
 
 
 /**
-* Generates the {@link <a href="http://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Wilson_score_interval" target="_blank">Variance/a>} 
+* Generates the {@link <a href="http://en.wikipedia.org/wiki/Variance" target="_blank">Variance/a>} 
 * of a set of Values. This UDF uses the fact that variance(x) = average(x^2) - average(x)^2
 * This class implements * {@link org.apache.pig.Algebraic}, so if possible the execution will performed in a distributed fashion.
 * VAR implements the {@link org.apache.pig.Accumulator} interface as well.

@@ -48,7 +48,7 @@ public class VARTests  extends PigTests
   @Test
   public void varTestFloat() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/varTestDouble.pig");
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/varTestFloat.pig");
 
     String[] input = {"1.0","2.0","3.0","4.0","10.0","5.0","6.0","7.0","8.0","9.0"};
     writeLinesToFile("input", input);
@@ -123,5 +123,37 @@ public class VARTests  extends PigTests
     List<Tuple> output = getLinesForAlias(test, "data_out", true);
     
     assertEquals(output.size(),0);
+  }
+  
+  @Test
+  public void varTestNullEntry() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/varTestDouble.pig");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9","null"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(8.25)");
+  }
+  
+  @Test
+  public void varTestNullEntries() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/varTestFloat.pig");
+
+    String[] input = {"1","2","3","4","10","5","6","7","8","9","null","null"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(8.25)");
   }
  }

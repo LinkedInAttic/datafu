@@ -80,13 +80,16 @@ public class IntVAR extends EvalFunc<Double> implements Algebraic, Accumulator<D
                     i = (Integer)tp.get(0);
                 }
                 
-                t.set(0, (long)i);
-                t.set(1, (long)i*i);
-                
-                if (i == null)
+                if (i == null) {
                     t.set(2, 0L);
-                else
+                    t.set(0, null);
+                    t.set(1, null);
+                }
+                else {
                     t.set(2, 1L);
+                    t.set(0, (long)i);
+                    t.set(1, (long)i*i);
+                }
                 return t;
             } catch(NumberFormatException nfe) {
                 // invalid input,
@@ -177,12 +180,13 @@ public class IntVAR extends EvalFunc<Double> implements Algebraic, Accumulator<D
             Long iSquare = (Long)t.get(1);
             Long count = (Long)t.get(2);
             
-            // we count nulls in avg as contributing 0
+            // we count nulls in var as contributing 0
             // a departure from SQL for performance of
             // COUNT() which implemented by just inspecting
             // size of the bag
             if(i == null) {
                 i = (long)0;
+                iSquare = (long)0;
             } else {
                 sawNonNull = true;
             }

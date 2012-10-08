@@ -79,13 +79,17 @@ public class DoubleVAR extends EvalFunc<Double> implements Algebraic, Accumulato
                     Tuple tp = bg.iterator().next();
                     d = (Double)tp.get(0);
                 }
-                t.set(0, d);
-                t.set(1, d*d);
                 
-                if (d == null)
-                    t.set(2, 0L);
-                else
-                    t.set(2, 1L);
+                if (d == null){
+                  t.set(0, null);
+                  t.set(1, null);
+                  t.set(2, 0L);
+                }
+                else {
+                  t.set(0, d);
+                  t.set(1, d*d);
+                  t.set(2, 1L);
+                }
                 return t;
             } catch(NumberFormatException nfe) {
                 // invalid input,
@@ -177,12 +181,13 @@ public class DoubleVAR extends EvalFunc<Double> implements Algebraic, Accumulato
             Double dSquare = (Double)t.get(1);
             Long count = (Long)t.get(2);
             
-            // we count nulls in avg as contributing 0
+            // we count nulls in var as contributing 0
             // a departure from SQL for performance of
             // COUNT() which implemented by just inspecting
             // size of the bag
             if(d == null) {
                 d = 0.0;
+                dSquare = 0.0;
             } else {
                 sawNonNull = true;
             }
@@ -216,7 +221,7 @@ public class DoubleVAR extends EvalFunc<Double> implements Algebraic, Accumulato
 
     static protected Double sum(Tuple input) throws ExecException, IOException {
         DataBag values = (DataBag)input.get(0);
-        
+       
         // if we were handed an empty bag, return NULL
         if(values.size() == 0) {
             return null;

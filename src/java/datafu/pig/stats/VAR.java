@@ -98,12 +98,16 @@ public class VAR extends EvalFunc<Double> implements Algebraic, Accumulator<Doub
                     dba = (DataByteArray)tp.get(0);
                 }
                 Double d = dba !=null ? Double.valueOf(dba.toString()) : null;
-                t.set(0, d);
-                t.set(1, d*d);
-                if (dba == null)
+                if (dba == null){
+                    t.set(0, null);
+                    t.set(1, null);
                     t.set(2, 0L);
-                else
+                }
+                else {
+                    t.set(0, d);
+                    t.set(1, d*d);
                     t.set(2, 1L);
+                }
                 return t;
             } catch(NumberFormatException nfe) {
                 // invalid input,
@@ -195,7 +199,7 @@ public class VAR extends EvalFunc<Double> implements Algebraic, Accumulator<Doub
             Double dSquare = (Double)t.get(1);
             Long count = (Long)t.get(2);
             
-            // we count nulls in avg as contributing 0
+            // we count nulls in var as contributing 0
             // a departure from SQL for performance of
             // COUNT() which implemented by just inspecting
             // size of the bag

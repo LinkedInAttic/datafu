@@ -79,14 +79,16 @@ public class LongVAR extends EvalFunc<Double> implements Algebraic, Accumulator<
                     Tuple tp = bg.iterator().next();
                     l = (Long)tp.get(0);
                 }
-                
-                t.set(0, l);
-                t.set(1, l*l);
-                
-                if (l == null)
+                if (l == null) {
+                    t.set(0, null);
+                    t.set(1, null);
                     t.set(2, 0L);
-                else
+                }
+                else { 
+                    t.set(0, l);
+                    t.set(1, l*l);
                     t.set(2, 1L);
+                }
                 return t;
             } catch(NumberFormatException nfe) {
                 // invalid input,
@@ -178,12 +180,13 @@ public class LongVAR extends EvalFunc<Double> implements Algebraic, Accumulator<
             Long lSquare = (Long)t.get(1);
             Long count = (Long)t.get(2);
             
-            // we count nulls in avg as contributing 0
+            // we count nulls in var as contributing 0
             // a departure from SQL for performance of
             // COUNT() which implemented by just inspecting
             // size of the bag
             if(l == null) {
                 l = (long)0;
+                lSquare = (long)0;
             } else {
                 sawNonNull = true;
             }

@@ -81,13 +81,16 @@ public class FloatVAR extends EvalFunc<Double> implements Algebraic, Accumulator
                 }
                 Double d = f!= null ? new Double(f): null;
                 
-                t.set(0, d);
-                t.set(1, d*d);
-                
-                if (f == null)
+                if (f == null){
+                    t.set(0, null);
+                    t.set(1, null);
                     t.set(2, 0L);
-                else
+                }
+                else {
+                    t.set(0, d);
+                    t.set(1, d*d);
                     t.set(2, 1L);
+                }
                 return t;
             } catch(NumberFormatException nfe) {
                 // invalid input,
@@ -179,12 +182,13 @@ public class FloatVAR extends EvalFunc<Double> implements Algebraic, Accumulator
             Double dSquare = (Double)t.get(1);
             Long count = (Long)t.get(2);
             
-            // we count nulls in avg as contributing 0
+            // we count nulls in var as contributing 0
             // a departure from SQL for performance of
             // COUNT() which implemented by just inspecting
             // size of the bag
             if(d == null) {
                 d = 0.0;
+                dSquare = 0.0;
             } else {
                 sawNonNull = true;
             }

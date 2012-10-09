@@ -25,17 +25,28 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Calculates the Levenshtein distance between two strings
+ * Calculates Levenshtein distance between two strings.
+ * e.g. distance bewteen cat and cot = 1
+ *
+ * LevenshteinDistance may be passed a maximum distance parameter k.  
+ * This reduces the compute time from len(string1) * len(string2) to len(string) * k;
+ * Example:
+ *
+ * <pre>
+ * {@code
+ * 
+ * define LevenshteinDistance datafu.pig.text.LevenshteinDistance('10');
+ * 
+ * data = load 'input' as (str1:chararray, str2:chararray);
+ * data_out = FOREACH data GENERATE LevenshteinDistance(str1, str2) as distance;
+ * store data_out into 'output';
+ * 
+ * }
+ * </pre>
+ * 
  */
 public class LevenshteinDistance extends SimpleEvalFunc<Integer> 
 {
-  /**
-   * Calculates Levenshtein distance between two strings.
-   * e.g. distance bewteen cat and cot = 1
-   *
-   * LevenshteinDistance may be passed a maximum distance parameter k.  
-   * This reduces the compute time from len(string1) * len(string2) to len(string) * k;
-   */
   private Integer maxDistance;
   private HashMap cache;
 
@@ -71,7 +82,7 @@ public class LevenshteinDistance extends SimpleEvalFunc<Integer>
   }
 
   public Integer distance(String s, String t, Integer entryCost) {
-    if ((entryCost != null) && (entryCost >= this.maxDistance)) return this.maxDistance;
+    if ((entryCost != null) && (entryCost >= this.maxDistance)) return 0;
 
     //Check memoization cache
     Integer dist = (Integer)cache.get(s + "_" + t);
@@ -81,18 +92,20 @@ public class LevenshteinDistance extends SimpleEvalFunc<Integer>
       int len_s = s.length();
       int len_t = t.length();
 
-      if (len_s == 0) dist = (entryCost + len_t);
-      else if (len_t == 0) dist = (entryCost + len_s);
+      if (len_s == 0) dist = len_t;
+      else if (len_t == 0) dist = len_s;
       else {
         int cost = 0;
         if (s.charAt(0) != t.charAt(0)) cost = 1;
 
-        dist = Math.min(distance(s.substring(1), t, entryCost + 1),
-                        Math.min(distance(s, t.substring(1), entryCost + 1),
-                                 distance(s.substring(1), t.substring(1), entryCost + cost)));
+        dist = Math.min(distance(s.substring(1), t, entryCost + 1) + 1,
+                        Math.min(distance(s, t.substring(1), entryCost + 1) + 1,
+                                 distance(s.substring(1), t.substring(1), entryCost + cost) + cost));
       }
-
-      cache.put(s + "_" + t, dist);
+      
+      //Place the element into the memoization cache if we were not cut off by the maxDistance parameter
+      if ((dist + entryCost) < this.maxDistance)
+        cache.put(s + "_" + t, dist);
     }
     return dist;
   }

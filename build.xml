@@ -201,30 +201,30 @@
     
   <target name="jar" depends="build" description="Builds the final JAR">
     <!-- build the core jar -->
-    <delete file="${dist.dir}/${name}-${datafu.version}.jar" />
-    <jar destfile="${dist.dir}/${name}-${datafu.version}.jar">
+    <delete file="${dist.dir}/${final.name}.jar" />
+    <jar destfile="${dist.dir}/${final.name}.jar">
       <fileset dir="${classes.dir}">
         <include name="**/*.*" />
       </fileset>
     </jar>
     
     <!-- add fastutil classese to the core jar -->
-    <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
-    <move file="${dist.dir}/${name}-${datafu.version}.jar" tofile="${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    <delete file="${dist.dir}/${final.name}-orig.jar" />
+    <move file="${dist.dir}/${final.name}.jar" tofile="${dist.dir}/${final.name}-orig.jar" />
     <java jar="${tools.dir}/autojar.jar" fork="true">
-      <arg line="-baeq -o ${dist.dir}/${name}-${datafu.version}.jar -c ${lib.dir}/fastutil-6.3.jar ${dist.dir}/${name}-${datafu.version}-orig.jar" />
+      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${lib.dir}/fastutil-6.3.jar ${dist.dir}/${final.name}-orig.jar" />
     </java>
-    <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    <delete file="${dist.dir}/${final.name}-orig.jar" />
     
     <!-- build the final jar -->
-    <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
-    <move file="${dist.dir}/${name}-${datafu.version}.jar" tofile="${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    <delete file="${dist.dir}/${final.name}-orig.jar" />
+    <move file="${dist.dir}/${final.name}.jar" tofile="${dist.dir}/${final.name}-orig.jar" />
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="tools/jarjar-1.1.jar"/>
     <jarjar jarfile="${dist.dir}/${final.name}.jar">
-        <zipfileset src="${dist.dir}/${name}-${datafu.version}-orig.jar"/>
+        <zipfileset src="${dist.dir}/${final.name}-orig.jar"/>
         <rule pattern="it.unimi.dsi.fastutil.**" result="datafu.it.unimi.dsi.fastutil.@1"/>
     </jarjar>
-    <delete file="${dist.dir}/${name}-${datafu.version}-orig.jar" />
+    <delete file="${dist.dir}/${final.name}-orig.jar" />
   </target>
     
   <target name="jar-instrumented" depends="jar" description="Build an instrumented jar">
@@ -241,11 +241,11 @@
       </instrumentationClasspath>
     </cobertura-instrument>
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="tools/jarjar-1.1.jar"/>
-    <delete file="${instrumented.dir}/${name}-${datafu.version}.jar" />
+    <delete file="${instrumented.dir}/${final.name}.jar" />
     <!-- Classes are now instrumented, but we need to merge back with original JAR to get back what was lost, since
          we don't instrument everything and therefore classes are missing form the instrumented directory. -->
-    <jarjar jarfile="${instrumented.dir}/${name}-${datafu.version}.jar">      
-      <zipfileset src="${dist.dir}/${name}-${datafu.version}.jar"/>        
+    <jarjar jarfile="${instrumented.dir}/${final.name}.jar">      
+      <zipfileset src="${dist.dir}/${final.name}.jar"/>        
       <!-- Classes in instrumented directory come last so they take precedence over the classes in the JAR.
            We need to include the JAR so we get the fastutil classes.  The fastutil classes are not instrumented (by design),
            so they are not in the instrumented directory. -->

@@ -74,7 +74,7 @@ public class LevenshteinDistance extends SimpleEvalFunc<Integer>
     {
       //TODO: consider possibility of keeping memoize cache between calls; would need way to clean out cache if gets big
       cache = new HashMap();  
-      return distance(word1, word2, 0);
+      return Math.min(distance(word1, word2, 0), this.maxDistance);
     }
     catch (Exception e) {
       throw new IOException(e);

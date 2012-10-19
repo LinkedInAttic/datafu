@@ -17,43 +17,39 @@ package datafu.pig.bags;
 
 import java.io.IOException;
 
-import org.apache.pig.EvalFunc;
-import org.apache.pig.data.BagFactory;
+import datafu.pig.util.SimpleEvalFunc;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
-import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
-import org.apache.pig.impl.util.WrappedIOException;
 
-/* Given a bag, return the first tuple from the bag
-
-For example,
-FirstTupleFromBag({(1), (2)}, null) -> (1)
+/**
+ * Returns the first tuple from a bag. Takes an optional second parameter that will be returned if the bag is empty.
+ *
+ * Example:
+ * <pre>
+ * {@code
+ * define FirstTupleFromBag datafu.pig.bags.FirstTupleFromBag();
+ *
+ * -- input:
+ * -- ({(a,1)})
+ * input = LOAD 'input' AS (B: bag {T: tuple(alpha:CHARARRAY, numeric:INT)});
+ *
+ * output = FOREACH input GENERATE FirstTupleFromBag(B);
+ *
+ * -- output:
+ * -- (a,1)
+ * }
+ * </pre>
  */
 
-public class FirstTupleFromBag extends EvalFunc<Object>
+public class FirstTupleFromBag extends SimpleEvalFunc<Tuple>
 {
-  private static final BagFactory bagFactory = BagFactory.getInstance();
-  private static final TupleFactory tupleFactory = TupleFactory.getInstance();
-
-  @Override
-  public Object exec(Tuple input) throws IOException
+  public Tuple call(DataBag bag, Tuple defaultValue) throws IOException
   {
-    // PigStatusReporter reporter = PigStatusReporter.getInstance();
-    try {
-      DataBag outputBag = bagFactory.newDefaultBag();
-      long i=0, j, cnt=0;
-      DataBag inputBag = (DataBag) input.get(0);
-      Object default_val = input.get(1);
-      for(Tuple bag2tuple : inputBag){
-        outputBag.add(bag2tuple);
-        return bag2tuple;
-      }
-      return default_val;
+    for (Tuple t : bag) {
+      return t;
     }
-    catch (Exception e) {
-      throw WrappedIOException.wrap("Caught exception processing input of " + this.getClass().getName(), e);
-    }
+    return defaultValue;
   }
 
   @Override

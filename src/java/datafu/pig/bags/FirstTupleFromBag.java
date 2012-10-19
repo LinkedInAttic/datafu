@@ -23,7 +23,7 @@ import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
- * Returns the first tuple from a bag. Takes an optional second parameter that will be returned if the bag is empty.
+ * Returns the first tuple from a bag. Requires a second parameter that will be returned if the bag is empty.
  *
  * Example:
  * <pre>
@@ -34,7 +34,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * -- ({(a,1)})
  * input = LOAD 'input' AS (B: bag {T: tuple(alpha:CHARARRAY, numeric:INT)});
  *
- * output = FOREACH input GENERATE FirstTupleFromBag(B);
+ * output = FOREACH input GENERATE FirstTupleFromBag(B, null);
  *
  * -- output:
  * -- (a,1)

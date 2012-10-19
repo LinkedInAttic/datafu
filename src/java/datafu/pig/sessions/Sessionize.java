@@ -47,16 +47,18 @@ import org.joda.time.Period;
  * 
  * define Sessionize datafu.pig.sessions.Sessionize('$TIME_WINDOW');
  *
+ * views = LOAD 'views.tsv' AS (visit_date:chararray, member_id:int, url:chararray);
+ *
  * -- sessionize the visit stream
- * VIEWS = group VIEWS by member_id;
- * SESSIONS = foreach VIEWS {
- *   VISITS = order VIEWS by visit_date;
- *   generate FLATTEN(Sessionize(VISITS)) as (visit_date,member_id,url,session_id); 
+ * views = GROUP views BY member_id;
+ * sessions = FOREACH views {
+ *   visits = ORDER views BY visit_date;
+ *   GENERATE FLATTEN(Sessionize(VISITS)) AS (visit_date,member_id,url,session_id); 
  * }
  *
  * -- count the number of sessions hitting the url
- * ROLLUP = group SESSIONS by url;
- * RESULT = foreach ROLLUP generate group as url, COUNT(SESSIONS) as session_cnt;
+ * rollup = GROUP sessions BY url;
+ * result = FOREACH rollup GENERATE group AS url, COUNT(SESSIONS) AS session_cnt;
  * }
  * </pre>
  */

@@ -18,7 +18,6 @@ package datafu.pig.bags;
 
 import java.io.IOException;
 
-import org.apache.pig.Accumulator;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
@@ -30,55 +29,48 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Enumerate through a bag, replacing each (elem) with (elem, idx). For example:
+ * Enumerate through a bag, replacing each (elem) with (elem, idx). Indices are being produced in 
+ * Decreasing order. For example:
  * <pre>
- *   {(A),(B),(C),(D)} => {(A,0),(B,1),(C,2),(D,3)}
+ *   {(A),(B),(C),(D)} => {(A,3),(B,2),(C,1),(D,0)}
  * </pre>
  * The first constructor parameter (optional) dictates the starting index of the counting.
  * <p>
  * Example:
  * <pre>
  * {@code
- * define Enumerate datafu.pig.bags.Enumerate('1');
+ * define ReverseEnumerate datafu.pig.bags.ReverseEnumerate('1');
  *
  * -- input:
  * -- ({(100),(200),(300),(400)})
  * input = LOAD 'input' as (B: bag{T: tuple(v2:INT)});
  *
  * -- output:
- * -- ({(100,1),(200,2),(300,3),(400,4)})
- * output = FOREACH input GENERATE Enumerate(B);
+ * -- ({(100,4),(200,3),(300,2),(400,1)})
+ * output = FOREACH input GENERATE ReverseEnumerate(B);
  * }
  * </pre>
  */
-public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<DataBag>
+public class ReverseEnumerate extends SimpleEvalFunc<DataBag>
 {
   private final int start;
-  
-  private DataBag outputBag;
-  private long i;
-  private long count;
 
-  public Enumerate()
+  public ReverseEnumerate()
   {
-    this("0");
+    this.start = 0;
   }
 
-  public Enumerate(String start)
+  public ReverseEnumerate(String start)
   {
     this.start = Integer.parseInt(start);
-    this.outputBag = BagFactory.getInstance().newDefaultBag();
-    this.i = this.start;
-    this.count = 0;
   }
   
   public DataBag call(DataBag inputBag) throws IOException
   {
-    enumerateBag(inputBag);
-    return getValue();
-  }
-  
-  public void enumerateBag(DataBag inputBag){
+    DataBag outputBag = BagFactory.getInstance().newDefaultBag();
+    long i = start, count = 0;
+    i = inputBag.size() - 1 + start;
+
     for (Tuple t : inputBag) {
       Tuple t1 = TupleFactory.getInstance().newTuple(t.getAll());
       t1.append(i);
@@ -88,32 +80,13 @@ public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<Da
         outputBag.spill();
         count = 0;
       }
-      i++;
+      i--;
       count++;
     }
-  }
-  
-  @Override
-  public void accumulate(Tuple arg0) throws IOException
-  {
-    DataBag inputBag = (DataBag)arg0.get(0);
-    enumerateBag(inputBag);
-  }
 
-  @Override
-  public void cleanup()
-  {
-    this.outputBag = null;
-    this.i = 0;
-    this.count = 0;
-  }
-
-  @Override
-  public DataBag getValue()
-  {
     return outputBag;
   }
-  
+
   @Override
   public Schema outputSchema(Schema input)
   {

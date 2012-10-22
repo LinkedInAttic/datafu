@@ -12,6 +12,13 @@ import org.testng.annotations.Test;
 
 import datafu.test.pig.PigTests;
 
+/**
+ * Macros tests are currently disabled as a bug in Pig (PIG-2279) prevents macros
+ * from being imported with PigUnit.
+ * 
+ * @author "Matt Hayes <mhayes@linkedin.com>"
+ *
+ */
 public class MacrosTests extends PigTests
 { 
   @Test(enabled=false)

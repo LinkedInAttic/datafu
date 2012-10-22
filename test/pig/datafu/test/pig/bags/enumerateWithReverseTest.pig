@@ -1,6 +1,6 @@
 register $JAR_PATH
 
-define Enumerate datafu.pig.bags.Enumerate('1', 'true');
+define Enumerate datafu.pig.bags.ReverseEnumerate('1');
 
 data = LOAD 'input' AS (data: bag {T: tuple(v1:INT,B: bag{T: tuple(v2:INT)})});
 

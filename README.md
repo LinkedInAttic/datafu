@@ -20,9 +20,9 @@ Here's a taste of what you can do in Pig.
 
 ### Statistics
   
-Compute the [median](http://en.wikipedia.org/wiki/Median) of sequence of sorted bags:
+Compute the [median](http://en.wikipedia.org/wiki/Median):
 
-    define Median datafu.pig.stats.Median();
+    define Median datafu.pig.stats.StreamingMedian();
 
     -- input: 3,5,4,1,2
     input = LOAD 'input' AS (val:int);
@@ -30,14 +30,11 @@ Compute the [median](http://en.wikipedia.org/wiki/Median) of sequence of sorted 
     grouped = GROUP input ALL;
 
     -- produces median of 3
-    medians = FOREACH grouped {
-      sorted = ORDER input BY val;
-      GENERATE Median(sorted.val);
-    }
+    medians = FOREACH grouped GENERATE Median(sorted.val);
   
 Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quantile):
 
-    define Quantile datafu.pig.stats.Quantile('0.0','0.5','1.0');
+    define Quantile datafu.pig.stats.StreamingQuantile('0.0','0.5','1.0');
 
     -- input: 9,10,2,3,5,8,1,4,6,7
     input = LOAD 'input' AS (val:int);
@@ -45,11 +42,20 @@ Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quanti
     grouped = GROUP input ALL;
 
     -- produces: (1,5.5,10)
-    quantiles = FOREACH grouped {
-      sorted = ORDER input BY val;
-      GENERATE Quantile(sorted.val);
-    }
+    quantiles = FOREACH grouped GENERATE Quantile(sorted.val);
 
+Or how about the [variance](http://en.wikipedia.org/wiki/Variance):
+
+    define VAR datafu.pig.stats.VAR();
+
+    -- input: 1,2,3,4,5,6,7,8,9
+    input = LOAD 'input' AS (val:int);
+
+    grouped = GROUP input ALL;
+
+    -- produces variance of 7.5
+    variance = FOREACH grouped GENERATE VAR(input.val);
+ 
 ### Set Operations
 
 Treat sorted bags as sets and compute their intersection:

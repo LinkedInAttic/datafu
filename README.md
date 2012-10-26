@@ -1,6 +1,6 @@
 # DataFu
 
-DataFu is a collection of user-defined functions for working with large-scale data in Hadoop and Pig. This library was born out of the need for a stable, well-tested library of UDFs for data mining and statistics. It is used at LinkedIn in many of our off-line workflows for data derived products like "People You May Know" and "Skills". It contains functions for:
+DataFu is a collection of user-defined functions for working with large-scale data in Hadoop and Pig. This library was born out of the need for a stable, well-tested library of UDFs for data mining and statistics. It is used at LinkedIn in many of our off-line workflows for data derived products like "People You May Know" and "Skills & Endorsements". It contains functions for:
 
 * PageRank
 * Quantiles (median), variance, etc.
@@ -10,7 +10,7 @@ DataFu is a collection of user-defined functions for working with large-scale da
 EvalFuncs)
 * and [more](http://linkedin.github.com/datafu/docs/javadoc/)...
 
-Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against pig 0.10.
+Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against Pig 0.10.
 
 [http://data.linkedin.com/opensource/datafu](http://data.linkedin.com/opensource/datafu)
 
@@ -28,7 +28,6 @@ Compute the [median](http://en.wikipedia.org/wiki/Median):
     input = LOAD 'input' AS (val:int);
 
     grouped = GROUP input ALL;
-
     -- produces median of 3
     medians = FOREACH grouped GENERATE Median(sorted.val);
   
@@ -40,7 +39,6 @@ Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quanti
     input = LOAD 'input' AS (val:int);
 
     grouped = GROUP input ALL;
-
     -- produces: (1,5.5,10)
     quantiles = FOREACH grouped GENERATE Quantile(sorted.val);
 
@@ -52,7 +50,6 @@ Or how about the [variance](http://en.wikipedia.org/wiki/Variance):
     input = LOAD 'input' AS (val:int);
 
     grouped = GROUP input ALL;
-
     -- produces variance of 7.5
     variance = FOREACH grouped GENERATE VAR(input.val);
  

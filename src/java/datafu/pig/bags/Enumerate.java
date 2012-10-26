@@ -35,6 +35,8 @@ import datafu.pig.util.SimpleEvalFunc;
  *   {(A),(B),(C),(D)} => {(A,0),(B,1),(C,2),(D,3)}
  * </pre>
  * The first constructor parameter (optional) dictates the starting index of the counting.
+ * This UDF implements the accumulator interface, reducing DataBag materialization costs.
+ *
  * <p>
  * Example:
  * <pre>

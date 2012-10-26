@@ -1,8 +1,15 @@
 package datafu.test.pig.bags;
 
+import static org.testng.Assert.assertEquals;
+
+import org.apache.pig.data.BagFactory;
+import org.apache.pig.data.DataBag;
+import org.apache.pig.data.Tuple;
+import org.apache.pig.data.TupleFactory;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
+import datafu.pig.bags.Enumerate;
 import datafu.test.pig.PigTests;
 
 
@@ -235,6 +242,49 @@ public class BagTests extends PigTests
                  "(50,{(12),(13),(14),(15)},4)");
   }
   
+  /* 
+   * Testing "Accumulator" part of Enumeration by manually invoke accumulate() and getValue() 
+   */
+  @Test
+  public void enumerateAccumulatorTest() throws Exception
+  {
+    Enumerate enumurate = new Enumerate(); 
+    
+    Tuple tuple1 = TupleFactory.getInstance().newTuple(1);
+    tuple1.set(0, 10);
+    
+    Tuple tuple2 = TupleFactory.getInstance().newTuple(1);
+    tuple2.set(0, 20);
+    
+    Tuple tuple3 = TupleFactory.getInstance().newTuple(1);
+    tuple3.set(0, 30);
+    
+    Tuple tuple4 = TupleFactory.getInstance().newTuple(1);
+    tuple4.set(0, 40);
+    
+    Tuple tuple5 = TupleFactory.getInstance().newTuple(1);
+    tuple5.set(0, 50);
+    
+    DataBag bag1 = BagFactory.getInstance().newDefaultBag();
+    bag1.add(tuple1);
+    bag1.add(tuple2);
+    bag1.add(tuple3);
+    
+    DataBag bag2 = BagFactory.getInstance().newDefaultBag();
+    bag2.add(tuple4);
+    bag2.add(tuple5);
+    
+    Tuple inputTuple1 = TupleFactory.getInstance().newTuple(1);
+    inputTuple1.set(0,bag1);
+    
+    Tuple inputTuple2 = TupleFactory.getInstance().newTuple(1);
+    inputTuple2.set(0,bag2);
+    
+    enumurate.accumulate(inputTuple1);
+    enumurate.accumulate(inputTuple2);
+    assertEquals(enumurate.getValue().toString(), "{(10,0),(20,1),(30,2),(40,3),(50,4)}");
+  }
+  
   @Test
   public void comprehensiveBagSplitAndEnumerate() throws Exception
   {
@@ -286,5 +336,4 @@ public class BagTests extends PigTests
     assertOutput(test, "data2",
                  "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
   }
-
 }

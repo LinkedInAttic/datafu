@@ -65,24 +65,6 @@
   </parent>
   <dependencies>
     <dependency>
-      <groupId>org.apache.pig</groupId>
-      <artifactId>pig</artifactId>
-      <version>0.10.0</version>
-      <exclusions>
-        <exclusion>
-          <!-- Don't pull in this version of avro because pig 0.10.0 uses a newer version (pom is incorrect) -->
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>avro</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <!-- Use correct version of avro that pig 0.10.0 was built against -->
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-      <version>1.5.3</version>
-    </dependency>
-    <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <version>1.6</version>
@@ -96,16 +78,6 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-      <version>0.20.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>6.2</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

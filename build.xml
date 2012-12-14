@@ -7,7 +7,7 @@
   <property name="display.name" value="DataFu" />
   <property name="author" value="Matthew Hayes, Sam Shah" />
   <property environment="env" />
-  <property name="datafu.version" value="0.0.6" />
+  <property name="datafu.version" value="0.0.7" />
   <property name="version" value="${datafu.version}-SNAPSHOT" />
   <property name="final.name" value="${name}-${version}" />
   
@@ -354,7 +354,7 @@
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
          uri="antlib:org.apache.maven.artifact.ant"
          classpathref="main-classpath" />
-           
+
     <artifact:pom file="${datafu.pomfile}" id="datafu-pom"/>
     <artifact:install-provider artifactId="wagon-ssh" version="${wagon-http.version}"/>
     <artifact:deploy file="${output.jarfile}">

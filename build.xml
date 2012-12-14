@@ -61,8 +61,6 @@
   <loadproperties srcfile="${ivy.jar.dir}/libraries.properties"/>
   
   <target name="all" depends="clean, jar, sources-jar, javadoc-jar, coverage" description="Build all artifacts." />
-
-  <!-- TODO need a release target -->
     
   <target name="init" depends="ivy-resolve">
     <mkdir dir="${dist.dir}" />
@@ -317,39 +315,7 @@
       </fileset>
     </jar>
   </target>
-    
-  <macrodef name="create-release-artifacts">
-    <attribute name="version" />
-    <sequential>
-    <antcall target="all"/>
-    <zip destfile="${dist.dir}/${name}-@{version}.zip">
-      <zipfileset dir="." prefix="${name}-@{version}" includes="**">
-        <exclude name="${dist.dir}/classes/**"/>
-		<exclude name="${dist.dir}/pigtestclasses/**"/>
-		<exclude name="${dist.dir}/unittestclasses/**"/>
-        <exclude name=".git*/**"/>
-		<exclude name="input"/>
-		<exclude name="pigunit-input-overriden.txt"/>
-      </zipfileset>
-    </zip>
-    <tar destfile="${dist.dir}/${name}-@{version}.tar.gz" compression="gzip" longfile="gnu">
-      <tarfileset dir="." prefix="${name}-@{version}" includes="**">
-        <exclude name="${dist.dir}/classes/**"/>
-		<exclude name="${dist.dir}/pigtestclasses/**"/>
-		<exclude name="${dist.dir}/unittestclasses/**"/>
-        <exclude name="${dist.dir}/*.zip"/>
-        <exclude name=".git*/**"/>
-		<exclude name="input"/>
-		<exclude name="pigunit-input-overriden.txt"/>
-      </tarfileset>
-    </tar>
-    </sequential>
-  </macrodef>
-
-  <target name="release" description="Create a release zip file with everything pre-built.">
-    <create-release-artifacts version="${datafu.version}" />
-  </target>
- 
+     
   <target name="deploy" depends="clean,jar,sources-jar,javadoc-jar,set-version,sign">
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
          uri="antlib:org.apache.maven.artifact.ant"

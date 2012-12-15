@@ -1,18 +1,17 @@
 # DataFu
 
-DataFu is a collection of user-defined functions for working with large-scale data in Hadoop and Pig. This library was born out of the need for a stable, well-tested library of UDFs for data mining and statistics. It is used at LinkedIn in many of our off-line workflows for data derived products like "People You May Know" and "Skills & Endorsements". It contains functions for:
+[DataFu](http://data.linkedin.com/opensource/datafu) is a collection of user-defined functions for working with large-scale data in Hadoop and Pig. This library was born out of the need for a stable, well-tested library of UDFs for data mining and statistics. It is used at LinkedIn in many of our off-line workflows for data derived products like "People You May Know" and "Skills & Endorsements". It contains functions for:
 
 * PageRank
 * Quantiles (median), variance, etc.
 * Sessionization
+* Variance
 * Convenience bag functions (e.g., set operations, enumerating bags, etc)
 * Convenience utility functions (e.g., assertions, easier writing of
 EvalFuncs)
 * and [more](http://linkedin.github.com/datafu/docs/javadoc/)...
 
 Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against Pig 0.10.
-
-[http://data.linkedin.com/opensource/datafu](http://data.linkedin.com/opensource/datafu)
 
 ## What can you do with it?
 
@@ -136,18 +135,18 @@ The JAR can be found [here](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22co
 
 If you are using Ivy:
 
-    <dependency org="com.linkedin.datafu" name="datafu" rev="0.0.4"/>
+    <dependency org="com.linkedin.datafu" name="datafu" rev="0.0.6"/>
     
 If you are using Maven:
 
     <dependency>
       <groupId>com.linkedin.datafu</groupId>
       <artifactId>datafu</artifactId>
-      <version>0.0.4</version>
+      <version>0.0.6</version>
     </dependency>
-    
-Or you can download one of the packages from the [downloads](https://github.com/linkedin/datafu/downloads) section.    
 
+Or [download](https://github.com/linkedin/datafu/archive/master.zip) the code.
+    
 ## Working with the source code
 
 Here are some common tasks when working with the source code.

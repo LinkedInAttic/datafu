@@ -6,7 +6,11 @@ data = LOAD 'input' AS (B1:bag{T:tuple(val1:int,val2:int)},B2:bag{T:tuple(val1:i
 
 dump data
 
-data2 = FOREACH data GENERATE SetUnion(B1,B2);
+data2 = FOREACH data GENERATE SetUnion(B1,B2) AS C;
+data2 = FOREACH data2 {
+  C = ORDER C BY val1 ASC, val2 ASC;
+  generate C;
+}
 
 dump data2
 

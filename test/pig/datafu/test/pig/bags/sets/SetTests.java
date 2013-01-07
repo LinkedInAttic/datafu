@@ -48,9 +48,9 @@ public class SetTests extends PigTests
     };
     
     String[] output = {
-        "({(1,10),(1,20),(1,30),(1,40),(1,50),(1,60),(1,80),(1,1),(1,25),(1,70)})"
+        "({(1,1),(1,10),(1,20),(1,25),(1,30),(1,40),(1,50),(1,60),(1,70),(1,80)})"
       };
     
-    test.assertOutput("data",input,"data2",output);
+    test.assertOutput("data", input, "data2", output);
   }
 }

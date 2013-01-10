@@ -1,8 +1,16 @@
 package datafu.test.pig.bags.sets;
 
+import java.util.Arrays;
+
+import org.apache.pig.data.BagFactory;
+import org.apache.pig.data.DataBag;
+import org.apache.pig.data.Tuple;
+import org.apache.pig.data.TupleFactory;
 import org.apache.pig.pigunit.PigTest;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import datafu.pig.bags.sets.SetIntersect;
 import datafu.test.pig.PigTests;
 
 public class SetTests extends PigTests
@@ -25,6 +33,16 @@ public class SetTests extends PigTests
     test.assertOutput("data",input,"data2",output);
   }
   
+  @Test
+  public void testIntersectWithNullTuples() throws Exception {
+     DataBag one = BagFactory.getInstance().newDefaultBag();
+     DataBag two = BagFactory.getInstance().newDefaultBag();
+
+     Tuple input = TupleFactory.getInstance().newTuple(Arrays.asList(one, two));
+     DataBag output = new SetIntersect().exec(input);
+     Assert.assertEquals(0, output.size());
+  }
+
   @Test(expectedExceptions=org.apache.pig.impl.logicalLayer.FrontendException.class)
   public void setIntersectOutOfOrderTest() throws Exception
   {

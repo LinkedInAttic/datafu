@@ -202,9 +202,9 @@ public abstract class SimpleEvalFunc<T> extends EvalFunc<T>
     // check type for each argument
     for (int i=0; i < parameterTypes.length; i++) {
       try {
-        Byte inputType = inputSchema.getField(i).type;
-        Byte parameterType = DataType.findType(parameterTypes[i]);
-        if (! inputType.equals(parameterType)) {
+        byte inputType = inputSchema.getField(i).type;
+        byte parameterType = DataType.findType(parameterTypes[i]);
+        if (inputType != parameterType) {
           throw new IllegalArgumentException(String.format("%s: argument type mismatch [#%d]; expected %s, got %s",
                                                            _method_signature(),
                                                            i+1,

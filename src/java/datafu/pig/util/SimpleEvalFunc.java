@@ -179,9 +179,9 @@ public abstract class SimpleEvalFunc<T> extends EvalFunc<T>
   }
 
   /**
-   * Override outputSchema so we can verify the input schema
+   * Override outputSchema so we can verify the input schema at pig compile time, instead of runtime
    * @param inputSchema input schema
-   * @return call to super.outputSchema
+   * @return call to super.outputSchema in case schema was defined elsewhere
    */
   @Override
   public Schema outputSchema(Schema inputSchema)

@@ -21,7 +21,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.apache.pig.EvalFunc;
+import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
+import org.apache.pig.impl.logicalLayer.FrontendException;
+import org.apache.pig.impl.logicalLayer.schema.Schema;
+
 
 /**
   Uses reflection to makes writing simple wrapper Pig UDFs easier.
@@ -172,6 +176,49 @@ public abstract class SimpleEvalFunc<T> extends EvalFunc<T>
     catch (Exception e) {
         throw new IOException(String.format("%s: caught exception processing input.", _method_signature()), e);
     }
+  }
+
+  /**
+   * Override outputSchema so we can verify the input schema
+   * @param inputSchema input schema
+   * @return call to super.outputSchema
+   */
+  @Override
+  public Schema outputSchema(Schema inputSchema)
+  {
+    if (inputSchema == null) {
+      throw new IllegalArgumentException(String.format("%s: null schema passed to %s", _method_signature(), getClass().getName()));
+    }
+
+    // check correct number of arguments
+    Class parameterTypes[] = m.getParameterTypes();
+    if (inputSchema.size() != parameterTypes.length) {
+      throw new IllegalArgumentException(String.format("%s: got %d arguments, expected %d.",
+                                                       _method_signature(),
+                                                       inputSchema.size(),
+                                                       parameterTypes.length));
+    }
+
+    // check type for each argument
+    for (int i=0; i < parameterTypes.length; i++) {
+      try {
+        Byte inputType = inputSchema.getField(i).type;
+        Byte parameterType = DataType.findType(parameterTypes[i]);
+        if (! inputType.equals(parameterType)) {
+          throw new IllegalArgumentException(String.format("%s: argument type mismatch [#%d]; expected %s, got %s",
+                                                           _method_signature(),
+                                                           i+1,
+                                                           DataType.findTypeName(parameterType),
+                                                           DataType.findTypeName(inputType)));
+        }
+      }
+      catch (FrontendException fe) {
+        throw new IllegalArgumentException(String.format("%s: Problem with input schema: ", _method_signature(), inputSchema), fe);
+      }
+    }
+
+    // delegate to super to determine the actual outputSchema (if specified)
+    return super.outputSchema(inputSchema);
   }
 }
 

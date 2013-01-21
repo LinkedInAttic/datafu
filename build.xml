@@ -91,7 +91,7 @@
              uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
   </target>
   
-  <target name="ivy-resolve" depends="ivy-taskdef" description="retreive dependencies with ivy">
+  <target name="ivy-resolve" depends="ivy-taskdef" description="retrieve dependencies with ivy">
     <ivy:retrieve/>
   </target>
   

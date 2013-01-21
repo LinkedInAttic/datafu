@@ -51,8 +51,7 @@ public class SetUnion extends SetOperationsBase
   @Override
   public DataBag exec(Tuple input) throws IOException
   {
-    Set<Object> seen = new HashSet<Object>();
-    DataBag outputBag = bagFactory.newDefaultBag();
+    DataBag outputBag = bagFactory.newDistinctBag();
 
     try {
       for (int i=0; i < input.size(); i++) {
@@ -62,10 +61,7 @@ public class SetUnion extends SetOperationsBase
 
         DataBag inputBag = (DataBag) o;
         for (Tuple elem : inputBag) {
-          if (!seen.contains(elem)) {
-            outputBag.add(elem);
-            seen.add(elem);
-          }
+          outputBag.add(elem);
         }
       }
 

@@ -6,7 +6,7 @@
   <name>DataFu</name>
   <version>@version</version>
   <description>A collection of user-defined functions for working with large-scale data in Hadoop and Pig.</description>
-  <url>http://sna-projects.com/datafu/</url>
+  <url>http://data.linkedin.com/opensource/datafu</url>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>

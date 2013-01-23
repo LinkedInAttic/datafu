@@ -242,6 +242,30 @@ public class BagTests extends PigTests
                  "(50,{(12),(13),(14),(15)},4)");
   }
   
+  @Test
+  public void enumerateTest2() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateTest.pig");
+      
+    writeLinesToFile("input",
+                     "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})",
+                     "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})");
+   
+    test.runScript();
+   
+    assertOutput(test, "data4",
+                 "(10,{(1),(2),(3)},0)",
+                 "(20,{(4),(5),(6)},1)",
+                 "(30,{(7),(8)},2)",
+                 "(40,{(9),(10),(11)},3)",
+                 "(50,{(12),(13),(14),(15)},4)",
+                 "(10,{(1),(2),(3)},0)",
+                 "(20,{(4),(5),(6)},1)",
+                 "(30,{(7),(8)},2)",
+                 "(40,{(9),(10),(11)},3)",
+                 "(50,{(12),(13),(14),(15)},4)");
+  }  
+  
   /* 
    * Testing "Accumulator" part of Enumeration by manually invoke accumulate() and getValue() 
    */

@@ -76,6 +76,8 @@ public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<Da
   
   public DataBag call(DataBag inputBag) throws IOException
   {
+    cleanup();
+    outputBag = BagFactory.getInstance().newDefaultBag();
     enumerateBag(inputBag);
     return getValue();
   }
@@ -106,7 +108,7 @@ public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<Da
   public void cleanup()
   {
     this.outputBag = null;
-    this.i = 0;
+    this.i = this.start;
     this.count = 0;
   }
 

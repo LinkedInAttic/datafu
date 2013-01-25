@@ -171,9 +171,16 @@ Override `testclasses.pattern`, which defaults to `**/*.class`.  For example, to
 
 ### Releasing 
 
-We use Sonatype to release artifacts.  Information on how this is set up can be found [here](https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide).  Most of this has already been set up with the `build.xml` file.  You will however need a Sonatype account and must create a Maven `settings.xml` with your account information, as described [here](https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-7a.1.POMandsettingsconfig).
+We use Sonatype to release artifacts.  Information on how this is set up can be found [here](https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide).  Most of this has already been set up with the `build.xml` file.  You will however need a Sonatype account and must create a Maven `~/.m2/settings.xml` with your account information, as described [here](https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-7a.1.POMandsettingsconfig).
 
-We use `gpg` to sign the artifacts, so you'll need `gpg` set up as well. Information on generating PGP signatures with `gpg` can be found [here](https://docs.sonatype.org/display/Repository/How+To+Generate+PGP+Signatures+With+Maven).
+Create the settings.xml from our template:
+
+    mkdir ~/.m2
+    cp settings.xml.template ~/.m2/settings.xml
+
+Then edit `~/.m2/settings.xml` and add your user name and password.
+
+We use `gpg` to sign the artifacts, so you'll need `gpg` set up as well. Information on generating PGP signatures with `gpg` can be found [here](https://docs.sonatype.org/display/Repository/How+To+Generate+PGP+Signatures+With+Maven).  Make sure you follow the section *Deleting a Sub Key*.
 
 First run the tests to make sure all is well:
 

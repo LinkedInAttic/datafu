@@ -1,0 +1,22 @@
+<settings>
+  <servers>
+    <server>
+      <id>sonatype-nexus-snapshots</id>
+      <username>TODOTODO</username>
+      <password>TODOTODO</password>
+    </server>
+    <server>
+      <id>sonatype-nexus-staging</id>
+      <username>TODOTODO</username>
+      <password>TODOTODO</password>
+    </server>
+  </servers>
+  <profiles>
+    <profile>
+      <id>gpg</id>
+      <properties>
+        <gpg.passphrase>TODOTODO</gpg.passphrase>
+      </properties>
+    </profile>
+  </profiles>
+</settings>

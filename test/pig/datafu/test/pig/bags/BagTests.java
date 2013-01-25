@@ -1,8 +1,15 @@
 package datafu.test.pig.bags;
 
+import static org.testng.Assert.assertEquals;
+
+import org.apache.pig.data.BagFactory;
+import org.apache.pig.data.DataBag;
+import org.apache.pig.data.Tuple;
+import org.apache.pig.data.TupleFactory;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
+import datafu.pig.bags.Enumerate;
 import datafu.test.pig.PigTests;
 
 
@@ -119,19 +126,6 @@ public class BagTests extends PigTests
         
     this.writeLinesToFile("input", "1\t{(1),(2),(3),(4),(5)}");
     
-    String[] output = {
-        "(1,2)",
-        "(1,3)",
-        "(1,4)",
-        "(1,5)",
-        "(2,3)",
-        "(2,4)",
-        "(2,5)",
-        "(3,4)",
-        "(3,5)",
-        "(4,5)"
-      };
-    
     test.runScript();
     this.getLinesForAlias(test, "data3");
     
@@ -236,6 +230,73 @@ public class BagTests extends PigTests
   }
   
   @Test
+  public void enumerateTest2() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateTest.pig");
+      
+    writeLinesToFile("input",
+                     "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})",
+                     "({(11,{(11),(12),(13),(14)}),(21,{(15),(16),(17),(18)}),(31,{(19),(20)}),(41,{(21),(22),(23),(24)}),(51,{(25),(26),(27)})})");
+   
+    test.runScript();
+   
+    assertOutput(test, "data4",
+                 "(10,{(1),(2),(3)},0)",
+                 "(20,{(4),(5),(6)},1)",
+                 "(30,{(7),(8)},2)",
+                 "(40,{(9),(10),(11)},3)",
+                 "(50,{(12),(13),(14),(15)},4)",
+                 "(11,{(11),(12),(13),(14)},0)",
+                 "(21,{(15),(16),(17),(18)},1)",
+                 "(31,{(19),(20)},2)",
+                 "(41,{(21),(22),(23),(24)},3)",
+                 "(51,{(25),(26),(27)},4)");
+  }  
+  
+  /* 
+   * Testing "Accumulator" part of Enumeration by manually invoke accumulate() and getValue() 
+   */
+  @Test
+  public void enumerateAccumulatorTest() throws Exception
+  {
+    Enumerate enumurate = new Enumerate(); 
+    
+    Tuple tuple1 = TupleFactory.getInstance().newTuple(1);
+    tuple1.set(0, 10);
+    
+    Tuple tuple2 = TupleFactory.getInstance().newTuple(1);
+    tuple2.set(0, 20);
+    
+    Tuple tuple3 = TupleFactory.getInstance().newTuple(1);
+    tuple3.set(0, 30);
+    
+    Tuple tuple4 = TupleFactory.getInstance().newTuple(1);
+    tuple4.set(0, 40);
+    
+    Tuple tuple5 = TupleFactory.getInstance().newTuple(1);
+    tuple5.set(0, 50);
+    
+    DataBag bag1 = BagFactory.getInstance().newDefaultBag();
+    bag1.add(tuple1);
+    bag1.add(tuple2);
+    bag1.add(tuple3);
+    
+    DataBag bag2 = BagFactory.getInstance().newDefaultBag();
+    bag2.add(tuple4);
+    bag2.add(tuple5);
+    
+    Tuple inputTuple1 = TupleFactory.getInstance().newTuple(1);
+    inputTuple1.set(0,bag1);
+    
+    Tuple inputTuple2 = TupleFactory.getInstance().newTuple(1);
+    inputTuple2.set(0,bag2);
+    
+    enumurate.accumulate(inputTuple1);
+    enumurate.accumulate(inputTuple2);
+    assertEquals(enumurate.getValue().toString(), "{(10,0),(20,1),(30,2),(40,3),(50,4)}");
+  }
+  
+  @Test
   public void comprehensiveBagSplitAndEnumerate() throws Exception
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/comprehensiveBagSplitAndEnumerate.pig");
@@ -290,25 +351,7 @@ public class BagTests extends PigTests
   @Test
   public void weightedSampleTest() throws Exception
   {
-    // the system property random seed is used to enable repeatable tests
-    System.getProperties().setProperty("pigunit.randseed", "1");
     PigTest test = createPigTest("test/pig/datafu/test/pig/bags/weightedSampleTest.pig");
-
-    writeLinesToFile("input", 
-                     "({(a, 100),(b, 1),(c, 5),(d, 2)})");
-                  
-    test.runScript();
-            
-    assertOutput(test, "data2",
-        "({(c,5),(a,100),(b,1),(d,2)})");
-  }
-  
-  @Test
-  public void weightedSampleScoreTest() throws Exception
-  {
-    // the system property random seed is used to enable repeatable tests
-    System.getProperties().setProperty("pigunit.randseed", "1");
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/weightedSampleScoreTest.pig");
 
     writeLinesToFile("input", 
                      "({(a, 100),(b, 1),(c, 5),(d, 2)})");
@@ -320,11 +363,9 @@ public class BagTests extends PigTests
   }
   
   @Test
-  public void weightedSampleScoreLimitTest() throws Exception
+  public void weightedSampleLimitTest() throws Exception
   {
-    // the system property random seed is used to enable repeatable tests
-    System.getProperties().setProperty("pigunit.randseed", "1");
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/weightedSampleScoreLimitTest.pig");
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/weightedSampleLimitTest.pig");
 
     writeLinesToFile("input", 
                      "({(a, 100),(b, 1),(c, 5),(d, 2)})");
@@ -362,5 +403,4 @@ public class BagTests extends PigTests
     assertOutput(test, "data3",
         "({(A,3),(B,2),(C,1)})");
   }
-
 }

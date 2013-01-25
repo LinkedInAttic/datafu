@@ -28,15 +28,11 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
  * Create a new bag by performing a weighted sampling without replacement
- * from the input bag. Optionally takes two additional arguments to specify
- * the index of the column to use as a scoring column (uses enumerated bag 
- * order if not specified) and a limit on the number of items to return.
+ * from the input bag. Sampling is biased according to a score/weight that
+ * is part of the inner tuples in the bag. Optionally, a limit on the number
+ * of items to return may be specified.
  * n.b.
- * <ul>
- * <li>When no scoring column is specified, items from the top of the bag are
- * more likely to be chosen than items from the bottom.
- * <li>High scores are more likely to be chosen when using a scoring column.
- * </ul>
+ * <em>High scores/weights are more likely to be chosen.</em>
  * 
  * <p>
  * Example:
@@ -45,28 +41,31 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * define WeightedSample com.linkedin.endorsements.pig.WeightedSample()
  * 
  * -- input:
- * -- ({(a,1),(b,2),(c,3),(d,4),(e,5)})
+ * -- ({(a, 100),(b, 1),(c, 5),(d, 2)})
  * input = LOAD 'input' AS (A: bag{T: tuple(name:chararray,score:int)});
  * 
- * output1 = FOREACH input GENERATE WeightedSample(A);
+ * output1 = FOREACH input GENERATE WeightedSample(A,1);
  * -- output1:
- * -- no scoring column specified, so uses bag order
- * -- ({(a,1),(b,2),(e,5),(d,4),(c,3)}) -- example of random
+ * -- uses the field indexed by 1 as a score
+ * -- ({(a,100),(c,5),(b,1),(d,2)}) -- example of random
  * 
  * -- sample using the second column (index 1) and keep only the top 3
- * -- scoring column is specified, so bias towards higher scores
- * -- only keep the first 3
  * output2 = FOREACH input GENERATE WeightedSample(A,1,3);
  * -- output2:
- * -- ({(e,5),(d,4),(b,2)})
+ * -- ({(a,100),(c,5),(b,1)})
  * }
  * </pre>
  */
 public class WeightedSample extends EvalFunc<DataBag>
 {
   BagFactory bagFactory = BagFactory.getInstance();
+  Long seed = null;
 
   public WeightedSample() {
+  }
+  
+  public WeightedSample(String seed) {
+    this.seed = Long.parseLong(seed);
   }
 
   @Override
@@ -88,22 +87,16 @@ public class WeightedSample extends EvalFunc<DataBag>
     }
 
     double[] scores = new double[numSamples];
-    if (input.size() <= 1) {      
-      // no scoring column specified, so use rank order
-      for (int i = 0; i < scores.length; i++) {
-        scores[i] = scores.length + 1 - i;
-      }
-    } else {
-      tupleIndex = 0;
-      int scoreIndex = ((Number)input.get(1)).intValue();
-      for (Tuple tuple : samples) {
-        double score = ((Number)tuple.get(scoreIndex)).doubleValue();
-        score = Math.max(score, Double.MIN_NORMAL); // negative scores cause problems
-        scores[tupleIndex] = score;
-        tupleIndex++;
-      }
+    int scoreIndex = ((Number)input.get(1)).intValue();
+    tupleIndex = 0;
+    for (Tuple tuple : samples) {
+      double score = ((Number)tuple.get(scoreIndex)).doubleValue();
+      score = Math.max(score, Double.MIN_NORMAL); // negative scores cause problems
+      scores[tupleIndex] = score;
+      tupleIndex++;
     }
     
+    // accept any type of number for sample size, but convert to int
     int limitSamples = numSamples;
     if (input.size() == 3) {
       // sample limit included
@@ -127,12 +120,13 @@ public class WeightedSample extends EvalFunc<DataBag>
      * This is an O(k*n) algorithm, where k is the number of elements to sample and n is
      * the number of scores.
      */    
-    Random rng = new Random();
-    // the system property random seed is used to enable repeatable tests
-    if (System.getProperties().containsKey("pigunit.randseed")) {
-      long randSeed = Long.parseLong(System.getProperties().getProperty("pigunit.randseed"));
-      rng = new Random(randSeed);
+    Random rng = null;    
+    if (seed == null) {
+      rng = new Random();
+    } else {
+      rng = new Random(seed);
     }
+    
     for (int k = 0; k < limitSamples; k++) {
       double val = rng.nextDouble();
       int idx = find_cumsum_interval(scores, val, k, numSamples);
@@ -165,11 +159,24 @@ public class WeightedSample extends EvalFunc<DataBag>
 
   @Override
   public Schema outputSchema(Schema input) {
-    try {     
+    try {
+      if (!(input.size() == 2 || input.size() == 3))
+      {
+        throw new RuntimeException("Expected input to have two or three fields");
+      }
+      
       Schema.FieldSchema inputFieldSchema = input.getField(0);
 
       if (inputFieldSchema.type != DataType.BAG) {
-        throw new RuntimeException("Expected a BAG as input");
+        throw new RuntimeException("Expected a BAG as first input, got: "+inputFieldSchema.type);
+      }
+      
+      if (input.getField(1).type != DataType.INTEGER) {
+        throw new RuntimeException("Expected an INT as second input, got: "+input.getField(1).type);
+      }      
+      
+      if (input.size() == 3 && !(input.getField(2).type == DataType.INTEGER || input.getField(2).type == DataType.LONG)) {
+        throw new RuntimeException("Expected an INT or LONG as second input, got: "+input.getField(2).type);
       }
       
       return new Schema(new Schema.FieldSchema(getSchemaName(this.getClass().getName().toLowerCase(), input),

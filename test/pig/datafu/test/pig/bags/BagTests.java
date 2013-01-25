@@ -126,19 +126,6 @@ public class BagTests extends PigTests
         
     this.writeLinesToFile("input", "1\t{(1),(2),(3),(4),(5)}");
     
-    String[] output = {
-        "(1,2)",
-        "(1,3)",
-        "(1,4)",
-        "(1,5)",
-        "(2,3)",
-        "(2,4)",
-        "(2,5)",
-        "(3,4)",
-        "(3,5)",
-        "(4,5)"
-      };
-    
     test.runScript();
     this.getLinesForAlias(test, "data3");
     
@@ -359,5 +346,61 @@ public class BagTests extends PigTests
     
     assertOutput(test, "data2",
                  "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
+  }
+  
+  @Test
+  public void weightedSampleTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/weightedSampleTest.pig");
+
+    writeLinesToFile("input", 
+                     "({(a, 100),(b, 1),(c, 5),(d, 2)})");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data2",
+        "({(a,100),(c,5),(b,1),(d,2)})");
+  }
+  
+  @Test
+  public void weightedSampleLimitTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/weightedSampleLimitTest.pig");
+
+    writeLinesToFile("input", 
+                     "({(a, 100),(b, 1),(c, 5),(d, 2)})");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data2",
+        "({(a,100),(c,5),(b,1)})");
+  }
+  
+  @Test 
+  public void countEachTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/countEachTest.pig");
+
+    writeLinesToFile("input", 
+                     "({(A),(B),(A),(C),(A),(B)})");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data3",
+        "({((A),3),((B),2),((C),1)})");
+  }
+  
+  @Test 
+  public void countEachFlattenTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/countEachFlattenTest.pig");
+
+    writeLinesToFile("input", 
+                     "({(A),(B),(A),(C),(A),(B)})");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data3",
+        "({(A,3),(B,2),(C,1)})");
   }
 }

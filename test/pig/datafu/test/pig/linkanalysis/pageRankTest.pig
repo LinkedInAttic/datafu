@@ -14,12 +14,12 @@ data_grouped = foreach data_grouped {
 
 data_grouped2 = GROUP data_grouped by topic;
 data_grouped2 = foreach data_grouped2 {
-  generate group as topic, FLATTEN(PageRank(data_grouped.(source,edges))) as (source,rank);
+  generate group as topic, FLATTEN(PageRank(data_grouped.(source,edges))) as (source,rnk);
 };
 
 data_grouped3 = FOREACH data_grouped2 GENERATE
   topic,
   source,
-  rank;
+  rnk;
   
 STORE data_grouped3 INTO 'output';

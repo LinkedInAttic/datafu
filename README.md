@@ -11,7 +11,7 @@
 EvalFuncs)
 * and [more](http://linkedin.github.com/datafu/docs/javadoc/)...
 
-Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against Pig 0.10.
+Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against Pig 0.11.
 
 ## What can you do with it?
 

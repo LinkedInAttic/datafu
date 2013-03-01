@@ -104,7 +104,13 @@ public abstract class PigTests
     }
     else if (files.length > 1)
     {
-      throw new RuntimeException("Found more JAR files than expected");
+      StringBuilder sb = new StringBuilder();
+      for (String file : files)
+      {
+        sb.append(file);
+        sb.append(",");
+      }
+      throw new RuntimeException("Found more JAR files than expected: " + sb.substring(0, sb.length()-1));
     }
     
     return  userDir.getAbsolutePath() + "/" + files[0];

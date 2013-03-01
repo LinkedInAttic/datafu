@@ -2,7 +2,7 @@
     <info organisation="datafu" module="datafu"/>
     <dependencies>
       
-        <dependency org="org.apache.pig" name="pig" rev="0.10.0">
+        <dependency org="org.apache.pig" name="pig" rev="0.11.0">
           <!-- pig 0.10.0 pom lists wrong version of avro -->
           <exclude org="org.apache.hadoop" name="avro" />
         </dependency>

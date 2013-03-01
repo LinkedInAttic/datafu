@@ -14,12 +14,21 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.metrics.jvm.JvmMetrics;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.pigunit.PigTest;
 import org.apache.pig.tools.parameters.ParseException;
 
 public abstract class PigTests
 {    
+  @org.testng.annotations.BeforeClass
+  public void before()
+  {
+    Logger.getLogger(JvmMetrics.class).setLevel(Level.OFF);
+  }
+  
   protected String[] getDefaultArgs()
   {
     String[] args = {

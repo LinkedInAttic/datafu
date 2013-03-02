@@ -8,18 +8,35 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.metrics.jvm.JvmMetrics;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.pigunit.PigTest;
 import org.apache.pig.tools.parameters.ParseException;
 
 public abstract class PigTests
 {    
+  @org.testng.annotations.BeforeClass
+  public void beforeClass()
+  {
+    Logger.getRootLogger().removeAllAppenders();
+    Logger.getLogger(JvmMetrics.class).setLevel(Level.OFF);
+  }
+  
+  @org.testng.annotations.BeforeMethod
+  public void beforeMethod(Method method)
+  {
+    System.out.println("\n*** Running " + method.getName() + " ***");
+  }
+  
   protected String[] getDefaultArgs()
   {
     String[] args = {
@@ -71,9 +88,7 @@ public abstract class PigTests
   }
   
   protected String getJarPath()
-  {
-    System.out.println("Getting jar path");
-    
+  {    
     String jarDir = null;
     
     if (System.getProperty("datafu.jar.dir") != null)

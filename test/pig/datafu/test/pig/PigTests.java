@@ -40,8 +40,7 @@ public abstract class PigTests
   protected String[] getDefaultArgs()
   {
     String[] args = {
-        "JAR_PATH=" + getJarPath(),
-        "MACROS_PATH=" + getMacrosPath()
+        "JAR_PATH=" + getJarPath()
       };
     return args;
   }
@@ -129,11 +128,6 @@ public abstract class PigTests
     }
     
     return  userDir.getAbsolutePath() + "/" + files[0];
-  }
-  
-  protected String getMacrosPath()
-  {
-    return new File(getJarPath()).getParentFile().getParentFile().getAbsolutePath() + "/src/datafu-macros.pig";
   }
   
   protected List<Tuple> getLinesForAlias(PigTest test, String alias) throws IOException, ParseException

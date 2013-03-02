@@ -6,5 +6,5 @@ data_in = LOAD 'input' as (val:double);
 data_out = GROUP data_in ALL;
 data_out = FOREACH data_out GENERATE VAR(data_in.val) AS variance; 
 
-describe data_out;
+/*describe data_out;*/
 STORE data_out into 'output';

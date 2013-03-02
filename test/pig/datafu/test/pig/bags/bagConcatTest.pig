@@ -6,6 +6,6 @@ data = LOAD 'input' AS (A: bag{T: tuple(v:INT)}, B: bag{T: tuple(v:INT)}, C: bag
 
 data2 = FOREACH data GENERATE BagConcat(A,B,C);
 
-describe data2
+/*describe data2*/
 
 STORE data2 INTO 'output';

@@ -254,12 +254,12 @@ public class BagTests extends PigTests
   }  
   
   /* 
-   * Testing "Accumulator" part of Enumeration by manually invoke accumulate() and getValue() 
+   * Testing "Accumulator" part of Enumeration by manually invoking accumulate(), getValue() and cleanup()
    */
   @Test
   public void enumerateAccumulatorTest() throws Exception
   {
-    Enumerate enumurate = new Enumerate(); 
+    Enumerate enumerate = new Enumerate(); 
     
     Tuple tuple1 = TupleFactory.getInstance().newTuple(1);
     tuple1.set(0, 10);
@@ -291,9 +291,15 @@ public class BagTests extends PigTests
     Tuple inputTuple2 = TupleFactory.getInstance().newTuple(1);
     inputTuple2.set(0,bag2);
     
-    enumurate.accumulate(inputTuple1);
-    enumurate.accumulate(inputTuple2);
-    assertEquals(enumurate.getValue().toString(), "{(10,0),(20,1),(30,2),(40,3),(50,4)}");
+    enumerate.accumulate(inputTuple1);
+    enumerate.accumulate(inputTuple2);
+    assertEquals(enumerate.getValue().toString(), "{(10,0),(20,1),(30,2),(40,3),(50,4)}");
+
+    // Testing that cleanup code is correct by calling cleanup() and passing inputs back to Enumerate instance
+    enumerate.cleanup();
+    enumerate.accumulate(inputTuple1);
+    enumerate.accumulate(inputTuple2);
+    assertEquals(enumerate.getValue().toString(), "{(10,0),(20,1),(30,2),(40,3),(50,4)}");     
   }
   
   @Test

@@ -107,7 +107,7 @@ public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<Da
   @Override
   public void cleanup()
   {
-    this.outputBag = null;
+    this.outputBag = BagFactory.getInstance().newDefaultBag();
     this.i = this.start;
     this.count = 0;
   }

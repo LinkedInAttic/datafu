@@ -69,9 +69,7 @@ public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<Da
   public Enumerate(String start)
   {
     this.start = Integer.parseInt(start);
-    this.outputBag = BagFactory.getInstance().newDefaultBag();
-    this.i = this.start;
-    this.count = 0;
+    cleanup();
   }
   
   public DataBag call(DataBag inputBag) throws IOException

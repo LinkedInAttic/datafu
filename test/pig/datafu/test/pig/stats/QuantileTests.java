@@ -20,7 +20,7 @@ public class QuantileTests  extends PigTests
     PigTest test = createPigTest("test/pig/datafu/test/pig/stats/quantileTest.pig",
                                  "QUANTILES='0.0','0.25','0.5','0.75','1.0'");
 
-    String[] input = {"1","2","3","4","10","5","6","7","8","9"};
+    String[] input = {"2","2","3","4","10","5","6","7","8","9"};
     writeLinesToFile("input", input);
         
     test.runScript();

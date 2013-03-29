@@ -254,7 +254,7 @@
   <target name="test" depends="build-pig-tests, build-unit-tests, jar" description="Runs the pig tests">
     <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
     <testng classpathref="test-classpath"
-            outputDir="${report.dir}" verbose="2">
+            outputDir="${report.dir}" verbose="2" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
       <classfileset dir="${unittestclasses.dir}" includes="${testclasses.pattern}" />
@@ -265,7 +265,7 @@
   <target name="test-instrumented" depends="build-pig-tests, build-unit-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
     <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
     <testng classpathref="instrumented-test-classpath"
-            outputDir="${report.dir}" >
+            outputDir="${report.dir}" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${instrumented.dir}" />
       <classfileset dir="${pigtestclasses.dir}" includes="${testclasses.pattern}" />

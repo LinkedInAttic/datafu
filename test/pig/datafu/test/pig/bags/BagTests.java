@@ -409,4 +409,23 @@ public class BagTests extends PigTests
     assertOutput(test, "data3",
         "({(A,3),(B,2),(C,1)})");
   }
+  
+  @Test
+  public void totalTimeBetweenTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/totalTimeBetweenTest.pig");
+    
+    writeLinesToFile("input",
+        "2012-01-01T00:00:00\tbiuA8n98wn\thttp://www.google.com/",
+        "2012-01-01T00:00:00\tasd909m09j\thttp://www.google.com/",
+        "2012-01-01T00:01:00\tbiuA8n98wn\thttp://www.google.com/1",
+        "2012-01-01T00:01:05\tbiuA8n98wn\thttp://www.google.com/",
+        "2012-01-01T00:02:00\tasd909m09j\thttp://www.google.com/2");
+    
+    test.runScript();
+    
+    assertOutput(test, "ordered_time",
+        "(biuA8n98wn,65)",
+        "(asd909m09j,120)");
+  }
 }

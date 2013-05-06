@@ -24,7 +24,7 @@ import org.joda.time.format.ISODateTimeFormat;
  * 
  * Example:
  * {@code
- * DEFINE TotalTime datafu.pig.bags.TotalTime();
+ * DEFINE TotalTimeBetween datafu.pig.bags.TotalTimeBetween();
  * 
  * -- input: 
  * -- 2012-01-01T00:00:00\tbiuA8n98wn\thttp://www.google.com/

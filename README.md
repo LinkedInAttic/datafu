@@ -49,7 +49,7 @@ Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](h
     input = LOAD 'input' AS (val:int);
 
     grouped = GROUP input ALL;
-    -- produces variance of 7.5
+    -- produces variance of 6.666666666666668
     variance = FOREACH grouped GENERATE VAR(input.val);
  
 ### Set Operations

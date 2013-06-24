@@ -2,6 +2,11 @@ package datafu.test.pig.bags;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import junit.framework.Assert;
+
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
@@ -9,6 +14,7 @@ import org.apache.pig.data.TupleFactory;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
+import datafu.pig.bags.CountEach;
 import datafu.pig.bags.Enumerate;
 import datafu.test.pig.PigTests;
 
@@ -394,6 +400,106 @@ public class BagTests extends PigTests
             
     assertOutput(test, "data3",
         "({((A),3),((B),2),((C),1)})");
+  }
+  
+  @Test 
+  public void countEachExecAndAccumulateTest() throws Exception
+  {    
+    for (int c=0; c<2; c++)
+    {
+      CountEach countEach = new CountEach("flatten");
+      
+      DataBag bag = BagFactory.getInstance().newDefaultBag();
+      { 
+        Tuple t = TupleFactory.getInstance().newTuple(1);
+        t.set(0, "A");
+        bag.add(t);
+      }
+      { 
+        Tuple t = TupleFactory.getInstance().newTuple(1);
+        t.set(0, "B");
+        bag.add(t);
+      }
+      { 
+        Tuple t = TupleFactory.getInstance().newTuple(1);
+        t.set(0, "B");
+        bag.add(t);
+      }
+      { 
+        Tuple t = TupleFactory.getInstance().newTuple(1);
+        t.set(0, "C");
+        bag.add(t);
+      }
+      { 
+        Tuple t = TupleFactory.getInstance().newTuple(1);
+        t.set(0, "A");
+        bag.add(t);
+      }
+      { 
+        Tuple t = TupleFactory.getInstance().newTuple(1);
+        t.set(0, "D");
+        bag.add(t);
+      }
+      
+      DataBag output = null;
+      
+      if (c == 0)
+      {
+        Tuple input = TupleFactory.getInstance().newTuple(1);
+        input.set(0, bag);
+        
+        System.out.println("Testing exec");
+        output = countEach.exec(input);
+      }
+      else
+      {
+        System.out.println("Testing accumulate");
+        for (Tuple t : bag)
+        {
+          DataBag tb = BagFactory.getInstance().newDefaultBag();
+          tb.add(t);
+          Tuple input = TupleFactory.getInstance().newTuple(1);
+          input.set(0, tb);
+          countEach.accumulate(input);
+        }
+        
+        output = countEach.getValue();
+        
+        countEach.cleanup();        
+        Assert.assertEquals(0, countEach.getValue().size());
+      }
+      
+      System.out.println(output.toString());
+      
+      Assert.assertEquals(4, output.size());
+      Set<String> found = new HashSet<String>();
+      for (Tuple t : output)
+      {
+        String key = (String)t.get(0);    
+        found.add(key);  
+        if (key == "A")
+        {
+          Assert.assertEquals(2, t.get(1));
+        }
+        else if (key == "B")
+        {
+          Assert.assertEquals(2, t.get(1));
+        }
+        else if (key == "C")
+        {
+          Assert.assertEquals(1, t.get(1));
+        }
+        else if (key == "D")
+        {
+          Assert.assertEquals(1, t.get(1));
+        }
+        else
+        {
+          Assert.fail("Unexpected: " + key);
+        }
+      }
+      Assert.assertEquals(4, found.size());
+    }
   }
   
   @Test 

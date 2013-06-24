@@ -409,4 +409,18 @@ public class BagTests extends PigTests
     assertOutput(test, "data3",
         "({(A,3),(B,2),(C,1)})");
   }
+  
+  @Test 
+  public void bagLeftOuterJoinTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagLeftOuterJoinTest.pig");
+
+    writeLinesToFile("input", 
+                     "1\t{(K1,A1),(K2,B1),(K3,C1)}\t{(K1,A2),(K2,B2),(K2,B22)}\t{(K1,A3),(K3,C3),(K4,D3)}");
+                  
+    test.runScript();
+    
+    assertOutput(test, "data2",
+        "(1,{(K1,A1,K1,A2,K1,A3),(K2,B1,K2,B2,,),(K2,B1,K2,B22,,),(K3,C1,,,K3,C3)},{(K1,A1,K1,A3,K1,A2),(K2,B1,,,K2,B2),(K2,B1,,,K2,B22),(K3,C1,K3,C3,,)})");
+  }
 }

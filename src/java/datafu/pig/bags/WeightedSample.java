@@ -38,7 +38,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * Example:
  * <pre>
  * {@code
- * define WeightedSample com.linkedin.endorsements.pig.WeightedSample()
+ * define WeightedSample datafu.pig.bags.WeightedSample()
  * 
  * -- input:
  * -- ({(a, 100),(b, 1),(c, 5),(d, 2)})

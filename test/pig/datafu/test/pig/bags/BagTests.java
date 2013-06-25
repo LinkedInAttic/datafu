@@ -359,35 +359,7 @@ public class BagTests extends PigTests
     assertOutput(test, "data2",
                  "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
   }
-  
-  @Test
-  public void weightedSampleTest() throws Exception
-  {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/weightedSampleTest.pig");
-
-    writeLinesToFile("input", 
-                     "({(a, 100),(b, 1),(c, 5),(d, 2)})");
-                  
-    test.runScript();
-            
-    assertOutput(test, "data2",
-        "({(a,100),(c,5),(b,1),(d,2)})");
-  }
-  
-  @Test
-  public void weightedSampleLimitTest() throws Exception
-  {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/weightedSampleLimitTest.pig");
-
-    writeLinesToFile("input", 
-                     "({(a, 100),(b, 1),(c, 5),(d, 2)})");
-                  
-    test.runScript();
-            
-    assertOutput(test, "data2",
-        "({(a,100),(c,5),(b,1)})");
-  }
-  
+ 
   @Test 
   public void countEachTest() throws Exception
   {

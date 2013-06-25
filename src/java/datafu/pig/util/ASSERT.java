@@ -37,7 +37,7 @@ import org.apache.pig.data.Tuple;
  * Example:
  * <pre>
  * {@code
- * FILTER members BY ASSERT( (member_id < 0 ? 1 : 0), 'This should always fail, as nobody has a negative member_id' );
+ * FILTER members BY ASSERT( (member_id >= 0 ? 1 : 0), 'Doh! Some member ID is negative.' );
  * }
  * </pre></p>
  */

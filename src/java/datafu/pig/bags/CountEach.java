@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.pig.Accumulator;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -52,9 +53,10 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * } 
  * </pre>
  */
-public class CountEach extends EvalFunc<DataBag>
+public class CountEach extends EvalFunc<DataBag> implements Accumulator<DataBag>
 {
   private boolean flatten = false;
+  private Map<Tuple, Integer> counts = new HashMap<Tuple, Integer>();
   
   public CountEach() {
     
@@ -67,18 +69,22 @@ public class CountEach extends EvalFunc<DataBag>
   }
 
   @Override
-  public DataBag exec(Tuple input) throws IOException {
+  public void accumulate(Tuple input) throws IOException
+  {
     DataBag inputBag = (DataBag)input.get(0);
     if (inputBag == null) throw new IllegalArgumentException("Expected a bag, got null");
     
-    Map<Tuple, Integer> counts = new HashMap<Tuple, Integer>();
     for (Tuple tuple : inputBag) {
       if (!counts.containsKey(tuple)) {
         counts.put(tuple, 0);
       }
       counts.put(tuple, counts.get(tuple)+1);
     }
-    
+  }
+
+  @Override
+  public DataBag getValue()
+  {
     DataBag output = BagFactory.getInstance().newDefaultBag();
     for (Tuple tuple : counts.keySet()) {
       Tuple outputTuple = null;
@@ -95,6 +101,27 @@ public class CountEach extends EvalFunc<DataBag>
     }
 
     return output;
+  }
+
+  @Override
+  public void cleanup()
+  {
+    counts.clear();
+  }
+  
+  @Override
+  public DataBag exec(Tuple input) throws IOException
+  {
+    try
+    {
+      accumulate(input);
+      
+      return getValue();
+    }
+    finally
+    {
+      cleanup();
+    }
   }
   
   @Override
@@ -147,5 +174,4 @@ public class CountEach extends EvalFunc<DataBag>
       throw new RuntimeException(e);
     }
   }
-
 }

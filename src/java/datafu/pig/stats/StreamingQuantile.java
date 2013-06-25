@@ -248,8 +248,19 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
   public Schema outputSchema(Schema input)
   {
     Schema tupleSchema = new Schema();
-    for (int i = 0; i < numQuantiles; i++) {
-      tupleSchema.add(new Schema.FieldSchema("quantile_" + i, DataType.DOUBLE));
+    if (this.quantiles != null)
+    {
+      for (Double x : this.quantiles)
+      {
+        tupleSchema.add(new Schema.FieldSchema("quantile_" + x.toString().replace(".", "_"), DataType.DOUBLE));
+      }
+    }
+    else
+    {
+      for (int i = 0; i < numQuantiles; i++) 
+      {
+        tupleSchema.add(new Schema.FieldSchema("quantile_" + i, DataType.DOUBLE));
+      }
     }
     return tupleSchema;
   }

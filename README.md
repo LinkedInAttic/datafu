@@ -1,4 +1,4 @@
-# DataFu [![Build Status](https://travis-ci.org/matthayes/datafu.png?branch=master)](https://travis-ci.org/matthayes/datafu)
+# DataFu [![Build Status](https://travis-ci.org/linkedin/datafu.png?branch=master)](https://travis-ci.org/linkedin/datafu)
 
 [DataFu](http://data.linkedin.com/opensource/datafu) is a collection of user-defined functions for working with large-scale data in Hadoop and Pig. This library was born out of the need for a stable, well-tested library of UDFs for data mining and statistics. It is used at LinkedIn in many of our off-line workflows for data derived products like "People You May Know" and "Skills & Endorsements". It contains functions for:
 
@@ -49,7 +49,7 @@ Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](h
     input = LOAD 'input' AS (val:int);
 
     grouped = GROUP input ALL;
-    -- produces variance of 7.5
+    -- produces variance of 6.666666666666668
     variance = FOREACH grouped GENERATE VAR(input.val);
  
 ### Set Operations

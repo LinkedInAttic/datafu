@@ -38,9 +38,9 @@ public class COALESCE extends EvalFunc<Object>
   public Object exec(Tuple input) throws IOException
   {
     
-    if (input.size() == 0)
+    if (input == null || input.size() == 0)
     {
-      throw new RuntimeException("Expected at least one parameter");
+      return null;
     }
         
     for (Object o : input)

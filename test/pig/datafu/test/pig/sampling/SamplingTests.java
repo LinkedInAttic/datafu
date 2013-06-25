@@ -61,26 +61,6 @@ public class SamplingTests extends PigTests
   }
 
   @Test
-  public void sampleByKeyTest2() throws Exception
-  {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/sampling/sampleByKeyTest2.pig");
-    
-    writeLinesToFile("input",
-                     "A1\tB1\t1","A1\tB1\t4","A1\tB3\t4","A1\tB4\t4",
-                     "A2\tB1\t4","A2\tB2\t4",
-                     "A3\tB1\t3","A3\tB1\t1","A3\tB3\t77",
-                     "A4\tB1\t3","A4\tB2\t3","A4\tB3\t59","A4\tB4\t29",
-                     "A5\tB1\t4",
-                     "A6\tB2\t3","A6\tB2\t55","A6\tB3\t1",
-                     "A7\tB1\t39","A7\tB2\t27","A7\tB3\t85",
-                     "A8\tB1\t4","A8\tB2\t45",
-                     "A9\tB3\t92", "A9\tB1\t42","A9\tB2\t1","A9\tB3\t0",
-                     "A10\tB1\t7","A10\tB2\t23","A10\tB3\t1","A10\tB4\t41","A10\tB5\t52");
-    test.runScript();
-    assertOutput(test, "joined");
-  }
-  
-  @Test
   public void sampleByKeyMultipleKeyTest() throws Exception
   {
     PigTest test = createPigTest("test/pig/datafu/test/pig/sampling/sampleByKeyMultipleKeyTest.pig");

@@ -27,7 +27,7 @@ import org.apache.pig.impl.util.UDFContext;
  *    DataBag interestRates = getBag(input, "interest_rates");
  *    
  *    for (Tuple interestTuple : interestRates) {
- *      Double interest = getDouble(interestTuple, "interest_rate");  // get a value from the inner bag tuple by alias
+ *      Double interest = getDouble(interestTuple, getPrefixedAliasName("interest_rates", "interest_rate"));  // get a value from the inner bag tuple by alias
  *      double monthlyPayment = computeMonthlyPayment(principal, numPayments, interest);
  *      output.add(TupleFactory.getInstance().newTuple(monthlyPayment));
  *    }

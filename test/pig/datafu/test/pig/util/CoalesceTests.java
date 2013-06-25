@@ -51,6 +51,32 @@ public class CoalesceTests extends PigTests
       }
     }
   }
+  @Test
+  public void coalesceLongTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/util/coalesceLongTest.pig");
+    
+    this.writeLinesToFile("input", "1,5",
+                                   "2,");
+    
+    test.runScript();
+    
+    List<Tuple> lines = this.getLinesForAlias(test, "data4");
+    
+    Assert.assertEquals(2, lines.size());
+    for (Tuple t : lines)
+    {
+      switch((Integer)t.get(0))
+      {
+      case 1:
+        Assert.assertEquals(500L, t.get(1)); break;
+      case 2:
+        Assert.assertEquals(10000L, t.get(1)); break;
+      default:
+        Assert.fail("Did not expect: " + t.get(1));                    
+      }
+    }
+  }
   
   @Test(expectedExceptions=FrontendException.class)
   public void coalesceDiffTypesTest() throws Exception

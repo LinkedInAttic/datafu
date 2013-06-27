@@ -4,6 +4,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.pigunit.PigTest;
@@ -13,10 +14,27 @@ import datafu.test.pig.PigTests;
 
 public class CoalesceTests extends PigTests
 {
+  /**
+  register $JAR_PATH
+
+  define COALESCE datafu.pig.util.COALESCE();
+  
+  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2:INT,val3:INT);
+  
+  data2 = FOREACH data GENERATE testcase, COALESCE(val1,val2,val3) as result;
+  
+  describe data2;
+  
+  data3 = FOREACH data2 GENERATE testcase, result;
+  
+  STORE data3 INTO 'output';
+  */
+  @Multiline private static String d1;
+  
   @Test
   public void coalesceIntTest() throws Exception
-  {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/util/coalesceTest.pig");
+  { 
+    PigTest test = createPigTestFromString(d1);
     
     this.writeLinesToFile("input", "1,1,2,3",
                                    "2,,2,3",
@@ -51,10 +69,30 @@ public class CoalesceTests extends PigTests
       }
     }
   }
+  
+  /**
+  register $JAR_PATH
+
+  define COALESCE datafu.pig.util.COALESCE();
+  
+  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:LONG);
+  
+  data2 = FOREACH data GENERATE testcase, COALESCE(val1,100L) as result;
+  
+  describe data2;
+  
+  data3 = FOREACH data2 GENERATE testcase, result;
+  
+  data4 = FOREACH data3 GENERATE testcase, result*100 as result;
+  
+  STORE data4 INTO 'output';
+  */
+  @Multiline private static String d2;
+  
   @Test
   public void coalesceLongTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/util/coalesceLongTest.pig");
+    PigTest test = createPigTestFromString(d2);
     
     this.writeLinesToFile("input", "1,5",
                                    "2,");
@@ -78,10 +116,27 @@ public class CoalesceTests extends PigTests
     }
   }
   
+  /**
+  register $JAR_PATH
+  
+  define COALESCE datafu.pig.util.COALESCE();
+  
+  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2:DOUBLE);
+  
+  data2 = FOREACH data GENERATE testcase, COALESCE(val1,val2) as result;
+  
+  describe data2;
+  
+  data3 = FOREACH data2 GENERATE testcase, result;
+  
+  STORE data3 INTO 'output';
+  */
+  @Multiline private static String d3;
+  
   @Test(expectedExceptions=FrontendException.class)
   public void coalesceDiffTypesTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/util/coalesceDiffTypesTest.pig");
+    PigTest test = createPigTestFromString(d3);
     
     this.writeLinesToFile("input", "1,1,2.0");
     
@@ -90,10 +145,27 @@ public class CoalesceTests extends PigTests
     this.getLinesForAlias(test, "data3");
   }
   
+  /**
+  register $JAR_PATH
+  
+  define COALESCE datafu.pig.util.COALESCE();
+  
+  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2: bag {tuple(aVal:int)});
+  
+  data2 = FOREACH data GENERATE testcase, COALESCE(val1,val2) as result;
+  
+  describe data2;
+  
+  data3 = FOREACH data2 GENERATE testcase, result;
+  
+  STORE data3 INTO 'output';
+  */
+  @Multiline private static String d4;
+  
   @Test(expectedExceptions=FrontendException.class)
   public void coalesceBagTypeTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/util/coalesceBagTypeTest.pig");
+    PigTest test = createPigTestFromString(d4);
     
     this.writeLinesToFile("input", "1,1,{(2)}");
     

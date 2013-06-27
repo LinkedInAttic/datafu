@@ -20,13 +20,16 @@
   <!-- directories -->
   <property name="src.dir" value="${basedir}/src" />
   <property name="java.dir" value="${src.dir}/java" />
+  <property name="plugin.java.dir" value="${basedir}/plugin/java" />
   <property name="test.dir" value="${basedir}/test" />
   <property name="unittestsrc.dir" value="${test.dir}/unit" />
   <property name="pigtestsrc.dir" value="${test.dir}/pig" />
   <property name="dist.dir" value="${basedir}/dist" />
   <property name="tools.dir" value="${basedir}/tools" />
   <property name="lib.dir" value="${basedir}/lib" />
+  <property name="static.lib.dir" value="${basedir}/staticlibs" />
   <property name="classes.dir" value="${dist.dir}/classes" />
+  <property name="plugin.classes.dir" value="${dist.dir}/pluginclasses" />
   <property name="report.dir" value="${basedir}/report" />
   <property name="report.unit.dir" value="${report.dir}/unit" />
   <property name="report.pig.dir" value="${report.dir}/pig" />
@@ -59,11 +62,36 @@
 	<property name="maven.jar" location="${ivy.jar.dir}/maven-ant-tasks-${maven.jar.version}.jar"/>
   
   <loadproperties srcfile="${ivy.jar.dir}/libraries.properties"/>
+
+  <basename property="basedirname" file="${basedir}"/>
   
   <target name="all" depends="clean, jar, sources-jar, javadoc-jar, coverage" description="Build all artifacts." />
     
   <target name="init" depends="ivy-resolve">
     <mkdir dir="${dist.dir}" />
+  </target>
+
+  <target name="eclipse" depends="jar,jar-plugin">
+    <delete file="${basedir}/.factorypath"/>
+    <copy file="${basedir}/.factorypath.template"
+             tofile="${basedir}/.factorypath">
+        <filterchain>
+           <replacetokens>
+                <token key="HOME" value="/${basedirname}"/>
+            </replacetokens>
+        </filterchain>
+    </copy>
+    <echo message="Created .factorypath"/>
+    <delete file="${basedir}/.classpath"/>
+    <copy file="${basedir}/.classpath.template"
+             tofile="${basedir}/.classpath">
+        <filterchain>
+           <replacetokens>
+                <token key="PROJECT" value="${basedirname}"/>
+            </replacetokens>
+        </filterchain>
+    </copy>
+    <echo message="Created .classpath"/>
   </target>
     
   <target name="maven-ant-tasks-jar-download" description="Download maven tasks jar">
@@ -119,11 +147,17 @@
   
   <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
   
+  <path id="plugin-classpath">
+    <fileset dir="${static.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+
   <path id="base-test-classpath">    
     <fileset dir="${lib.dir}">
       <include name="*.jar" />
     </fileset>
-    <fileset dir="${basedir}/otherlibs">
+    <fileset dir="${static.lib.dir}">
       <include name="*.jar" />
     </fileset>
     <pathelement path="${classes.dir}" />
@@ -137,6 +171,7 @@
     <fileset dir="${dist.dir}">
       <include name="*.jar" />
     </fileset>
+    <pathelement path="${plugin.classes.dir}" />
   </path>
   
   <path id="instrumented-test-classpath">
@@ -157,6 +192,7 @@
   </macrodef>
   
   <target name="clean" description="Delete generated files.">
+    <delete dir="${basedir}/build" />
     <delete dir="${lib.dir}" />
     <delete dir="${dist.dir}" />
     <delete dir="${docs.dir}" />
@@ -175,6 +211,24 @@
       <classpath refid="main-classpath" />
     </javac>
   </target>
+
+  <target name="build-plugins" depends="init" description="Compile main source tree java files">
+    <replace-dir dir="${plugin.classes.dir}" />
+    <javac destdir="${plugin.classes.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
+      <src path="${plugin.java.dir}" />
+      <classpath refid="plugin-classpath" />
+    </javac>
+  </target>
+
+  <target name="jar-plugin" depends="build-plugins" description="Builds the plugin JAR">
+    <delete file="${basedir}/annotation-plugin.jar" />
+    <jar destfile="${basedir}/annotation-plugin.jar">
+      <fileset dir="${plugin.classes.dir}">
+        <include name="**/*.*" />
+      </fileset>
+      <service type="javax.annotation.processing.Processor" provider="org.adrianwalker.multilinestring.MultilineProcessor"/>
+    </jar>
+  </target>
   
   <target name="build-unit-tests" depends="build" description="Compile unit test classes">
     <replace-dir dir="${unittestclasses.dir}" />
@@ -184,7 +238,7 @@
     </javac>
   </target>
   
-  <target name="build-pig-tests" depends="build, build-unit-tests" description="Compile pig test classes">
+  <target name="build-pig-tests" depends="build,build-unit-tests,build-plugins" description="Compile pig test classes">
     <replace-dir dir="${pigtestclasses.dir}" />
     <copy todir="${pigtestclasses.dir}">
       <fileset dir="${pigtestsrc.dir}">
@@ -193,6 +247,7 @@
     </copy>
     <javac destdir="${pigtestclasses.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
       <src path="${pigtestsrc.dir}" />
+      <compilerarg line="-processor org.adrianwalker.multilinestring.MultilineProcessor"/>
       <classpath refid="test-classpath" />
     </javac>
   </target>

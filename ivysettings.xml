@@ -7,6 +7,7 @@
   <filesystem name="tools" local="true">
     <artifact pattern="${java.home}/lib/tools.[type]" />
     <artifact pattern="${java.home}/../lib/tools.[type]" />
+    <artifact pattern="${java.home}/../Classes/classes.[type]" />
   </filesystem>
 </resolvers>
 <modules>

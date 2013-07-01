@@ -92,9 +92,22 @@ public class Sessionize extends EvalFunc<DataBag> implements Accumulator<DataBag
   public void accumulate(Tuple input) throws IOException
   {
     for (Tuple t : (DataBag) input.get(0)) {
-      String timeString = (String)t.get(0);
-      DateTime date = new DateTime(timeString);
-
+      Object timeObj = t.get(0);
+      
+      DateTime date;
+      if (timeObj instanceof String)
+      {
+        date = new DateTime((String)timeObj);
+      }
+      else if (timeObj instanceof Long)
+      {
+        date = new DateTime((Long)timeObj);
+      }
+      else
+      {
+        throw new RuntimeException("Time must either be a String or Long");
+      }
+      
       if (this.last_date == null)
         this.last_date = date;
       else if (date.isAfter(this.last_date.plus(this.millis)))
@@ -145,9 +158,10 @@ public class Sessionize extends EvalFunc<DataBag> implements Accumulator<DataBag
       
       Schema inputTupleSchema = inputBagSchema.getField(0).schema;
       
-      if (inputTupleSchema.getField(0).type != DataType.CHARARRAY)
+      if (inputTupleSchema.getField(0).type != DataType.CHARARRAY
+          && inputTupleSchema.getField(0).type != DataType.LONG)
       {
-        throw new RuntimeException(String.format("Expected first element of tuple to be a CHARARRAY, but instead found %s",
+        throw new RuntimeException(String.format("Expected first element of tuple to be a CHARARRAY or LONG, but instead found %s",
                                                  DataType.findTypeName(inputTupleSchema.getField(0).type)));
       }
       

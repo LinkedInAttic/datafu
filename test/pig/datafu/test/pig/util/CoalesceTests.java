@@ -29,12 +29,12 @@ public class CoalesceTests extends PigTests
   
   STORE data3 INTO 'output';
   */
-  @Multiline private static String d1;
+  @Multiline private static String coalesceIntTest;
   
   @Test
   public void coalesceIntTest() throws Exception
   { 
-    PigTest test = createPigTestFromString(d1);
+    PigTest test = createPigTestFromString(coalesceIntTest);
     
     this.writeLinesToFile("input", "1,1,2,3",
                                    "2,,2,3",
@@ -87,12 +87,12 @@ public class CoalesceTests extends PigTests
   
   STORE data4 INTO 'output';
   */
-  @Multiline private static String d2;
+  @Multiline private static String coalesceLongTest;
   
   @Test
   public void coalesceLongTest() throws Exception
   {
-    PigTest test = createPigTestFromString(d2);
+    PigTest test = createPigTestFromString(coalesceLongTest);
     
     this.writeLinesToFile("input", "1,5",
                                    "2,");
@@ -131,12 +131,12 @@ public class CoalesceTests extends PigTests
   
   STORE data3 INTO 'output';
   */
-  @Multiline private static String d3;
+  @Multiline private static String coalesceDiffTypesTest;
   
   @Test(expectedExceptions=FrontendException.class)
   public void coalesceDiffTypesTest() throws Exception
   {
-    PigTest test = createPigTestFromString(d3);
+    PigTest test = createPigTestFromString(coalesceDiffTypesTest);
     
     this.writeLinesToFile("input", "1,1,2.0");
     
@@ -160,12 +160,12 @@ public class CoalesceTests extends PigTests
   
   STORE data3 INTO 'output';
   */
-  @Multiline private static String d4;
+  @Multiline private static String coalesceBagTypeTest;
   
   @Test(expectedExceptions=FrontendException.class)
   public void coalesceBagTypeTest() throws Exception
   {
-    PigTest test = createPigTestFromString(d4);
+    PigTest test = createPigTestFromString(coalesceBagTypeTest);
     
     this.writeLinesToFile("input", "1,1,{(2)}");
     

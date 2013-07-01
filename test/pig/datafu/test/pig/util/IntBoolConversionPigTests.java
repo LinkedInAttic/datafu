@@ -19,12 +19,12 @@ public class IntBoolConversionPigTests extends PigTests
   
   STORE data2 INTO 'output';
   */
-  @Multiline private static String d1;
+  @Multiline private static String intToBoolTest;
   
   @Test
   public void intToBoolTest() throws Exception
   {
-    PigTest test = createPigTestFromString(d1);
+    PigTest test = createPigTestFromString(intToBoolTest);
         
     String[] input = {
       "", // null
@@ -54,12 +54,12 @@ public class IntBoolConversionPigTests extends PigTests
   
   STORE data3 INTO 'output';
   */
-  @Multiline private static String d2;
+  @Multiline private static String intToBoolToIntTest;
   
   @Test
   public void intToBoolToIntTest() throws Exception
   {
-    PigTest test = createPigTestFromString(d2);
+    PigTest test = createPigTestFromString(intToBoolToIntTest);
         
     String[] input = {
       "", // null

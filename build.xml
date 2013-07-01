@@ -312,7 +312,7 @@
   </target>
   
   <target name="test" depends="build-pig-tests, build-unit-tests, jar" description="Runs the pig tests">
-    <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
+    <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-jar-6.2.jar"/>
     <testng classpathref="test-classpath"
             outputDir="${report.dir}" verbose="2" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
@@ -323,7 +323,7 @@
   </target>
   
   <target name="test-instrumented" depends="build-pig-tests, build-unit-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
-    <taskdef resource="testngtasks" classpath="lib/testng-6.2.jar"/>
+    <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-6.2.jar"/>
     <testng classpathref="instrumented-test-classpath"
             outputDir="${report.dir}" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />

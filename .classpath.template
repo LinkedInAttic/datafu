@@ -12,6 +12,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="annotation-plugin.jar"/>
-	<classpathentry kind="lib" path="staticlibs/pigunit-0.9.jar"/>
 	<classpathentry kind="output" path="build/testclasses"/>
 </classpath>

@@ -27,6 +27,8 @@
   <property name="dist.dir" value="${basedir}/dist" />
   <property name="tools.dir" value="${basedir}/tools" />
   <property name="lib.dir" value="${basedir}/lib" />
+  <property name="common.lib.dir" value="${lib.dir}/common" />
+  <property name="tools.lib.dir" value="${lib.dir}/tools" />
   <property name="static.lib.dir" value="${basedir}/staticlibs" />
   <property name="classes.dir" value="${dist.dir}/classes" />
   <property name="plugin.classes.dir" value="${dist.dir}/pluginclasses" />
@@ -120,9 +122,9 @@
   </target>
   
   <target name="ivy-resolve" depends="ivy-taskdef" description="retrieve dependencies with ivy">
-    <ivy:retrieve/>
+    <ivy:retrieve pattern="${lib.dir}/[conf]/[artifact]-[type]-[revision].[ext]"/>
   </target>
-  
+
   <target name="check-licenses" description="checks that source files have license header">
     <exec executable="./check-license-headers.sh" failonerror="true"/>
   </target>
@@ -132,7 +134,7 @@
   </target>
   
   <path id="main-classpath">
-    <fileset dir="${lib.dir}">
+    <fileset dir="${common.lib.dir}">
       <include name="*.jar" />
     </fileset>
     <pathelement path="${classes.dir}" />
@@ -151,10 +153,13 @@
     <fileset dir="${static.lib.dir}">
       <include name="*.jar" />
     </fileset>
+    <fileset dir="${tools.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
   </path>
 
   <path id="base-test-classpath">    
-    <fileset dir="${lib.dir}">
+    <fileset dir="${common.lib.dir}">
       <include name="*.jar" />
     </fileset>
     <fileset dir="${static.lib.dir}">
@@ -265,7 +270,7 @@
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     <move file="${dist.dir}/${final.name}.jar" tofile="${dist.dir}/${final.name}-orig.jar" />
     <java jar="${tools.dir}/autojar.jar" fork="true">
-      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${lib.dir}/fastutil-6.3.jar ${dist.dir}/${final.name}-orig.jar" />
+      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${common.lib.dir}/fastutil-6.3.jar ${dist.dir}/${final.name}-orig.jar" />
     </java>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     

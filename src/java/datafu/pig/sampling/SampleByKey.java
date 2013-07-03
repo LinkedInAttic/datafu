@@ -1,7 +1,8 @@
 package datafu.pig.sampling;
 
 import java.io.IOException;
-import java.util.Random;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 import org.apache.pig.FilterFunc;
 import org.apache.pig.data.Tuple;
 
@@ -56,9 +57,32 @@ public class SampleByKey extends FilterFunc
     for(Object each:input){
       hashCode = hashCode*PRIME_NUMBER + each.hashCode();
     }
-    Random generator = new Random(seed * hashCode);
-    double value = generator.nextDouble();
-    if (value <= size) return true;
-    return false;
+    
+    try {
+      if (intToRandomDouble(hashCode) <= size) return true;
+      return false;
+    } catch (Exception e){
+        e.printStackTrace(); 
+        throw new RuntimeException("Exception on intToRandomDouble");
+    }
+  }
+  
+  private Double intToRandomDouble(int input) throws Exception{
+    MessageDigest hasher = MessageDigest.getInstance("sha-1");
+
+    ByteBuffer b = ByteBuffer.allocate(4+4);
+    ByteBuffer b2 = ByteBuffer.allocate(20);
+
+    b.putInt(seed);
+    b.putInt(input);
+    byte[] digest = hasher.digest(b.array());
+    b.clear();
+
+    b2.put(digest);
+    b2.rewind();
+    double result = (((double)b2.getInt())/Integer.MAX_VALUE  + 1)/2;
+    b2.clear();
+
+    return result;
   }
 }

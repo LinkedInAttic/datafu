@@ -1,4 +1,8 @@
 dist/
+build/
+annotation-plugin.jar
+.factorypath
+.classpath
 docs/
 input
 lib/

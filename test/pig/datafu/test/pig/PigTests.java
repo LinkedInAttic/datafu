@@ -56,7 +56,12 @@ public abstract class PigTests
     return argsList;
   }
   
-  protected PigTest createPigTest(String scriptPath, String... args) throws IOException
+  protected PigTest createPigTestFromString(String str, String... args) throws IOException
+  {
+    return createPigTest(str.split("\n"),args);
+  }
+  
+  protected PigTest createPigTest(String[] lines, String... args) throws IOException
   {
     // append args to list of default args
     List<String> theArgs = getDefaultArgsAsList();
@@ -64,8 +69,6 @@ public abstract class PigTests
     {
       theArgs.add(arg);
     }
-    
-    String[] lines = getLinesFromFile(scriptPath);
     
     for (String arg : theArgs)
     {
@@ -82,9 +85,9 @@ public abstract class PigTests
     return new PigTest(lines);
   }
   
-  protected PigTest createPigTest(String scriptPath) throws IOException
+  protected PigTest createPigTest(String scriptPath, String... args) throws IOException
   {
-    return createPigTest(scriptPath, getDefaultArgs());
+    return createPigTest(getLinesFromFile(scriptPath), args);
   }
   
   protected String getJarPath()

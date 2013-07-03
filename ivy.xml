@@ -1,30 +1,36 @@
 <ivy-module version="2.0">
     <info organisation="datafu" module="datafu"/>
+    <configurations>
+      <conf name="common" description="common libraries" />
+      <conf name="tools" description="tools libraries" />
+    </configurations>
     <dependencies>
       
-        <dependency org="org.apache.pig" name="pig" rev="0.11.1">
+        <dependency org="org.apache.pig" name="pig" rev="0.11.1" conf="common->default">
           <!-- pig 0.10.0 pom lists wrong version of avro -->
           <exclude org="org.apache.hadoop" name="avro" />
         </dependency>
 
-        <dependency org="org.apache.pig" name="pigunit" rev="0.11.1" />
+        <dependency org="org.apache.pig" name="pigunit" rev="0.11.1" conf="common->default"/>
         
         <!-- use the right avro version which pig 0.10.0 was built against -->
-        <dependency org="org.apache.avro" name="avro" rev="1.5.3"/>
+        <dependency org="org.apache.avro" name="avro" rev="1.5.3" conf="common->default"/>
         
-        <dependency org="it.unimi.dsi" name="fastutil" rev="6.3"/>
-        <dependency org="joda-time" name="joda-time" rev="1.6"/>
-        <dependency org="org.apache.commons" name="commons-math" rev="2.1"/>
-        <dependency org="commons-io" name="commons-io" rev="1.4"/>
-        <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2"/>
-        <dependency org="org.testng" name="testng" rev="6.2"/>
-        <dependency org="com.google.guava" name="guava" rev="11.0" />
+        <dependency org="it.unimi.dsi" name="fastutil" rev="6.3" conf="common->default"/>
+        <dependency org="joda-time" name="joda-time" rev="1.6" conf="common->default"/>
+        <dependency org="org.apache.commons" name="commons-math" rev="2.1" conf="common->default"/>
+        <dependency org="commons-io" name="commons-io" rev="1.4" conf="common->default"/>
+        <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2" conf="common->default"/>
+        <dependency org="org.testng" name="testng" rev="6.2" conf="common->default"/>
+        <dependency org="com.google.guava" name="guava" rev="11.0" conf="common->default"/>
           
         <!-- needed for pigunit to work -->
-        <dependency org="log4j" name="log4j" rev="1.2.14" />
-        <dependency org="jline" name="jline" rev="0.9.94" />
-        <dependency org="org.antlr" name="antlr" rev="3.2" />
+        <dependency org="log4j" name="log4j" rev="1.2.14" conf="common->default"/>
+        <dependency org="jline" name="jline" rev="0.9.94" conf="common->default"/>
+        <dependency org="org.antlr" name="antlr" rev="3.2" conf="common->default"/>
 
-        <dependency org="org.apache.maven" name="maven-ant-tasks" rev="2.1.3" />
+        <dependency org="org.apache.maven" name="maven-ant-tasks" rev="2.1.3" conf="common->default" />
+        
+        <dependency org="com.sun" name="tools" rev="1.4.2" conf="tools->default"/>
     </dependencies>
 </ivy-module>

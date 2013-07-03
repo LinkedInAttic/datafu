@@ -151,6 +151,12 @@ Or [download](https://github.com/linkedin/datafu/archive/master.zip) the code.
 
 Here are some common tasks when working with the source code.
 
+### Eclipse
+
+To generate eclipse files:
+
+    ant eclipse
+
 ### Build the JAR
 
     ant jar

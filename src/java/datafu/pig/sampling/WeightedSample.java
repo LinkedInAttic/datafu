@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package datafu.pig.bags;
+package datafu.pig.sampling;
 
 import java.io.IOException;
 import java.util.Random;
@@ -38,7 +38,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * Example:
  * <pre>
  * {@code
- * define WeightedSample datafu.pig.bags.WeightedSample()
+ * define WeightedSample datafu.pig.sampling.WeightedSample()
  * 
  * -- input:
  * -- ({(a, 100),(b, 1),(c, 5),(d, 2)})

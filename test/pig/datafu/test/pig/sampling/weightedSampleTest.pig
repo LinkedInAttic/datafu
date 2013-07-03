@@ -1,6 +1,6 @@
 register $JAR_PATH
 
-define WeightedSample datafu.pig.bags.WeightedSample('1');
+define WeightedSample datafu.pig.sampling.WeightedSample('1');
 
 data = LOAD 'input' AS (A: bag {T: tuple(v1:chararray,v2:INT)});
 

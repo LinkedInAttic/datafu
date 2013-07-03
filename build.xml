@@ -123,9 +123,6 @@
     <fileset dir="${lib.dir}">
       <include name="*.jar" />
     </fileset>
-    <fileset dir="${basedir}/otherlibs">
-      <include name="*.jar" />
-    </fileset>
     <pathelement path="${classes.dir}" />
     <pathelement path="${pigtestclasses.dir}" />
     <pathelement path="${unittestclasses.dir}" />

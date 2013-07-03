@@ -1,3 +1,6 @@
+// Code from https://github.com/benelog/multiline.git
+// Based on Adrian Walker's blog post: http://www.adrianwalker.org/2011/12/java-multiline-string.html
+
 package org.adrianwalker.multilinestring;
 
 import java.util.Set;

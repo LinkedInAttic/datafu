@@ -1,5 +1,6 @@
 package datafu.test.pig.urls;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
@@ -8,10 +9,22 @@ import datafu.test.pig.PigTests;
 public class UserAgentTest extends PigTests
 {
   
+  /**
+  register $JAR_PATH
+
+  define UserAgentClassify datafu.pig.urls.UserAgentClassify();
+  
+  data = load 'input' as (usr_agent:chararray);
+  data_out = foreach data generate UserAgentClassify(usr_agent) as class;
+  --describe data_out;
+  store data_out into 'output';
+   */
+  @Multiline private String userAgentTest;
+  
   @Test
   public void userAgentTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/urls/userAgentTest.pig");
+    PigTest test = createPigTestFromString(userAgentTest);
   
     String[] input = {
         "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",

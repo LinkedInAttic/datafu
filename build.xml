@@ -356,10 +356,13 @@
     <attribute name="javadir" />
     <sequential>
       <replace-dir dir="@{dir}" />
-      <javadoc sourcepath="@{javadir}" destdir="@{dir}" windowtitle="${display.name} ${datafu.version}" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}">
+      <javadoc destdir="@{dir}" windowtitle="${display.name} ${datafu.version}" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}">
         <doctitle>${display.name} ${datafu.version}</doctitle>
         <bottom>${author}</bottom>
         <classpath refid="main-classpath" />
+        <fileset dir="@{javadir}">
+          <exclude name="datafu//pig/stats/*?VAR.java"/>
+        </fileset>
       </javadoc>
     </sequential>
   </macrodef>

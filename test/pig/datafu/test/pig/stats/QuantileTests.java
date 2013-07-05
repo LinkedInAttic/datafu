@@ -73,6 +73,27 @@ public class QuantileTests  extends PigTests
     assertEquals(output.size(),1);
     assertEquals(output.get(0).toString(), "(1.0,3.0,5.5,8.0,10.0)");
   }
+
+  @Test
+  public void quantile3Test() throws Exception {
+    PigTest test = createPigTestFromString(quantileTest,
+                                 "QUANTILES='0.0013','0.0228','0.1587','0.5','0.8413','0.9772','0.9987'");
+
+    List<String> input = new ArrayList<String>();
+    for (int i=100000; i>=0; i--)
+    {
+      input.add(Integer.toString(i));
+    }
+    
+    writeLinesToFile("input", input.toArray(new String[0]));
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(130.0,2280.0,15870.0,50000.0,84130.0,97720.0,99870.0)");
+  }
   
   @Test
   public void quantile4aTest() throws Exception
@@ -382,27 +403,6 @@ public class QuantileTests  extends PigTests
     assertEquals(output.size(),1);
     assertEquals(output.get(0).toString(), "(1.0,4.0,7.0,10.0)");
   }
-
-  @Test
-  public void quantile3Test() throws Exception {
-    PigTest test = createPigTestFromString(quantileTest,
-                                 "QUANTILES='0.0013','0.0228','0.1587','0.5','0.8413','0.9772','0.9987'");
-
-    List<String> input = new ArrayList<String>();
-    for (int i=100000; i>=0; i--)
-    {
-      input.add(Integer.toString(i));
-    }
-    
-    writeLinesToFile("input", input.toArray(new String[0]));
-        
-    test.runScript();
-    
-    List<Tuple> output = getLinesForAlias(test, "data_out", true);
-    
-    assertEquals(output.size(),1);
-    assertEquals(output.get(0).toString(), "(130.0,2280.0,15870.0,50000.0,84130.0,97720.0,99870.0)");
-  }
   
   @Test
   public void quantileParamsTest() throws Exception {
@@ -473,5 +473,116 @@ public class QuantileTests  extends PigTests
   
   private void assertAboutEqual(double actual, double expected) {
     assertTrue(Math.abs(actual-expected) < 0.001);
+  }
+  
+  /**
+  register $JAR_PATH
+  
+  define Quantile datafu.pig.stats.$UDF($QUANTILES);
+  
+  data_in = LOAD 'input' as (val:int);
+  
+  --describe data_in;
+  
+  data_out = GROUP data_in ALL;
+  
+  --describe data_out;
+  
+  data_out = FOREACH data_out {
+    sorted = ORDER data_in BY val;
+    GENERATE Quantile(sorted) as quantiles;
+  }
+  data_out = FOREACH data_out GENERATE FLATTEN(quantiles);
+  
+  --describe data_out;
+  
+  data_out = FOREACH data_out GENERATE $EXPECTED_OUTPUT;
+  
+  STORE data_out into 'output';
+   */
+  @Multiline private String quantileSchemaTest;
+  
+  @Test
+  public void quantileSchemaTest() throws Exception
+  {
+    PigTest test = createPigTestFromString(quantileSchemaTest,
+                                 "UDF=Quantile",
+                                 "QUANTILES='0.0','0.5','1.0'",
+                                 "EXPECTED_OUTPUT=quantiles::quantile_0_0, "+
+                                                 "quantiles::quantile_0_5, "+
+                                                 "quantiles::quantile_1_0");
+
+    String[] input = {"1","5","3","4","2"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,3.0,5.0)");
+  }
+  
+  @Test
+  public void quantileSchemaTest2() throws Exception
+  {
+    PigTest test = createPigTestFromString(quantileSchemaTest,
+                                 "UDF=Quantile", 
+                                 "QUANTILES='3'",
+                                 "EXPECTED_OUTPUT=quantiles::quantile_0, "+
+                                                 "quantiles::quantile_1, "+
+                                                 "quantiles::quantile_2");
+
+    String[] input = {"1","5","3","4","2"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,3.0,5.0)");
+  }
+  
+  @Test
+  public void quantileSchemaTest3() throws Exception
+  {
+    PigTest test = createPigTestFromString(quantileSchemaTest,
+                                 "UDF=StreamingQuantile", 
+                                 "QUANTILES='0.0','0.5','1.0'",
+                                 "EXPECTED_OUTPUT=quantiles::quantile_0_0, "+
+                                                 "quantiles::quantile_0_5, "+
+                                                 "quantiles::quantile_1_0");
+
+    String[] input = {"1","5","3","4","2"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,3.0,5.0)");
+  }
+  
+  @Test
+  public void quantileSchemaTest4() throws Exception
+  {
+    PigTest test = createPigTestFromString(quantileSchemaTest,
+                                 "UDF=StreamingQuantile", 
+                                 "QUANTILES='3'",
+                                 "EXPECTED_OUTPUT=quantiles::quantile_0, "+
+                                                 "quantiles::quantile_1, "+
+                                                 "quantiles::quantile_2");
+
+    String[] input = {"1","5","3","4","2"};
+    writeLinesToFile("input", input);
+        
+    test.runScript();
+    
+    List<Tuple> output = getLinesForAlias(test, "data_out", true);
+    
+    assertEquals(output.size(),1);
+    assertEquals(output.get(0).toString(), "(1.0,3.0,5.0)");
   }
 }

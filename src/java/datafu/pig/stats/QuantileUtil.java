@@ -19,6 +19,19 @@ import java.util.ArrayList;
 
 public class QuantileUtil
 { 
+  public static ArrayList<Double> getNQuantiles(int numQuantiles)
+  {
+    ArrayList<Double> quantiles = new ArrayList<Double>(numQuantiles);
+    quantiles = new ArrayList<Double>(numQuantiles);
+    int divisor = numQuantiles-1;
+    for (int q = 0; q <= divisor; q++)
+    {
+      double quantile = ((double)q)/divisor;
+      quantiles.add(quantile);
+    }
+    return quantiles;
+  }
+  
   public static ArrayList<Double> getQuantilesFromParams(String... k)
   {
     ArrayList<Double> quantiles = new ArrayList<Double>(k.length);
@@ -34,13 +47,7 @@ public class QuantileUtil
         throw new IllegalArgumentException("Number of quantiles must be greater than 1");
       }
       
-      quantiles = new ArrayList<Double>(numQuantiles);
-      int divisor = numQuantiles-1;
-      for (int q = 0; q <= divisor; q++)
-      {
-        double quantile = ((double)q)/divisor;
-        quantiles.add(quantile);
-      }
+      quantiles = getNQuantiles(numQuantiles);
     }
     else
     {

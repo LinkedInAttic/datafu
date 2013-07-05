@@ -67,7 +67,7 @@
 
   <basename property="basedirname" file="${basedir}"/>
   
-  <target name="all" depends="clean, jar, sources-jar, javadoc-jar, coverage" description="Build all artifacts." />
+  <target name="all" depends="clean, jar, sources-jar, javadoc-jar" description="Build all artifacts." />
     
   <target name="init" depends="ivy-resolve">
     <mkdir dir="${dist.dir}" />
@@ -356,8 +356,8 @@
     <attribute name="javadir" />
     <sequential>
       <replace-dir dir="@{dir}" />
-      <javadoc sourcepath="@{javadir}" destdir="@{dir}" windowtitle="${display.name}" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}">
-        <doctitle>${display.name}</doctitle>
+      <javadoc sourcepath="@{javadir}" destdir="@{dir}" windowtitle="${display.name} ${datafu.version}" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}">
+        <doctitle>${display.name} ${datafu.version}</doctitle>
         <bottom>${author}</bottom>
         <classpath refid="main-classpath" />
       </javadoc>

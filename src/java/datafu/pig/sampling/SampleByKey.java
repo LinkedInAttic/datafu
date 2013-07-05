@@ -25,7 +25,7 @@ import org.apache.pig.data.Tuple;
  * output = FILTER data BY SampleByKey(A_id);
  * 
  * --output: (B,1), (B,3)
- * 
+ * } 
  * 
  * </pre>
  * 

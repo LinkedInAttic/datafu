@@ -1,4 +1,4 @@
-package datafu.test.linkanalysis;
+package datafu.test.pig.linkanalysis;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
-public class PageRankTest
+public class PageRankImplTests 
 {
   @Test
   public void wikipediaGraphInMemoryTest() throws Exception {

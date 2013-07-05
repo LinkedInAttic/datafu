@@ -1,5 +1,6 @@
 package datafu.test.pig.sampling;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
@@ -8,10 +9,26 @@ import datafu.test.pig.PigTests;
 
 public class SamplingTests extends PigTests
 {
+  /**
+  register $JAR_PATH
+
+  define WeightedSample datafu.pig.sampling.WeightedSample('1');
+  
+  data = LOAD 'input' AS (A: bag {T: tuple(v1:chararray,v2:INT)});
+  
+  data2 = FOREACH data GENERATE WeightedSample(A,1);
+  --describe data2;
+  
+  STORE data2 INTO 'output';
+
+   */
+  @Multiline
+  private String weightedSampleTest;
+  
   @Test
   public void weightedSampleTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/sampling/weightedSampleTest.pig");
+    PigTest test = createPigTestFromString(weightedSampleTest);
 
     writeLinesToFile("input", 
                      "({(a, 100),(b, 1),(c, 5),(d, 2)})");
@@ -22,10 +39,25 @@ public class SamplingTests extends PigTests
         "({(a,100),(c,5),(b,1),(d,2)})");
   }
   
+  /**
+  register $JAR_PATH
+
+  define WeightedSample datafu.pig.sampling.WeightedSample('1');
+  
+  data = LOAD 'input' AS (A: bag {T: tuple(v1:chararray,v2:INT)});
+  
+  data2 = FOREACH data GENERATE WeightedSample(A,1,3);
+  --describe data2;
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String weightedSampleLimitTest;
+  
   @Test
   public void weightedSampleLimitTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/sampling/weightedSampleLimitTest.pig");
+    PigTest test = createPigTestFromString(weightedSampleLimitTest);
 
     writeLinesToFile("input", 
                      "({(a, 100),(b, 1),(c, 5),(d, 2)})");
@@ -36,10 +68,24 @@ public class SamplingTests extends PigTests
         "({(a,100),(c,5),(b,1)})");
   }
   
+  /**
+  register $JAR_PATH
+  
+  DEFINE SampleByKey datafu.pig.sampling.SampleByKey('salt2.5', '0.5');
+  
+  data = LOAD 'input' AS (A_id:chararray, B_id:chararray, C:int);
+  sampled = FILTER data BY SampleByKey(A_id);
+  
+  STORE sampled INTO 'output';
+
+   */
+  @Multiline
+  private String sampleByKeyTest;
+  
   @Test
   public void sampleByKeyTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/sampling/sampleByKeyTest.pig");
+    PigTest test = createPigTestFromString(sampleByKeyTest);
     
     writeLinesToFile("input",
                      "A1\tB1\t1","A1\tB1\t4","A1\tB3\t4","A1\tB4\t4",
@@ -62,10 +108,24 @@ public class SamplingTests extends PigTests
                  "(A10,B1,7)","(A10,B2,23)","(A10,B3,1)","(A10,B4,41)","(A10,B5,52)");
   }
 
+  /**
+  register $JAR_PATH
+  
+  DEFINE SampleByKey datafu.pig.sampling.SampleByKey('salt2.5', '0.5');
+  
+  data = LOAD 'input' AS (A_id:chararray, B_id:chararray, C:int);
+  sampled = FILTER data BY SampleByKey(A_id, B_id);
+  
+  STORE sampled INTO 'output';
+
+   */
+  @Multiline
+  private String sampleByKeyMultipleKeyTest;
+  
   @Test
   public void sampleByKeyMultipleKeyTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/sampling/sampleByKeyMultipleKeyTest.pig");
+    PigTest test = createPigTestFromString(sampleByKeyMultipleKeyTest);
     
     writeLinesToFile("input",
                      "A1\tB1\t1","A1\tB1\t4",
@@ -111,6 +171,20 @@ public class SamplingTests extends PigTests
                    
   }
   
+  /**
+  register $JAR_PATH
+
+  DEFINE ReservoirSample datafu.pig.sampling.ReservoirSample('$RESERVOIR_SIZE');
+  
+  data = LOAD 'input' AS (A_id:chararray, B_id:chararray, C:int);
+  sampled = FOREACH (GROUP data ALL) GENERATE ReservoirSample(data) as sample_data;
+  sampled = FOREACH sampled GENERATE COUNT(sample_data) AS sample_count;
+  STORE sampled INTO 'output';
+
+   */
+  @Multiline
+  private String reservoirSampleTest;
+  
   @Test
   public void reservoirSampleTest() throws Exception
   {
@@ -151,7 +225,7 @@ public class SamplingTests extends PigTests
    
     for(int i=10; i<=30; i=i+10){
       int reservoirSize = i ;
-      PigTest test = createPigTest("test/pig/datafu/test/pig/sampling/reservoirSampleTest.pig", "RESERVOIR_SIZE="+reservoirSize);
+      PigTest test = createPigTestFromString(reservoirSampleTest, "RESERVOIR_SIZE="+reservoirSize);
       test.runScript();
       assertOutput(test, "sampled", "("+reservoirSize+")");
     }

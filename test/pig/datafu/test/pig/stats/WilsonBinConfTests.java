@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
@@ -14,10 +15,25 @@ import datafu.test.pig.PigTests;
 
 public class WilsonBinConfTests extends PigTests
 {
+  /**
+  register $JAR_PATH
+
+  define WilsonBinConf datafu.pig.stats.WilsonBinConf('$alpha');
+  
+  data = load 'input' as (successes:long, totals:long);
+  --describe data;
+  
+  data_out = FOREACH data GENERATE WilsonBinConf(successes, totals) as interval;
+  data_out = FOREACH data_out GENERATE FLATTEN(interval);
+  
+  store data_out into 'output';
+   */
+  @Multiline private String wilsonBinConf;
+  
   @Test
   public void wilsonTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/wilsonBinConfTests.pig",
+    PigTest test = createPigTestFromString(wilsonBinConf,
                                  "alpha=0.05"); // alpha is 0.05 for 95% confidence
     
     writeLinesToFile("input",

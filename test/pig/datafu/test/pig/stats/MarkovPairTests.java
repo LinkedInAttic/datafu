@@ -4,6 +4,7 @@ import static org.testng.Assert.*;
 
 import java.util.Iterator;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
@@ -12,10 +13,28 @@ import datafu.test.pig.PigTests;
 
 public class MarkovPairTests extends PigTests
 {
+  /**
+  register $JAR_PATH
+
+  define markovPairs datafu.pig.stats.MarkovPairs();
+  
+  data = load 'input' as $schema;
+  --describe data;
+  
+  data_out1 = foreach data generate data as orig_bag;
+  --describe data_out1;
+  
+  data_out = foreach data_out1 generate markovPairs(orig_bag) as markov_bag;
+  --describe data_out;
+  
+  store data_out into 'output';
+   */
+  @Multiline private String markovPairDefault;
+  
   @Test
   public void markovPairDefaultTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/markovPairDefault.pig",
+    PigTest test = createPigTestFromString(markovPairDefault,
                                  "schema=(data: bag {t: tuple(val:int)})");
     
     writeLinesToFile("input", "{(10),(20),(30),(40),(50),(60)}");
@@ -34,7 +53,7 @@ public class MarkovPairTests extends PigTests
   @Test
   public void markovPairMultipleInput() throws Exception
   {    
-    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/markovPairDefault.pig",
+    PigTest test = createPigTestFromString(markovPairDefault,
                                  "schema=(data: bag {t: tuple(val1:int,val2:int)})");
     
     writeLinesToFile("input", "{(10,100),(20,200),(30,300),(40,400),(50,500),(60,600)}");
@@ -51,10 +70,28 @@ public class MarkovPairTests extends PigTests
     assertTuplesMatch(expectedOutput, actualOutput);
   }
   
+  /**
+  register $JAR_PATH
+
+  define markovPairs datafu.pig.stats.MarkovPairs('$lookahead');
+  
+  data = load 'input' as $schema;
+  --describe data;
+  
+  data_out1 = foreach data generate data as orig_bag;
+  --describe data_out1;
+  
+  data_out = foreach data_out1 generate markovPairs(orig_bag) as markov_bag;
+  --describe data_out;
+  
+  store data_out into 'output';
+   */
+  @Multiline private String markovPairLookahead;
+  
   @Test
   public void markovPairLookaheadTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/stats/markovPairLookahead.pig", 
+    PigTest test = createPigTestFromString(markovPairLookahead, 
                                  "schema=(data: bag {t: tuple(val:int)})",
                                  "lookahead=3");
     

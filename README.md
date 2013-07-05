@@ -3,12 +3,13 @@
 [DataFu](http://data.linkedin.com/opensource/datafu) is a collection of user-defined functions for working with large-scale data in Hadoop and Pig. This library was born out of the need for a stable, well-tested library of UDFs for data mining and statistics. It is used at LinkedIn in many of our off-line workflows for data derived products like "People You May Know" and "Skills & Endorsements". It contains functions for:
 
 * PageRank
-* Quantiles (median), variance, etc.
+* Statistics (e.g. quantiles, median, variance, etc.)
+* Sampling (e.g. weighted, reservoir, etc.)
 * Sessionization
-* Variance
-* Convenience bag functions (e.g., set operations, enumerating bags, etc)
-* Convenience utility functions (e.g., assertions, easier writing of
+* Convenience bag functions (e.g. enumerating items)
+* Convenience utility functions (e.g. assertions, easier writing of
 EvalFuncs)
+* Set operations (intersect, union)
 * and [more](http://linkedin.github.com/datafu/docs/javadoc/)...
 
 Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against Pig 0.11.

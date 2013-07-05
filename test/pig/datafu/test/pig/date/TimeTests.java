@@ -1,5 +1,6 @@
 package datafu.test.pig.date;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
@@ -7,10 +8,28 @@ import datafu.test.pig.PigTests;
 
 public class TimeTests extends PigTests
 {  
+  /**
+  register $JAR_PATH
+
+  define TimeCount datafu.pig.date.TimeCount('$TIME_WINDOW');
+  
+  views = LOAD 'input' AS (user_id:int, page_id:int, time:chararray);
+  
+  views_grouped = GROUP views BY (user_id, page_id);
+  view_counts = foreach views_grouped {
+    views = order views by time;
+    generate group.user_id as user_id, group.page_id as page_id, TimeCount(views.(time)) as count;
+  }
+  
+  STORE view_counts INTO 'output';
+   */
+  @Multiline
+  private String timeCountPageViewsTest;
+  
   @Test
   public void timeCountPageViewsTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/date/timeCountPageViewsTest.pig",
+    PigTest test = createPigTestFromString(timeCountPageViewsTest,
                                  "TIME_WINDOW=30m",
                                  "JAR_PATH=" + getJarPath());
         

@@ -175,6 +175,12 @@ Override `testclasses.pattern`, which defaults to `**/*.class`.  For example, to
 
     ant coverage
 
+### Notes on eclipse
+
+#### Adjusting heap size for TestNG plugin
+
+You may run out of heap when executing tests in Eclipse.  To fix this adjust your heap settings for the TestNG plugin.  Go to Eclipse->Preferences.  Select TestNG->Run/Debug.  Add "-Xmx1G" to the JVM args.
+
 ### Releasing 
 
 We use Sonatype to release artifacts.  Information on how this is set up can be found [here](https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide).  Most of this has already been set up with the `build.xml` file.  You will however need a Sonatype account and must create a Maven `~/.m2/settings.xml` with your account information, as described [here](https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-7a.1.POMandsettingsconfig).

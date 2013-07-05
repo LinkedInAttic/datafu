@@ -105,10 +105,25 @@ public class Quantile extends SimpleEvalFunc<Tuple>
       this.second = second;
     }
   }
+  
+  // For the output schema, label the quantiles 0, 1, 2, ... n
+  // Otherwise label the quantiles based on the quantile value.
+  // e.g. 50% quantile 0.5 will be labeled as 0_5
+  private boolean ordinalOutputSchema;
 
   public Quantile(String... k)
   {
     this.quantiles = QuantileUtil.getQuantilesFromParams(k);
+    
+    if (k.length == 1 && Double.parseDouble(k[0]) > 1.0) 
+    {
+      this.ordinalOutputSchema = true;
+      this.quantiles = QuantileUtil.getQuantilesFromParams(k);
+    }
+    else
+    {
+      this.quantiles = QuantileUtil.getQuantilesFromParams(k);
+    }
   }
 
   private static Pair<Long, Long> getIndexes(double k, long N)
@@ -165,8 +180,18 @@ public class Quantile extends SimpleEvalFunc<Tuple>
   public Schema outputSchema(Schema input)
   {
     Schema tupleSchema = new Schema();
-    for (Double x : this.quantiles)
-      tupleSchema.add(new Schema.FieldSchema("quantile_" + x.toString().replace(".", "_"), DataType.DOUBLE));
+    if (ordinalOutputSchema)
+    {
+      for (int i = 0; i < this.quantiles.size(); i++) 
+      {
+        tupleSchema.add(new Schema.FieldSchema("quantile_" + i, DataType.DOUBLE));
+      }
+    }
+    else
+    {
+      for (Double x : this.quantiles)
+        tupleSchema.add(new Schema.FieldSchema("quantile_" + x.toString().replace(".", "_"), DataType.DOUBLE));
+    }
     return tupleSchema;
   }
 }

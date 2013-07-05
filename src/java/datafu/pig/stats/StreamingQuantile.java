@@ -123,10 +123,16 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
   private final QuantileEstimator estimator;
   private List<Double> quantiles;
  
+ // For the output schema, label the quantiles 0, 1, 2, ... n
+ // Otherwise label the quantiles based on the quantile value.
+ // e.g. 50% quantile 0.5 will be labeled as 0_5
+ private boolean ordinalOutputSchema;
+  
   public StreamingQuantile(String... k)
   {
     if (k.length == 1 && Double.parseDouble(k[0]) > 1.0) 
     {
+      this.ordinalOutputSchema = true;
       this.numQuantiles = Integer.parseInt(k[0]);
     }
     else
@@ -248,19 +254,17 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
   public Schema outputSchema(Schema input)
   {
     Schema tupleSchema = new Schema();
-    if (this.quantiles != null)
+    if (ordinalOutputSchema)
     {
-      for (Double x : this.quantiles)
+      for (int i = 0; i < this.numQuantiles; i++) 
       {
-        tupleSchema.add(new Schema.FieldSchema("quantile_" + x.toString().replace(".", "_"), DataType.DOUBLE));
+        tupleSchema.add(new Schema.FieldSchema("quantile_" + i, DataType.DOUBLE));
       }
     }
     else
     {
-      for (int i = 0; i < numQuantiles; i++) 
-      {
-        tupleSchema.add(new Schema.FieldSchema("quantile_" + i, DataType.DOUBLE));
-      }
+      for (Double x : this.quantiles)
+        tupleSchema.add(new Schema.FieldSchema("quantile_" + x.toString().replace(".", "_"), DataType.DOUBLE));
     }
     return tupleSchema;
   }

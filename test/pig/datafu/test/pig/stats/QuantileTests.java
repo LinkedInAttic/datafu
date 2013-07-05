@@ -17,7 +17,7 @@ public class QuantileTests  extends PigTests
 {
   /**
   register $JAR_PATH
-
+  
   define Quantile datafu.pig.stats.Quantile($QUANTILES);
   
   data_in = LOAD 'input' as (val:int);

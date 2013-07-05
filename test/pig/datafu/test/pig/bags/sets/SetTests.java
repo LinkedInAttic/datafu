@@ -2,6 +2,7 @@ package datafu.test.pig.bags.sets;
 
 import java.util.Arrays;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
@@ -15,10 +16,24 @@ import datafu.test.pig.PigTests;
 
 public class SetTests extends PigTests
 {
+  /**
+  register $JAR_PATH
+
+  define SetIntersect datafu.pig.bags.sets.SetIntersect();
+  
+  data = LOAD 'input' AS (B1:bag{T:tuple(val1:int,val2:int)},B2:bag{T:tuple(val1:int,val2:int)});
+  
+  data2 = FOREACH data GENERATE SetIntersect(B1,B2);
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String setIntersectTest;
+  
   @Test
   public void setIntersectTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/sets/setIntersectTest.pig");
+    PigTest test = createPigTestFromString(setIntersectTest);
     
     String[] input = {
       "{(1,10),(2,20),(3,30),(4,40),(5,50),(6,60)}\t{(0,0),(2,20),(4,40),(8,80)}",
@@ -46,7 +61,7 @@ public class SetTests extends PigTests
   @Test(expectedExceptions=org.apache.pig.impl.logicalLayer.FrontendException.class)
   public void setIntersectOutOfOrderTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/sets/setIntersectTest.pig");
+    PigTest test = createPigTestFromString(setIntersectTest);
     
     this.writeLinesToFile("input", 
                           "{(1,10),(3,30),(2,20),(4,40),(5,50),(6,60)}\t{(0,0),(2,20),(4,40),(8,80)}");
@@ -56,10 +71,32 @@ public class SetTests extends PigTests
     this.getLinesForAlias(test, "data2");
   }
   
+  /**
+  register $JAR_PATH
+
+  define SetUnion datafu.pig.bags.sets.SetUnion();
+  
+  data = LOAD 'input' AS (B1:bag{T:tuple(val1:int,val2:int)},B2:bag{T:tuple(val1:int,val2:int)});
+  
+  --dump data
+  
+  data2 = FOREACH data GENERATE SetUnion(B1,B2) AS C;
+  data2 = FOREACH data2 {
+    C = ORDER C BY val1 ASC, val2 ASC;
+    generate C;
+  }
+  
+  --dump data2
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String setUnionTest;
+  
   @Test
   public void setUnionTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/sets/setUnionTest.pig");
+    PigTest test = createPigTestFromString(setUnionTest);
     
     String[] input = {
         "{(1,10),(1,20),(1,30),(1,40),(1,50),(1,60),(1,80)}\t{(1,1),(1,20),(1,25),(1,25),(1,25),(1,40),(1,70),(1,80)}"

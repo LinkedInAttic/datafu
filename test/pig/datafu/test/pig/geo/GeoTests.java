@@ -4,6 +4,7 @@ import static org.testng.Assert.*;
 
 import java.util.List;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
@@ -12,10 +13,24 @@ import datafu.test.pig.PigTests;
 
 public class GeoTests extends PigTests
 {
+  /**
+  register $JAR_PATH
+
+  define HaversineDistInMiles datafu.pig.geo.HaversineDistInMiles();
+  
+  data = LOAD 'input' AS (lat1:double,lng1:double,lat2:double,lng2:double);
+  
+  data2 = FOREACH data GENERATE HaversineDistInMiles(lat1,lng1,lat2,lng2);
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String haversineTest;
+  
   @Test
   public void haversineTest() throws Exception
   {    
-    PigTest test = createPigTest("test/pig/datafu/test/pig/geo/haversineTest.pig");
+    PigTest test = createPigTestFromString(haversineTest);
     
     // Approximate latitude and longitude for major cities from maps.google.com
     double[] la = {34.040143,-118.243103};

@@ -14,7 +14,7 @@
  * the License.
  */
  
-package datafu.pig.numbers;
+package datafu.pig.random;
 
 import java.io.IOException;
 import java.util.Random;

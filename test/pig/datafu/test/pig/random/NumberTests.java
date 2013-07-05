@@ -1,4 +1,4 @@
-package datafu.test.pig.numbers;
+package datafu.test.pig.random;
 
 import static org.testng.Assert.*;
 
@@ -17,7 +17,7 @@ public class NumberTests extends PigTests
   /**
   register $JAR_PATH
 
-  define RandInt datafu.pig.numbers.RandInt();
+  define RandInt datafu.pig.random.RandInt();
   
   data = LOAD 'input' AS (key:INT);
   data2 = FOREACH data GENERATE key, RandInt($MIN,$MAX) as val;

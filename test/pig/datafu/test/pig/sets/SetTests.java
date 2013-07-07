@@ -1,4 +1,4 @@
-package datafu.test.pig.bags.sets;
+package datafu.test.pig.sets;
 
 import java.util.Arrays;
 
@@ -11,7 +11,7 @@ import org.apache.pig.pigunit.PigTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import datafu.pig.bags.sets.SetIntersect;
+import datafu.pig.sets.SetIntersect;
 import datafu.test.pig.PigTests;
 
 public class SetTests extends PigTests
@@ -19,7 +19,7 @@ public class SetTests extends PigTests
   /**
   register $JAR_PATH
 
-  define SetIntersect datafu.pig.bags.sets.SetIntersect();
+  define SetIntersect datafu.pig.sets.SetIntersect();
   
   data = LOAD 'input' AS (B1:bag{T:tuple(val1:int,val2:int)},B2:bag{T:tuple(val1:int,val2:int)});
   
@@ -74,7 +74,7 @@ public class SetTests extends PigTests
   /**
   register $JAR_PATH
 
-  define SetUnion datafu.pig.bags.sets.SetUnion();
+  define SetUnion datafu.pig.sets.SetUnion();
   
   data = LOAD 'input' AS (B1:bag{T:tuple(val1:int,val2:int)},B2:bag{T:tuple(val1:int,val2:int)});
   

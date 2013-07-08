@@ -173,12 +173,12 @@ public class SessionTests extends PigTests
   STORE view_counts INTO 'output';
    */
   @Multiline
-  private String timeCountPageViewsTest;
+  private String sessionCountPageViewsTest;
   
   @Test
-  public void timeCountPageViewsTest() throws Exception
+  public void sessionCountPageViewsTest() throws Exception
   {
-    PigTest test = createPigTestFromString(timeCountPageViewsTest,
+    PigTest test = createPigTestFromString(sessionCountPageViewsTest,
                                  "TIME_WINDOW=30m",
                                  "JAR_PATH=" + getJarPath());
         

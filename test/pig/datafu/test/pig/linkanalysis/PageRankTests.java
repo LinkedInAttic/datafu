@@ -16,7 +16,7 @@ import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
 
-import datafu.test.linkanalysis.PageRankTest;
+import datafu.test.pig.linkanalysis.PageRankImplTests;
 import datafu.test.pig.PigTests;
 
 public class PageRankTests extends PigTests
@@ -57,11 +57,11 @@ public class PageRankTests extends PigTests
   {
     PigTest test = createPigTestFromString(pageRankTest);
 
-    String[] edges = PageRankTest.getWikiExampleEdges();
+    String[] edges = PageRankImplTests.getWikiExampleEdges();
 
     Map<String,Integer> nodeIds = new HashMap<String,Integer>();
     Map<Integer,String> nodeIdsReversed = new HashMap<Integer,String>();
-    Map<String,Float> expectedRanks = PageRankTest.parseExpectedRanks(PageRankTest.getWikiExampleExpectedRanks());
+    Map<String,Float> expectedRanks = PageRankImplTests.parseExpectedRanks(PageRankImplTests.getWikiExampleExpectedRanks());
 
     File f = new File(System.getProperty("user.dir"), "input").getAbsoluteFile();
     if (f.exists())

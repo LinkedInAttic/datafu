@@ -14,7 +14,7 @@
  * the License.
  */
 
-package datafu.pig.bags.sets;
+package datafu.pig.sets;
 
 import java.io.IOException;
 import java.util.Iterator;

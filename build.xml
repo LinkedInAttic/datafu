@@ -22,7 +22,6 @@
   <property name="java.dir" value="${src.dir}/java" />
   <property name="plugin.java.dir" value="${basedir}/plugin/java" />
   <property name="test.dir" value="${basedir}/test" />
-  <property name="unittestsrc.dir" value="${test.dir}/unit" />
   <property name="pigtestsrc.dir" value="${test.dir}/pig" />
   <property name="dist.dir" value="${basedir}/dist" />
   <property name="tools.dir" value="${basedir}/tools" />
@@ -33,14 +32,12 @@
   <property name="classes.dir" value="${dist.dir}/classes" />
   <property name="plugin.classes.dir" value="${dist.dir}/pluginclasses" />
   <property name="report.dir" value="${basedir}/report" />
-  <property name="report.unit.dir" value="${report.dir}/unit" />
   <property name="report.pig.dir" value="${report.dir}/pig" />
   <property name="docs.dir" value="${basedir}/docs" />
   <property name="javadoc.dir" value="${docs.dir}/javadoc" />
   <property name="cobertura.dir" value="${basedir}/cobertura" />
   <property name="coveragereport.dir" value="${basedir}/coverage-report" />
   <property name="instrumented.dir" value="${basedir}/instrumented" />
-  <property name="unittestclasses.dir" value="${dist.dir}/unittestclasses" />
   <property name="pigtestclasses.dir" value="${dist.dir}/pigtestclasses" />
   
   <!-- output names -->
@@ -67,7 +64,7 @@
 
   <basename property="basedirname" file="${basedir}"/>
   
-  <target name="all" depends="clean, jar, sources-jar, javadoc-jar, coverage" description="Build all artifacts." />
+  <target name="all" depends="clean, jar, sources-jar, javadoc-jar" description="Build all artifacts." />
     
   <target name="init" depends="ivy-resolve">
     <mkdir dir="${dist.dir}" />
@@ -167,7 +164,6 @@
     </fileset>
     <pathelement path="${classes.dir}" />
     <pathelement path="${pigtestclasses.dir}" />
-    <pathelement path="${unittestclasses.dir}" />
   </path>
   
   <path id="test-classpath">
@@ -235,15 +231,7 @@
     </jar>
   </target>
   
-  <target name="build-unit-tests" depends="build" description="Compile unit test classes">
-    <replace-dir dir="${unittestclasses.dir}" />
-    <javac destdir="${unittestclasses.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
-      <src path="${unittestsrc.dir}" />
-      <classpath refid="main-classpath" />
-    </javac>
-  </target>
-  
-  <target name="build-pig-tests" depends="build,build-unit-tests,build-plugins" description="Compile pig test classes">
+  <target name="build-pig-tests" depends="build,build-plugins" description="Compile pig test classes">
     <replace-dir dir="${pigtestclasses.dir}" />
     <copy todir="${pigtestclasses.dir}">
       <fileset dir="${pigtestsrc.dir}">
@@ -311,25 +299,23 @@
     </jarjar>
   </target>
   
-  <target name="test" depends="build-pig-tests, build-unit-tests, jar" description="Runs the pig tests">
+  <target name="test" depends="build-pig-tests, jar" description="Runs the pig tests">
     <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-jar-6.2.jar"/>
     <testng classpathref="test-classpath"
             outputDir="${report.dir}" verbose="2" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
-      <classfileset dir="${unittestclasses.dir}" includes="${testclasses.pattern}" />
       <classfileset dir="${pigtestclasses.dir}" includes="${testclasses.pattern}" />
     </testng>
   </target>
   
-  <target name="test-instrumented" depends="build-pig-tests, build-unit-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
+  <target name="test-instrumented" depends="build-pig-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
     <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-6.2.jar"/>
     <testng classpathref="instrumented-test-classpath"
             outputDir="${report.dir}" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${instrumented.dir}" />
       <classfileset dir="${pigtestclasses.dir}" includes="${testclasses.pattern}" />
-      <classfileset dir="${unittestclasses.dir}" includes="${testclasses.pattern}" />
     </testng>
   </target>
   
@@ -356,10 +342,13 @@
     <attribute name="javadir" />
     <sequential>
       <replace-dir dir="@{dir}" />
-      <javadoc sourcepath="@{javadir}" destdir="@{dir}" windowtitle="${display.name}" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}">
-        <doctitle>${display.name}</doctitle>
+      <javadoc destdir="@{dir}" windowtitle="${display.name} ${datafu.version}" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}">
+        <doctitle>${display.name} ${datafu.version}</doctitle>
         <bottom>${author}</bottom>
         <classpath refid="main-classpath" />
+        <fileset dir="@{javadir}">
+          <exclude name="datafu//pig/stats/*?VAR.java"/>
+        </fileset>
       </javadoc>
     </sequential>
   </macrodef>

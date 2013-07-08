@@ -14,7 +14,7 @@
  * the License.
  */
  
-package datafu.pig.bags.sets;
+package datafu.pig.sets;
 
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.DataBag;

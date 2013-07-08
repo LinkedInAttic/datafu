@@ -327,24 +327,6 @@ public class BagTests extends PigTests
                  "(D,4.0,2)",
                  "(E,5.0,2)");
   }
-  
-  @Test
-  public void aliasBagFieldsTest() throws Exception
-  {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/aliasBagFieldsTest.pig");
-    
-    writeLinesToFile("input",
-                     "({(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
-    
-    test.runScript();
-    
-    assertOutput(test, "data4",
-                 "(A,1)",
-                 "(B,2)",
-                 "(C,3)",
-                 "(D,4)",
-                 "(E,5)");
-  }
 
   @Test
   public void distinctByTest() throws Exception

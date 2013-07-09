@@ -160,7 +160,7 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     }
   }
   
-  protected String getPrefixedAliasName(String prefix, String alias)
+  public String getPrefixedAliasName(String prefix, String alias)
   {
     if (alias == null || alias.equals("null")) {
       if (prefix == null) return "";
@@ -176,7 +176,7 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
    * 
    * @return A map of field alias to field position
    */
-  protected Map<String, Integer> getFieldAliases()
+  public Map<String, Integer> getFieldAliases()
   {
     Map<String, Integer> aliases = getAliasMap();
     if (aliases == null) {
@@ -188,22 +188,22 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     return aliases;
   }
   
-  protected Integer getPosition(String alias) {
+  public Integer getPosition(String alias) {
     if (aliasToPosition == null) {
       aliasToPosition = getFieldAliases();
     }
     return aliasToPosition.get(alias);
   }
   
-  protected Integer getPosition(String prefix, String alias) {
+  public Integer getPosition(String prefix, String alias) {
     return getPosition(getPrefixedAliasName(prefix, alias));
   }
       
-  protected Integer getInteger(Tuple tuple, String alias) throws ExecException {
+  public Integer getInteger(Tuple tuple, String alias) throws ExecException {
     return getInteger(tuple, alias, null);
   }
   
-  protected Integer getInteger(Tuple tuple, String alias, Integer defaultValue) throws ExecException {
+  public Integer getInteger(Tuple tuple, String alias, Integer defaultValue) throws ExecException {
     Integer i = getPosition(alias); 
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
@@ -212,11 +212,11 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     return number.intValue();
   }
   
-  protected Long getLong(Tuple tuple, String alias) throws ExecException {
+  public Long getLong(Tuple tuple, String alias) throws ExecException {
     return getLong(tuple, alias, null);
   }
   
-  protected Long getLong(Tuple tuple, String alias, Long defaultValue) throws ExecException {
+  public Long getLong(Tuple tuple, String alias, Long defaultValue) throws ExecException {
     Integer i = getPosition(alias); 
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
@@ -225,11 +225,11 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     return number.longValue();
   }
   
-  protected Float getFloat(Tuple tuple, String alias) throws ExecException {
+  public Float getFloat(Tuple tuple, String alias) throws ExecException {
     return getFloat(tuple, alias, null);
   }
   
-  protected Float getFloat(Tuple tuple, String alias, Float defaultValue) throws ExecException {
+  public Float getFloat(Tuple tuple, String alias, Float defaultValue) throws ExecException {
     Integer i = getPosition(alias); 
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
@@ -238,11 +238,11 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     return number.floatValue();
   }
   
-  protected Double getDouble(Tuple tuple, String alias) throws ExecException {
+  public Double getDouble(Tuple tuple, String alias) throws ExecException {
     return getDouble(tuple, alias, null);
   }
   
-  protected Double getDouble(Tuple tuple, String alias, Double defaultValue) throws ExecException {
+  public Double getDouble(Tuple tuple, String alias, Double defaultValue) throws ExecException {
     Integer i = getPosition(alias); 
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
@@ -251,11 +251,11 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     return number.doubleValue();
   }
   
-  protected String getString(Tuple tuple, String alias) throws ExecException {
+  public String getString(Tuple tuple, String alias) throws ExecException {
     return getString(tuple, alias, null);
   }
   
-  protected String getString(Tuple tuple, String alias, String defaultValue) throws ExecException {
+  public String getString(Tuple tuple, String alias, String defaultValue) throws ExecException {
     Integer i = getPosition(alias); 
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
@@ -264,21 +264,21 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     return s;
   }
   
-  protected Boolean getBoolean(Tuple tuple, String alias) throws ExecException {
+  public Boolean getBoolean(Tuple tuple, String alias) throws ExecException {
     Integer i = getPosition(alias); 
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     return (Boolean)tuple.get(i);
   }
   
-  protected DataBag getBag(Tuple tuple, String alias) throws ExecException {
+  public DataBag getBag(Tuple tuple, String alias) throws ExecException {
     Integer i = getPosition(alias); 
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     return (DataBag)tuple.get(i);
   }
   
-  protected Object getObject(Tuple tuple, String alias) throws ExecException {
+  public Object getObject(Tuple tuple, String alias) throws ExecException {
     Integer i = getPosition(alias); 
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());

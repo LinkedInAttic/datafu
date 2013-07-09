@@ -483,4 +483,13 @@ public class BagTests extends PigTests
     assertOutput(test, "data2",
         "(1,{(K1,A1,K1,A2,K1,A3),(K2,B1,K2,B2,,),(K2,B1,K2,B22,,),(K3,C1,,,K3,C3)},{(K1,A1,K1,A3,K1,A2),(K2,B1,,,K2,B2),(K2,B1,,,K2,B22),(K3,C1,K3,C3,,)})");
   }
+  
+  @Test
+  public void bagUnionTest() throws Exception
+  {
+    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagUnionTest.pig");
+    writeLinesToFile("input", "({({(1,A),(1,B)}),({(2,A),(2,B),(2,C)}),({(3,A)})}");
+    test.runScript();
+    assertOutput(test, "data2", "({(1,A),(1,B),(2,A),(2,B),(2,C),(3,A)})");
+  }
 }

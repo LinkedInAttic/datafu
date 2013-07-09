@@ -48,7 +48,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
  * @author "Matthew Hayes <mhayes@linkedin.com>"
  *
  */
-public class COALESCE extends EvalFunc<Object>
+public class Coalesce extends EvalFunc<Object>
 {
   @Override
   public Object exec(Tuple input) throws IOException

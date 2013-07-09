@@ -23,7 +23,6 @@ import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
-import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
@@ -49,7 +48,6 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 public class BagConcat extends EvalFunc<DataBag>
 {
   private static final BagFactory bagFactory = BagFactory.getInstance();
-  private static final TupleFactory tupleFactory = TupleFactory.getInstance();
 
   @Override
   public DataBag exec(Tuple input) throws IOException

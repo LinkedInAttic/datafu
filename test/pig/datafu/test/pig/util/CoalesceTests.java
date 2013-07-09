@@ -17,7 +17,7 @@ public class CoalesceTests extends PigTests
   /**
   register $JAR_PATH
 
-  define COALESCE datafu.pig.util.COALESCE();
+  define COALESCE datafu.pig.util.Coalesce();
   
   data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2:INT,val3:INT);
   
@@ -73,7 +73,7 @@ public class CoalesceTests extends PigTests
   /**
   register $JAR_PATH
 
-  define COALESCE datafu.pig.util.COALESCE();
+  define COALESCE datafu.pig.util.Coalesce();
   
   data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:LONG);
   
@@ -119,7 +119,7 @@ public class CoalesceTests extends PigTests
   /**
   register $JAR_PATH
   
-  define COALESCE datafu.pig.util.COALESCE();
+  define COALESCE datafu.pig.util.Coalesce();
   
   data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2:DOUBLE);
   
@@ -148,7 +148,7 @@ public class CoalesceTests extends PigTests
   /**
   register $JAR_PATH
   
-  define COALESCE datafu.pig.util.COALESCE();
+  define COALESCE datafu.pig.util.Coalesce();
   
   data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2: bag {tuple(aVal:int)});
   

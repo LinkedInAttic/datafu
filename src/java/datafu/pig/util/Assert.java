@@ -41,7 +41,7 @@ import org.apache.pig.data.Tuple;
  * }
  * </pre></p>
  */
-public class ASSERT extends FilterFunc
+public class Assert extends FilterFunc
 {
   @Override
   public Boolean exec(Tuple tuple)

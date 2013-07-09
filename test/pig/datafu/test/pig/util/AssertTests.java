@@ -13,7 +13,7 @@ public class AssertTests extends PigTests
   /**
   register $JAR_PATH
   
-  define ASSERT datafu.pig.util.ASSERT();
+  define ASSERT datafu.pig.util.Assert();
   
   data = LOAD 'input' AS (val:INT);
   
@@ -58,7 +58,7 @@ public class AssertTests extends PigTests
   /**
   register $JAR_PATH
   
-  define ASSERT datafu.pig.util.ASSERT();
+  define ASSERT datafu.pig.util.Assert();
   
   data = LOAD 'input' AS (val:INT);
   

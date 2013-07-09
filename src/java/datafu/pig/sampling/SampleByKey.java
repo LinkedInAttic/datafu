@@ -70,10 +70,11 @@ public class SampleByKey extends FilterFunc
   public Boolean exec(Tuple input) throws IOException 
   {    
     int hashCode = 0;
-    for(Object each:input){
+    for(int i=0; i<input.size(); i++){
+      Object each = input.get(i);
       hashCode = hashCode*PRIME_NUMBER + each.hashCode();
     }
-    
+      
     try {
       if (intToRandomDouble(hashCode) <= size) return true;
       return false;

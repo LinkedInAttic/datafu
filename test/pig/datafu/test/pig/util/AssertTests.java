@@ -2,8 +2,12 @@ package datafu.test.pig.util;
 
 import static org.testng.Assert.*;
 
+import java.util.List;
+
 import org.adrianwalker.multilinestring.Multiline;
+import org.apache.pig.data.Tuple;
 import org.apache.pig.pigunit.PigTest;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import datafu.test.pig.PigTests;
@@ -52,7 +56,10 @@ public class AssertTests extends PigTests
     
     test.runScript();
     
-    this.getLinesForAlias(test, "data2");
+    List<Tuple> result = this.getLinesForAlias(test, "data2");
+    Assert.assertEquals(result.size(), 1);
+    Assert.assertEquals(result.get(0).size(), 1);
+    Assert.assertEquals(result.get(0).get(0), 1);
   }
   
   /**
@@ -97,6 +104,9 @@ public class AssertTests extends PigTests
     
     test.runScript();
     
-    this.getLinesForAlias(test, "data2");
+    List<Tuple> result = this.getLinesForAlias(test, "data2");
+    Assert.assertEquals(result.size(), 1);
+    Assert.assertEquals(result.get(0).size(), 1);
+    Assert.assertEquals(result.get(0).get(0), 1);
   }
 }

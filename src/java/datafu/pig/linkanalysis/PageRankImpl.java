@@ -14,7 +14,7 @@
  * the License.
  */
  
-package datafu.linkanalysis;
+package datafu.pig.linkanalysis;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -36,12 +36,11 @@ import java.util.Map;
 import com.google.common.collect.AbstractIterator;
 
 /**
- * An implementation of {@link <a href="http://en.wikipedia.org/wiki/PageRank" target="_blank">PageRank</a>}.
- * This implementation is not distributed.  It is intended for graphs of a reasonable size which can be processed
- * on a single machine.  Nodes are stored in memory.  Edges are stored in memory and can optionally be spilled to
- * disk once a certain limit is reached.  
+ * An implementation of {@link <a href="http://en.wikipedia.org/wiki/PageRank" target="_blank">PageRank</a>}, used by the {@link PageRank} UDF.
+ * It is not intended to be used directly.   
+ * </p>
  */
-public class PageRank
+public class PageRankImpl
 {    
   private float totalRankChange;
   private long edgeCount;

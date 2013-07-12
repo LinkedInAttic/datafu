@@ -14,7 +14,7 @@ public class PageRankImplTests
     System.out.println();
     System.out.println("Starting wikipediaGraphInMemoryTest");
     
-    datafu.linkanalysis.PageRank graph = new datafu.linkanalysis.PageRank();
+    datafu.pig.linkanalysis.PageRankImpl graph = new datafu.pig.linkanalysis.PageRankImpl();
    
     String[] edges = getWikiExampleEdges();
     
@@ -38,7 +38,7 @@ public class PageRankImplTests
     System.out.println();
     System.out.println("Starting wikipediaGraphDiskCacheTest");
     
-    datafu.linkanalysis.PageRank graph = new datafu.linkanalysis.PageRank();
+    datafu.pig.linkanalysis.PageRankImpl graph = new datafu.pig.linkanalysis.PageRankImpl();
     
     String[] edges = getWikiExampleEdges();
     
@@ -67,7 +67,7 @@ public class PageRankImplTests
     System.out.println();
     System.out.println("Starting hubAndSpokeInMemoryTest");
     
-    datafu.linkanalysis.PageRank graph = new datafu.linkanalysis.PageRank();
+    datafu.pig.linkanalysis.PageRankImpl graph = new datafu.pig.linkanalysis.PageRankImpl();
    
     String[] edges = getHubAndSpokeEdges();
     
@@ -85,7 +85,7 @@ public class PageRankImplTests
     System.out.println();
     System.out.println("Starting hubAndSpokeDiskCacheTest");
     
-    datafu.linkanalysis.PageRank graph = new datafu.linkanalysis.PageRank();
+    datafu.pig.linkanalysis.PageRankImpl graph = new datafu.pig.linkanalysis.PageRankImpl();
    
     String[] edges = getHubAndSpokeEdges();
     
@@ -159,7 +159,7 @@ public class PageRankImplTests
     return expectedRanks;
   }
   
-  private Map<String,Integer> loadGraphFromEdgeList(datafu.linkanalysis.PageRank graph, String[] edges) throws IOException
+  private Map<String,Integer> loadGraphFromEdgeList(datafu.pig.linkanalysis.PageRankImpl graph, String[] edges) throws IOException
   {
     Map<Integer,ArrayList<Map<String,Object>>> nodeEdgesMap = new HashMap<Integer,ArrayList<Map<String,Object>>>();
     Map<String,Integer> nodeIdsMap = new HashMap<String,Integer>();
@@ -199,11 +199,11 @@ public class PageRankImplTests
     return nodeIdsMap;
   }
   
-  private void performIterations(datafu.linkanalysis.PageRank graph, int maxIters, float tolerance) throws IOException
+  private void performIterations(datafu.pig.linkanalysis.PageRankImpl graph, int maxIters, float tolerance) throws IOException
   {
     System.out.println(String.format("Beginning iteration (maxIters = %d, tolerance=%e)", maxIters, tolerance));
     
-    datafu.linkanalysis.PageRank.ProgressIndicator progressIndicator = getDummyProgressIndicator();
+    datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator progressIndicator = getDummyProgressIndicator();
     
     System.out.println("Initializing graph");
     long startTime = System.nanoTime();
@@ -223,9 +223,9 @@ public class PageRankImplTests
     System.out.println(String.format("Done, took %f ms", (System.nanoTime() - startTime)/10.0e6));
   }
   
-  private datafu.linkanalysis.PageRank.ProgressIndicator getDummyProgressIndicator()
+  private datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator getDummyProgressIndicator()
   {
-    return new datafu.linkanalysis.PageRank.ProgressIndicator()
+    return new datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator()
     {
       @Override
       public void progress()
@@ -235,7 +235,7 @@ public class PageRankImplTests
     };
   }
   
-  private void validateExpectedRanks(datafu.linkanalysis.PageRank graph, Map<String,Integer> nodeIds, Map<String,Float> expectedRanks)
+  private void validateExpectedRanks(datafu.pig.linkanalysis.PageRankImpl graph, Map<String,Integer> nodeIds, Map<String,Float> expectedRanks)
   {
     System.out.println("Validating page rank results");
     

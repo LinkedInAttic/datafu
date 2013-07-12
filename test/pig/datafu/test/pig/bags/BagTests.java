@@ -7,6 +7,7 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
+import org.adrianwalker.multilinestring.Multiline;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
@@ -21,10 +22,28 @@ import datafu.test.pig.PigTests;
 
 public class BagTests extends PigTests
 {
+  /**
+  register $JAR_PATH
+
+  define NullToEmptyBag datafu.pig.bags.NullToEmptyBag();
+  
+  data = LOAD 'input' AS (B: bag {T: tuple(v:INT)});
+  
+  dump data;
+  
+  data2 = FOREACH data GENERATE NullToEmptyBag(B) as P;
+  
+  dump data2;
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String nullToEmptyBag;
+  
   @Test
   public void nullToEmptyBagTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/nullToEmptyBagTest.pig");
+    PigTest test = createPigTestFromString(nullToEmptyBag);
             
     writeLinesToFile("input", 
                      "({(1),(2),(3),(4),(5)})",
@@ -39,10 +58,25 @@ public class BagTests extends PigTests
                  "({(4),(5)})");
   }
   
+  /**
+  register $JAR_PATH
+
+  define AppendToBag datafu.pig.bags.AppendToBag();
+  
+  data = LOAD 'input' AS (key:INT, B: bag{T: tuple(v:INT)}, T: tuple(v:INT));
+  
+  data2 = FOREACH data GENERATE key, AppendToBag(B,T) as B;
+  
+  STORE data2 INTO 'output';
+
+   */
+  @Multiline
+  private String appendToBagTest;
+  
   @Test
   public void appendToBagTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/appendToBagTest.pig");
+    PigTest test = createPigTestFromString(appendToBagTest);
     
     writeLinesToFile("input", 
                      "1\t{(1),(2),(3)}\t(4)",
@@ -54,11 +88,26 @@ public class BagTests extends PigTests
                  "(1,{(1),(2),(3),(4)})",
                  "(2,{(10),(20),(30),(40),(50),(60)})");
   }
+  
+  /**
+  register $JAR_PATH
+
+  define FirstTupleFromBag datafu.pig.bags.FirstTupleFromBag();
+  
+  data = LOAD 'input' AS (key:INT, B: bag{T: tuple(v:INT)});
+  
+  data2 = FOREACH data GENERATE key, FirstTupleFromBag(B, null) as B;
+  
+  STORE data2 INTO 'output';
+
+   */
+  @Multiline
+  private String firstTupleFromBagTest;
 
    @Test
   public void firstTupleFromBagTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/firstTupleFromBagTest.pig");
+    PigTest test = createPigTestFromString(firstTupleFromBagTest);
 
     writeLinesToFile("input", "1\t{(4),(9),(16)}");
 
@@ -67,11 +116,25 @@ public class BagTests extends PigTests
     assertOutput(test, "data2", "(1,(4))");
   }
 
+  /**
+  register $JAR_PATH
+
+  define PrependToBag datafu.pig.bags.PrependToBag();
+  
+  data = LOAD 'input' AS (key:INT, B: bag{T: tuple(v:INT)}, T: tuple(v:INT));
+  
+  data2 = FOREACH data GENERATE key, PrependToBag(B,T) as B;
+  
+  STORE data2 INTO 'output';
+
+   */
+  @Multiline
+  private String prependToBagTest;
   
   @Test
   public void prependToBagTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/prependToBagTest.pig");
+    PigTest test = createPigTestFromString(prependToBagTest);
     
     writeLinesToFile("input", 
                      "1\t{(1),(2),(3)}\t(4)",
@@ -84,10 +147,26 @@ public class BagTests extends PigTests
                  "(2,{(60),(10),(20),(30),(40),(50)})");
   }
   
+  /**
+  register $JAR_PATH
+
+  define BagConcat datafu.pig.bags.BagConcat();
+  
+  data = LOAD 'input' AS (A: bag{T: tuple(v:INT)}, B: bag{T: tuple(v:INT)}, C: bag{T: tuple(v:INT)});
+  
+  data2 = FOREACH data GENERATE BagConcat(A,B,C);
+  
+  --describe data2
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String bagConcatTest;
+  
   @Test
   public void bagConcatTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagConcatTest.pig");
+    PigTest test = createPigTestFromString(bagConcatTest);
 
     writeLinesToFile("input", 
                      "({(1),(2),(3)}\t{(3),(5),(6)}\t{(10),(13)})",
@@ -100,10 +179,32 @@ public class BagTests extends PigTests
                  "({(2),(3),(4),(5),(5),(20)})");
   }
   
+  /**
+  register $JAR_PATH
+
+  define UnorderedPairs datafu.pig.bags.UnorderedPairs();
+  
+  data = LOAD 'input' AS (B: bag {T: tuple(v:INT)});
+  
+  data2 = FOREACH data GENERATE UnorderedPairs(B) as P;
+  
+  data3 = FOREACH data2 GENERATE FLATTEN(P);
+  
+  data4 = FOREACH data3 GENERATE FLATTEN(elem1), FLATTEN(elem2);
+  
+  data5 = ORDER data4 BY $0, $1;
+  
+  STORE data5 INTO 'output';
+
+
+   */
+  @Multiline
+  private String unorderedPairsTest;
+  
   @Test
   public void unorderedPairsTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/unorderedPairsTests.pig");
+    PigTest test = createPigTestFromString(unorderedPairsTest);
     
     String[] input = {
       "{(1),(2),(3),(4),(5)}"
@@ -125,10 +226,27 @@ public class BagTests extends PigTests
     test.assertOutput("data",input,"data4",output);
   }
   
+  /**
+  register $JAR_PATH
+
+  define UnorderedPairs datafu.pig.bags.UnorderedPairs();
+  
+  data = LOAD 'input' AS (A:int, B: bag {T: tuple(v:INT)});
+  
+  data2 = FOREACH data GENERATE A, UnorderedPairs(B) as P;
+  
+  data3 = FOREACH data2 GENERATE A, FLATTEN(P);
+  
+  STORE data3 INTO 'output';
+
+   */
+  @Multiline
+  private String unorderedPairsTest2;
+  
   @Test
   public void unorderedPairsTest2() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/unorderedPairsTests2.pig");
+    PigTest test = createPigTestFromString(unorderedPairsTest2);
         
     this.writeLinesToFile("input", "1\t{(1),(2),(3),(4),(5)}");
     
@@ -148,10 +266,30 @@ public class BagTests extends PigTests
                       "(1,(4),(5))");    
   }
  
+  /**
+  register $JAR_PATH
+
+  define BagSplit datafu.pig.bags.BagSplit();
+  
+  data = LOAD 'input' AS (B:bag{T:tuple(val1:INT,val2:INT)});
+  
+  data2 = FOREACH data GENERATE BagSplit($MAX,B);
+  --describe data2;
+  
+  data3 = FOREACH data2 GENERATE FLATTEN($0);
+  
+  --describe data3
+  
+  STORE data3 INTO 'output';
+
+   */
+  @Multiline
+  private String bagSplitTest;
+  
   @Test
   public void bagSplitTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagSplitTest.pig",
+    PigTest test = createPigTestFromString(bagSplitTest,
                                  "MAX=5");
     
     writeLinesToFile("input", 
@@ -165,10 +303,26 @@ public class BagTests extends PigTests
                  "({(11,1111),(12,1212)})");
   }
   
+  /**
+  register $JAR_PATH
+
+  define BagSplit datafu.pig.bags.BagSplit('true');
+  
+  data = LOAD 'input' AS (B:bag{T:tuple(val1:INT,val2:INT)});
+  
+  data2 = FOREACH data GENERATE BagSplit($MAX,B);
+  
+  data3 = FOREACH data2 GENERATE FLATTEN($0);
+  
+  STORE data3 INTO 'output';
+   */
+  @Multiline
+  private String bagSplitWithBagNumTest;
+  
   @Test
   public void bagSplitWithBagNumTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagSplitWithBagNumTest.pig",
+    PigTest test = createPigTestFromString(bagSplitWithBagNumTest,
                                  "MAX=10");
     
     writeLinesToFile("input", 
@@ -181,10 +335,32 @@ public class BagTests extends PigTests
                  "({(11,1111),(12,1212)},1)");
   }
   
+  /**
+  register $JAR_PATH
+
+  define Enumerate datafu.pig.bags.ReverseEnumerate('1');
+  
+  data = LOAD 'input' AS (data: bag {T: tuple(v1:INT,B: bag{T: tuple(v2:INT)})});
+  
+  data2 = FOREACH data GENERATE Enumerate(data);
+  --describe data2;
+  
+  data3 = FOREACH data2 GENERATE FLATTEN($0);
+  --describe data3;
+  
+  data4 = FOREACH data3 GENERATE $0 as v1, $1 as B, $2 as i;
+  --describe data4;
+  
+  STORE data4 INTO 'output';
+
+   */
+  @Multiline
+  private String enumerateWithReverseTest;
+  
   @Test
   public void enumerateWithReverseTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateWithReverseTest.pig");
+    PigTest test = createPigTestFromString(enumerateWithReverseTest);
        
     writeLinesToFile("input", 
                      "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})");
@@ -199,10 +375,32 @@ public class BagTests extends PigTests
                  "(50,{(12),(13),(14),(15)},1)");
   }
   
+  /**
+  register $JAR_PATH
+
+  define Enumerate datafu.pig.bags.Enumerate('1');
+  
+  data = LOAD 'input' AS (data: bag {T: tuple(v1:INT,B: bag{T: tuple(v2:INT)})});
+  
+  data2 = FOREACH data GENERATE Enumerate(data);
+  --describe data2;
+  
+  data3 = FOREACH data2 GENERATE FLATTEN($0);
+  --describe data3;
+  
+  data4 = FOREACH data3 GENERATE $0 as v1, $1 as B, $2 as i;
+  --describe data4;
+  
+  STORE data4 INTO 'output';
+
+   */
+  @Multiline
+  private String enumerateWithStartTest;
+  
   @Test
   public void enumerateWithStartTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateWithStartTest.pig");
+    PigTest test = createPigTestFromString(enumerateWithStartTest);
        
     writeLinesToFile("input", 
                      "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})");
@@ -217,10 +415,32 @@ public class BagTests extends PigTests
                  "(50,{(12),(13),(14),(15)},5)");
   }
   
+  /**
+  register $JAR_PATH
+
+  define Enumerate datafu.pig.bags.Enumerate();
+  
+  data = LOAD 'input' AS (data: bag {T: tuple(v1:INT,B: bag{T: tuple(v2:INT)})});
+  
+  data2 = FOREACH data GENERATE Enumerate(data);
+  --describe data2;
+  
+  data3 = FOREACH data2 GENERATE FLATTEN($0);
+  --describe data3;
+  
+  data4 = FOREACH data3 GENERATE $0 as v1, $1 as B, $2 as i;
+  --describe data4;
+  
+  STORE data4 INTO 'output';
+
+   */
+  @Multiline
+  private String enumerateTest;
+  
   @Test
   public void enumerateTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateTest.pig");
+    PigTest test = createPigTestFromString(enumerateTest);
        
     writeLinesToFile("input",
                      "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})");
@@ -238,7 +458,7 @@ public class BagTests extends PigTests
   @Test
   public void enumerateTest2() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/enumerateTest.pig");
+    PigTest test = createPigTestFromString(enumerateTest);
       
     writeLinesToFile("input",
                      "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})",
@@ -308,10 +528,41 @@ public class BagTests extends PigTests
     assertEquals(enumerate.getValue().toString(), "{(10,0),(20,1),(30,2),(40,3),(50,4)}");     
   }
   
+  /**
+  register $JAR_PATH
+
+  define BagSplit datafu.pig.bags.BagSplit();
+  define Enumerate datafu.pig.bags.Enumerate('1');
+  
+  data = LOAD 'input' AS (data: bag {T: tuple(name:CHARARRAY, score:double)});
+  
+  data2 = FOREACH data GENERATE BagSplit(3,data) as the_bags;
+  
+  --describe data2
+  
+  data3 = FOREACH data2 GENERATE Enumerate(the_bags) as enumerated_bags;
+  
+  --describe data3
+  
+  data4 = FOREACH data3 GENERATE FLATTEN(enumerated_bags) as (data,i);
+  
+  --describe data4
+  
+  data5 = FOREACH data4 GENERATE data as the_data, i as the_key;
+  
+  --describe data5
+  
+  data_out = FOREACH data5 GENERATE FLATTEN(the_data), the_key;
+  
+  --describe data_out
+   */
+  @Multiline
+  private String comprehensiveBagSplitAndEnumerate;
+  
   @Test
   public void comprehensiveBagSplitAndEnumerate() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/comprehensiveBagSplitAndEnumerate.pig");
+    PigTest test = createPigTestFromString(comprehensiveBagSplitAndEnumerate);
     
     writeLinesToFile("input",
                      "({(A,1.0),(B,2.0),(C,3.0),(D,4.0),(E,5.0)})");
@@ -327,11 +578,28 @@ public class BagTests extends PigTests
                  "(D,4.0,2)",
                  "(E,5.0,2)");
   }
+  
+  /**
+  register $JAR_PATH
+
+  define DistinctBy datafu.pig.bags.DistinctBy('0');
+  
+  data = LOAD 'input' AS (data: bag {T: tuple(a:CHARARRAY, b:INT, c:INT)});
+  
+  data2 = FOREACH data GENERATE DistinctBy(data);
+  
+  --describe data2;
+  
+  STORE data2 INTO 'output';
+
+   */
+  @Multiline
+  private String distinctByTest;
 
   @Test
   public void distinctByTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/distinctByTest.pig");
+    PigTest test = createPigTestFromString(distinctByTest);
     
     writeLinesToFile("input",
                      "({(Z,1,0),(A,1,0),(A,1,0),(B,2,0),(B,22,1),(C,3,0),(D,4,0),(E,5,0)})");
@@ -341,11 +609,33 @@ public class BagTests extends PigTests
     assertOutput(test, "data2",
                  "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
   }
+  
+  /**
+  register $JAR_PATH
+
+  define CountEach datafu.pig.bags.CountEach();
+  
+  data = LOAD 'input' AS (data: bag {T: tuple(v1:chararray)});
+  
+  data2 = FOREACH data GENERATE CountEach(data) as counted;
+  --describe data2;
+  
+  data3 = FOREACH data2 {
+    ordered = ORDER counted BY count DESC;
+    GENERATE ordered;
+  }
+  --describe data3
+  
+  STORE data3 INTO 'output';
+
+   */
+  @Multiline
+  private String countEachTest;
  
   @Test 
   public void countEachTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/countEachTest.pig");
+    PigTest test = createPigTestFromString(countEachTest);
 
     writeLinesToFile("input", 
                      "({(A),(B),(A),(C),(A),(B)})");
@@ -456,10 +746,32 @@ public class BagTests extends PigTests
     }
   }
   
+  /**
+  register $JAR_PATH
+
+  define CountEach datafu.pig.bags.CountEach('flatten');
+  
+  data = LOAD 'input' AS (data: bag {T: tuple(v1:chararray)});
+  
+  data2 = FOREACH data GENERATE CountEach(data) as counted;
+  --describe data2;
+  
+  data3 = FOREACH data2 {
+    ordered = ORDER counted BY count DESC;
+    GENERATE ordered;
+  }
+  --describe data3
+  
+  STORE data3 INTO 'output';
+
+   */
+  @Multiline
+  private String countEachFlattenTest;
+  
   @Test 
   public void countEachFlattenTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/countEachFlattenTest.pig");
+    PigTest test = createPigTestFromString(countEachFlattenTest);
 
     writeLinesToFile("input", 
                      "({(A),(B),(A),(C),(A),(B)})");
@@ -470,10 +782,30 @@ public class BagTests extends PigTests
         "({(A,3),(B,2),(C,1)})");
   }
   
+  /**
+  register $JAR_PATH
+
+  define BagLeftOuterJoin datafu.pig.bags.BagLeftOuterJoin();
+  
+  data = LOAD 'input' AS (outer_key:chararray, bag1:bag{T:tuple(k:chararray,v:chararray)}, bag2:bag{T:tuple(k:chararray,v:chararray)}, bag3:bag{T:tuple(k3:chararray,v3:chararray)});
+  describe data;
+  
+  data2 = FOREACH data GENERATE 
+    outer_key, 
+    BagLeftOuterJoin(bag1, 'k', bag2, 'k', bag3, 'k3') as joined1,
+    BagLeftOuterJoin(bag1, 'k', bag3, 'k3', bag2, 'k') as joined2; --this will break without UDF signature and pig < 0.11
+  describe data2;
+  
+  STORE data2 INTO 'output';
+
+   */
+  @Multiline
+  private String bagLeftOuterJoinTest;
+  
   @Test 
   public void bagLeftOuterJoinTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagLeftOuterJoinTest.pig");
+    PigTest test = createPigTestFromString(bagLeftOuterJoinTest);
 
     writeLinesToFile("input", 
                      "1\t{(K1,A1),(K2,B1),(K3,C1)}\t{(K1,A2),(K2,B2),(K2,B22)}\t{(K1,A3),(K3,C3),(K4,D3)}");
@@ -484,10 +816,27 @@ public class BagTests extends PigTests
         "(1,{(K1,A1,K1,A2,K1,A3),(K2,B1,K2,B2,,),(K2,B1,K2,B22,,),(K3,C1,,,K3,C3)},{(K1,A1,K1,A3,K1,A2),(K2,B1,,,K2,B2),(K2,B1,,,K2,B22),(K3,C1,K3,C3,,)})");
   }
   
+  /**
+  register $JAR_PATH
+
+  define BagUnion datafu.pig.bags.BagUnion();
+  
+  data = LOAD 'input' AS (input_bag: bag {T: tuple(inner_bag: bag {T2: tuple(k: int, v: chararray)})});
+  describe data;
+  
+  data2 = FOREACH data GENERATE BagUnion(input_bag) as unioned;
+  describe data2;
+  
+  STORE data INTO 'output';
+
+   */
+  @Multiline
+  private String bagUnionTest;
+  
   @Test
   public void bagUnionTest() throws Exception
   {
-    PigTest test = createPigTest("test/pig/datafu/test/pig/bags/bagUnionTest.pig");
+    PigTest test = createPigTestFromString(bagUnionTest);
     writeLinesToFile("input", "({({(1,A),(1,B)}),({(2,A),(2,B),(2,C)}),({(3,A)})}");
     test.runScript();
     assertOutput(test, "data2", "({(1,A),(1,B),(2,A),(2,B),(2,C),(3,A)})");

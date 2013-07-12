@@ -32,20 +32,42 @@ public class SetTests extends PigTests
   
   @Test
   public void setIntersectTest() throws Exception
-  {
-    PigTest test = createPigTestFromString(setIntersectTest);
+  {    
+    PigTest test = createPigTestFromString(setIntersectTest);    
     
-    String[] input = {
-      "{(1,10),(2,20),(3,30),(4,40),(5,50),(6,60)}\t{(0,0),(2,20),(4,40),(8,80)}",
-      "{(1,10),(1,10),(2,20),(3,30),(3,30),(4,40),(4,40)}\t{(1,10),(3,30)}"
-    };
+    writeLinesToFile("input", 
+                     "{(1,10),(2,20),(3,30),(4,40),(5,50),(6,60)}\t{(0,0),(2,20),(4,40),(8,80)}",
+                     "{(1,10),(1,10),(2,20),(3,30),(3,30),(4,40),(4,40)}\t{(1,10),(3,30)}");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data2",
+                 "({(2,20),(4,40)})",
+                 "({(1,10),(3,30)})");
+  }
+  
+  @Test
+  public void setIntersectEmptyBagsTest() throws Exception
+  { 
+    PigTest test = createPigTestFromString(setIntersectTest);    
     
-    String[] output = {
-        "({(2,20),(4,40)})",
-        "({(1,10),(3,30)})"
-      };
-    
-    test.assertOutput("data",input,"data2",output);
+    writeLinesToFile("input", 
+                     "{(1,10),(2,20),(3,30),(4,40),(5,50),(6,60)}\t{(0,0),(2,20),(4,40),(8,80)}",
+                     "{(1,10),(1,10),(2,20),(3,30),(3,30),(4,40),(4,40)}\t{(100,10),(300,30)}",
+                     "{(1,10),(2,20)}\t{(1,10),(2,20)}",
+                     "{(1,10),(2,20)}\t{}",
+                     "{}\t{(1,10),(2,20)}",
+                     "{}\t{}");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data2",
+                 "({(2,20),(4,40)})",
+                 "({})",
+                 "({(1,10),(2,20)})",
+                 "({})",
+                 "({})",
+                 "({})");
   }
   
   @Test
@@ -95,17 +117,33 @@ public class SetTests extends PigTests
   
   @Test
   public void setUnionTest() throws Exception
+  {    
+    PigTest test = createPigTestFromString(setUnionTest);    
+    
+    writeLinesToFile("input", 
+                     "{(1,10),(1,20),(1,30),(1,40),(1,50),(1,60),(1,80)}\t{(1,1),(1,20),(1,25),(1,25),(1,25),(1,40),(1,70),(1,80)}");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data2",
+                 "({(1,1),(1,10),(1,20),(1,25),(1,30),(1,40),(1,50),(1,60),(1,70),(1,80)})");
+  }
+  
+  @Test
+  public void setUnionEmptyBagsTest() throws Exception
   {
-    PigTest test = createPigTestFromString(setUnionTest);
+    PigTest test = createPigTestFromString(setUnionTest);    
     
-    String[] input = {
-        "{(1,10),(1,20),(1,30),(1,40),(1,50),(1,60),(1,80)}\t{(1,1),(1,20),(1,25),(1,25),(1,25),(1,40),(1,70),(1,80)}"
-    };
-    
-    String[] output = {
-        "({(1,1),(1,10),(1,20),(1,25),(1,30),(1,40),(1,50),(1,60),(1,70),(1,80)})"
-      };
-    
-    test.assertOutput("data", input, "data2", output);
+    writeLinesToFile("input", 
+                     "{(1,10),(1,20),(1,30),(1,40),(1,50),(1,60),(1,80)}\t{}",
+                     "{}\t{(1,10),(1,20),(1,30),(1,40),(1,50)}",
+                     "{}\t{}");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data2",
+                 "({(1,10),(1,20),(1,30),(1,40),(1,50),(1,60),(1,80)})",
+                 "({(1,10),(1,20),(1,30),(1,40),(1,50)})",
+                 "({})");
   }
 }

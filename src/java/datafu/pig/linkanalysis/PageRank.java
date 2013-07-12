@@ -34,17 +34,86 @@ import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
-import datafu.linkanalysis.PageRank.ProgressIndicator;
+import datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator;
 
 
 /**
- * A UDF which implements {@link <a href="http://en.wikipedia.org/wiki/PageRank" target="_blank">PageRank</a>}.  
- * Each graph is stored in memory while running the algorithm, with edges optionally 
- * spilled to disk to conserve memory.  This can be used to distribute the execution of PageRank on a large number of 
- * reasonable sized graphs.  It does not distribute execuion of PageRank on a single graph.  Each graph is identified
+ * A UDF which implements {@link <a href="http://en.wikipedia.org/wiki/PageRank" target="_blank">PageRank</a>}.
+ * 
+ * <p>  
+ * This is not a distributed implementation.  Each graph is stored in memory while running the algorithm, with edges optionally 
+ * spilled to disk to conserve memory.  This can be used to distribute the execution of PageRank on multiple
+ * reasonably sized graphs.  It does not distribute execuion of PageRank for each individual graph.  Each graph is identified
  * by an integer valued topic ID.
+ * </p>
+ * 
  * <p>
- * Example:
+ * If the graph is too large to fit in memory than an alternative method must be used, such as an iterative approach which runs
+ * many MapReduce jobs in a sequence to complete the PageRank iterations.
+ * </p>
+ * 
+ * <p>
+ * Each graph is represented through a bag of (source,edges) tuples.  The 'source' is an integer ID representing the source node.
+ * The 'edges' are the outgoing edges from the source node, represented as a bag of (dest,weight) tuples.  The 'dest' is an
+ * integer ID representing the destination node.  The weight is a double representing how much the edge should be weighted.
+ * For a standard PageRank implementation just use weight of 1.0.
+ * </p>
+ * 
+ * <p>
+ * The output of the UDF is a bag of (source,rank) pairs, where 'rank' is the PageRank value for that source in the graph.
+ * </p>
+ * 
+ * <p>
+ * There are several configurable options for this UDF, among them:
+ * <p>
+ * 
+ * <ul>
+ * <li>
+ * <b>alpha</b>: Controls the PageRank alpha value.  The default is 0.85.  A higher value reduces the "random jump"
+ * factor and causes the rank to be influenced more by edges. 
+ * </li>
+ * <li>
+ * <b>max_iters</b>: The maximum number of iterations to run.  The default is 150.
+ * </li>
+ * <li>
+ * <b>dangling_nodes</b>: How to handling "dangling nodes", i.e. nodes with no outgoing edges.  When "true" this is equivalent
+ * to forcing a dangling node to have an outgoing edge to every other node in the graph.  The default is "false".
+ * </li>
+ * <li>
+ * <b>tolerance</b>: A threshold which causes iterations to cease.  It is measured from the total change in ranks from each of
+ * the nodes in the graph.  As the ranks settle on their final values the total change decreases.  This can be used
+ * to stop iterations early.  The default is 1e-16. 
+ * </li> 
+ * <li>
+ * <b>max_nodes_and_edges</b>: This is a control to prevent running out of memory.  As a graph is loaded, if the sum of edges
+ * and nodes exceeds this value then it will stop.  It will not fail but PageRank will not be run on this graph.  Instead a null
+ * value will be returned as a result.  The default is 100M.
+ * </li>
+ * <li>
+ * <b>spill_to_edge_disk_storage</b>: Used to conserve memory.  When "true" it causes the edge data to be written to disk in a temp file instead
+ * of being held in memory when the number of edges exceeds a threshold.  The nodes are still held in memory however.  
+ * Each iteration of PageRank will stream through the edges stored on disk.  The default is "false".
+ * </li>
+ * <li>
+ * <b>max_edges_in_memory</b>: When spilling edges to disk is enabled, this is the threshold which triggers that behavior.  The default is 30M.
+ * </li>
+ * </ul>
+ * 
+ * <p>
+ * Parameters are configured by passing them in as a sequence of pairs into the UDF constructor.  For example, below the alpha value is set to
+ * 0.87 and dangling nodes are enabled.  All arguments must be strings.
+ * </p>
+ * 
+ * <p>
+ * <pre>
+ * {@code
+ * define PageRank datafu.pig.linkanalysis.PageRank('alpha','0.87','dangling_nodes','true');
+ * }
+ * </pre>
+ * </p>
+ * 
+ * <p>
+ * Full example:
  * <pre>
  * {@code
  * 
@@ -66,11 +135,12 @@ import datafu.linkanalysis.PageRank.ProgressIndicator;
  *    topic, source, rank;
  * 
  * }
- * </pre> 
+ * </pre>
+ * </p> 
  */
 public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
 {
-  private final datafu.linkanalysis.PageRank graph = new datafu.linkanalysis.PageRank();
+  private final datafu.pig.linkanalysis.PageRankImpl graph = new datafu.pig.linkanalysis.PageRankImpl();
 
   private int maxNodesAndEdges = 100000000;
   private int maxEdgesInMemory = 30000000;
@@ -218,6 +288,7 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
       {
         System.out.println(String.format("There are too many nodes and edges (%d + %d > %d). Aborting.", graph.nodeCount(), graph.edgeCount(), maxNodesAndEdges));
         aborted = true;
+        break;
       }
 
       reporter.progress();

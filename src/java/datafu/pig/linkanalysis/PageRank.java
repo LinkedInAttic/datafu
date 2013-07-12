@@ -131,7 +131,7 @@ import datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator;
  *    group as topic,
  *    FLATTEN(PageRank(topic_edges_grouped.(source,edges))) as (source,rank);
  *
- * skill_ranks = FOREACH skill_ranks GENERATE
+ * topic_ranks = FOREACH topic_ranks GENERATE
  *    topic, source, rank;
  * 
  * }

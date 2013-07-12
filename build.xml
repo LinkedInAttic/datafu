@@ -39,6 +39,7 @@
   <property name="coveragereport.dir" value="${basedir}/coverage-report" />
   <property name="instrumented.dir" value="${basedir}/instrumented" />
   <property name="pigtestclasses.dir" value="${dist.dir}/pigtestclasses" />
+  <property name="fastutil.jar" value="fastutil-jar-6.3.jar" />
   
   <!-- output names -->
   <property name="output.jarfile" value="${dist.dir}/${final.name}.jar" />
@@ -253,12 +254,23 @@
         <include name="**/*.*" />
       </fileset>
     </jar>
+
+    <!-- Need to check for the existence of the jar because next command won't fail if it's missing -->
+    <fail message="Could not find fastutil jar">
+      <condition>
+          <not>
+              <resourcecount count="1">
+                  <fileset id="fs" dir="${common.lib.dir}" includes="${fastutil.jar}"/>
+              </resourcecount>
+          </not>
+      </condition>
+    </fail>
     
     <!-- add fastutil classese to the core jar -->
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     <move file="${dist.dir}/${final.name}.jar" tofile="${dist.dir}/${final.name}-orig.jar" />
     <java jar="${tools.dir}/autojar.jar" fork="true">
-      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${common.lib.dir}/fastutil-6.3.jar ${dist.dir}/${final.name}-orig.jar" />
+      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${common.lib.dir}/${fastutil.jar} ${dist.dir}/${final.name}-orig.jar" />
     </java>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     

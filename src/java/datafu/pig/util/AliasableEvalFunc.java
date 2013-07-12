@@ -28,41 +28,52 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.util.UDFContext;
 
 /**
- * Captures the schema of the input tuple on the front-end, stores it into the UDFContext, and provides
- * an easy means of referencing it on the back-end to aid in writing schema-based UDFs.
+ * Makes implementing and using UDFs easier by enabling named parameters. 
  * 
- * Example:  This example computes the monthly payments for mortgages depending on interest rate.
- * <code>
- *  public class MortgagePayment extends AliasableEvalFunc<DataBag> {
- *  ...
- *  public DataBag exec(Tuple input) throws IOException {
- *    DataBag output = BagFactory.getInstance().newDefaultBag();
- *    
- *    Double principal = getDouble(input, "principal"); // get a value from the input tuple by alias
- *    Integer numPayments = getInteger(input, "num_payments");
- *    DataBag interestRates = getBag(input, "interest_rates");
- *    
- *    for (Tuple interestTuple : interestRates) {
- *      Double interest = getDouble(interestTuple, getPrefixedAliasName("interest_rates", "interest_rate"));  // get a value from the inner bag tuple by alias
- *      double monthlyPayment = computeMonthlyPayment(principal, numPayments, interest);
- *      output.add(TupleFactory.getInstance().newTuple(monthlyPayment));
- *    }
- *    return output;
- *  }
- * </code>
- * 
- * <h3>Comparison versus {@link SimpleEvalFunc}</h3>
  * <p>
- * SimpleEvalFunc and AliasableEvalFunc are actually fairly different.  The primary purpose of simple is 
+ * This works by capturing the schema of the input tuple on the front-end and storing it into the UDFContext. 
+ * It provides an easy means of referencing the parameters on the back-end to aid in writing schema-based UDFs.
+ * </p>
+ * 
+ * <p>
+ * A related class is {@link SimpleEvalFunc}.  However they are actually fairly different.  The primary purpose of {@link SimpleEvalFunc} is 
  * to skip the boilerplate under the assumption that the arguments in and out are well... simple.  
  * It also assumes that these arguments are in a well-defined positional ordering.
+ * </p>
+ * 
  * <p>
- * Aliasable allows the UDF writer to avoid dealing with all positional assumptions and instead reference fields 
+ * AliasableEvalFunc allows the UDF writer to avoid dealing with all positional assumptions and instead reference fields 
  * by their aliases.  This practice allows for more readable code since the alias names should have more meaning 
  * to the reader than the position.  This approach is also less error prone since it creates a more explicit contract 
- * of what input the UDF expects and prevents simple mistakes that positional-based UDFs could not easily catch, 
+ * for what input the UDF expects and prevents simple mistakes that positional-based UDFs could not easily catch, 
  * such as transposing two fields of the same type.  If this contract is violated, say, by attempting to reference 
  * a field that is not present, a meaningful error message may be thrown.
+ * </p>
+ * 
+ * <p>
+ * Example:  This example computes the monthly payments for mortgages depending on interest rate.
+ * <pre>
+ * {@code
+ *  public class MortgagePayment extends AliasableEvalFunc<DataBag> {
+ *    ...
+ *    public DataBag exec(Tuple input) throws IOException {
+ *      DataBag output = BagFactory.getInstance().newDefaultBag();
+ *      
+ *      Double principal = getDouble(input, "principal"); // get a value from the input tuple by alias
+ *      Integer numPayments = getInteger(input, "num_payments");
+ *      DataBag interestRates = getBag(input, "interest_rates");
+ *    
+ *      for (Tuple interestTuple : interestRates) {
+ *        Double interest = getDouble(interestTuple, getPrefixedAliasName("interest_rates", "interest_rate"));  // get a value from the inner bag tuple by alias
+ *        double monthlyPayment = computeMonthlyPayment(principal, numPayments, interest);
+ *        output.add(TupleFactory.getInstance().newTuple(monthlyPayment));
+ *      }
+ *      return output;
+ *    }
+ *  }
+ * }
+ * </pre>
+ * </p>
  * 
  * @author wvaughan
  *
@@ -104,7 +115,7 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
   /**
    * Helper method to return the context properties for this class
    * 
-   * @return
+   * @return context properties
    */
   protected Properties getContextProperties() {
     UDFContext context = UDFContext.getUDFContext();
@@ -115,7 +126,7 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
   /**
    * Helper method to return the context properties for this instance of this class
    * 
-   * @return
+   * @return instances properties
    */
   protected Properties getInstanceProperties() {
     Properties contextProperties = getContextProperties();

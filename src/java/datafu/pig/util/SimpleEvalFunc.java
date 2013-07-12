@@ -34,34 +34,26 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
   this:
   <pre>
   {@code
-package datafu.pig.util;
-
-import java.io.IOException;
-
-import org.apache.pig.EvalFunc;
-import org.apache.pig.data.Tuple;
-import org.apache.pig.impl.util.WrappedIOException;
-
-public class TRIM extends EvalFunc<String> 
-{
-  public String exec(Tuple input) throws IOException 
+  public class TRIM extends EvalFunc<String> 
   {
-    if (input.size() != 1)
-      throw new IllegalArgumentException("requires a parameter");
-
-    try {
-      Object o = input.get(0);
-      if (!(o instanceof String))
-        throw new IllegalArgumentException("expected a string");
-
-      String str = (String)o;
-      return (str == null) ? null : str.trim();
-    } 
-    catch (Exception e) {
-      throw WrappedIOException.wrap("error...", e);
+    public String exec(Tuple input) throws IOException 
+    {
+      if (input.size() != 1)
+        throw new IllegalArgumentException("requires a parameter");
+  
+      try {
+        Object o = input.get(0);
+        if (!(o instanceof String))
+          throw new IllegalArgumentException("expected a string");
+  
+        String str = (String)o;
+        return (str == null) ? null : str.trim();
+      } 
+      catch (Exception e) {
+        throw WrappedIOException.wrap("error...", e);
+      }
     }
   }
-}
   }
   </pre>
   There is a lot of boilerplate to check the number of arguments and
@@ -73,32 +65,32 @@ public class TRIM extends EvalFunc<String>
   checking and exception wrapping for you. So your code would be:
   <pre>
   {@code
-package datafu.pig.util;
-
-public class TRIM2 extends SimpleEvalFunc<String> 
-{
-  public String call(String s)
+  public class TRIM2 extends SimpleEvalFunc<String> 
   {
-    return (s != null) ? s.trim() : null;
+    public String call(String s)
+    {
+      return (s != null) ? s.trim() : null;
+    }
   }
-}
   }
   </pre>
 
   An example of this UDF in action with Pig:
   <pre>
   {@code
-grunt> a = load 'test' as (x:chararray, y:chararray); dump a;
-  (1 , 2)
-grunt> b = foreach a generate TRIM2(x); dump b;
-  (1)
-grunt> c = foreach a generate TRIM2((int)x); dump c;
-  datafu.pig.util.TRIM2(java.lang.String): argument type 
-  mismatch [#1]; expected java.lang.String, got java.lang.Integer
-grunt> d = foreach a generate TRIM2(x, y); dump d;
-  datafu.pig.util.TRIM2(java.lang.String): got 2 arguments, 
-  expected 1.
-}
+  grunt> a = load 'test' as (x:chararray, y:chararray); dump a;
+    (1 , 2)
+    
+  grunt> b = foreach a generate TRIM2(x); dump b;
+    (1)
+    
+  grunt> c = foreach a generate TRIM2((int)x); dump c;
+    datafu.pig.util.TRIM2(java.lang.String): argument type 
+    mismatch [#1]; expected java.lang.String, got java.lang.Integer
+    
+  grunt> d = foreach a generate TRIM2(x, y); dump d;
+    datafu.pig.util.TRIM2(java.lang.String): got 2 arguments, expected 1.
+  }
   </pre>
 
 */

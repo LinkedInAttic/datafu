@@ -25,10 +25,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 
 /**
- * Returns the first non-null value from a tuple.
- * <p>
- * Similar to {@link <a href="http://msdn.microsoft.com/en-us/library/ms190349.aspx" target="_blank">COALESCE</a>} in T-SQL. 
- * </p>
+ * Returns the first non-null value from a tuple, just like {@link <a href="http://msdn.microsoft.com/en-us/library/ms190349.aspx" target="_blank">COALESCE</a>} in SQL. 
  * 
  * <p>
  * Example:
@@ -43,7 +40,9 @@ import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
  * -- produces: 1,2,3,99,4,99,5
  * coalesced = FOREACH input GENERATE COALESCE(val,99);
  *
- * }</pre></p>
+ * }
+ * </pre>
+ * </p>
  * 
  * @author "Matthew Hayes <mhayes@linkedin.com>"
  *

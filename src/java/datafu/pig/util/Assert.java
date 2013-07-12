@@ -22,24 +22,29 @@ import org.apache.pig.FilterFunc;
 import org.apache.pig.data.Tuple;
 
 /**
- * Asserts some boolean.  There is a unary and a binary version.
+ * Filter function which asserts that a value is true.
+ * 
  * <p>
- * The unary version just takes a boolean, and throws out a generic exception message when the
- * assertion is violated.
+ * Unfortunately, the Pig interpreter doesn't recognize boolean expressions nested as function
+ * arguments, so this uses C-style booleans.  That is, the first argument should be
+ * an integer.  0 is interpreted as "false", and anything else is considered "true".
+ * The function will cause the Pig script to fail if a "false" value is encountered.
+ * </p>
+ * 
  * <p>
- * The binary version takes a String as a second argument and throws that out when the assertion
+ * There is a unary and a binary version. The unary version just takes a boolean, and throws out a generic exception message when the
+ * assertion is violated.  The binary version takes a String as a second argument and throws that out when the assertion
  * is violated.
- * <p>
- * Unfortunately, the pig interpreter doesn't recognize boolean expressions nested as function
- * arguments, so this has reverted to C-style booleans.  That is, the first argument should be
- * an integer.  0 for false, anything else for true.
+ * </p>
+ * 
  * <p>
  * Example:
  * <pre>
  * {@code
  * FILTER members BY ASSERT( (member_id >= 0 ? 1 : 0), 'Doh! Some member ID is negative.' );
  * }
- * </pre></p>
+ * </pre>
+ * </p>
  */
 public class Assert extends FilterFunc
 {

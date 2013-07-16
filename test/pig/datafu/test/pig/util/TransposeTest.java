@@ -71,7 +71,7 @@ public class TransposeTest extends PigTests
   */
   @Multiline private static String transposeBadTypeTest;
   
-  @Test(expectedExceptions={RuntimeException.class})
+  @Test(expectedExceptions={org.apache.pig.impl.logicalLayer.FrontendException.class})
   public void transposeBadTypeTest() throws Exception
   { 
     PigTest test = createPigTestFromString(transposeBadTypeTest);

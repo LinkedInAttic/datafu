@@ -149,7 +149,7 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
   {
     Map<String, Integer> aliases = new HashMap<String, Integer>();
     constructFieldAliases(aliases, tupleSchema, null);
-    log.info("In instance: "+getInstanceName()+", stored alias map: " + aliases);
+    log.debug("In instance: "+getInstanceName()+", stored alias map: " + aliases);
     
     // pass the input schema into the exec function
     setAliasMap(aliases);
@@ -162,7 +162,7 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
       String alias = getPrefixedAliasName(prefix, field.alias);
       if (field.alias != null && !field.alias.equals("null")) { 
         aliases.put(alias, position);
-        log.trace("In instance: "+getInstanceName()+", stored alias " + alias + " as position " + position);
+        log.debug("In instance: "+getInstanceName()+", stored alias " + alias + " as position " + position);
       }
       if (field.schema != null) {
         constructFieldAliases(aliases, field.schema, alias);

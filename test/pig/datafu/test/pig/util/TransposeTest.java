@@ -16,7 +16,7 @@ public class TransposeTest extends PigTests
   /**
   register $JAR_PATH
 
-  define Transpose datafu.pig.util.Transpose();
+  define Transpose datafu.pig.util.TransposeTupleToBag();
   
   data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2:INT,val3:INT);
   
@@ -57,7 +57,7 @@ public class TransposeTest extends PigTests
   /**
   register $JAR_PATH
 
-  define Transpose datafu.pig.util.Transpose();
+  define Transpose datafu.pig.util.TransposeTupleToBag();
   
   data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2:INT,val3:DOUBLE);
   

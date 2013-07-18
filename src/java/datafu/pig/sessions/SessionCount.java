@@ -27,8 +27,7 @@ import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * Performs a count of events, ignoring events which occur within the
- * same time window (i.e session).  For events to occur within separate time windows they
- * must be separated by at least the specified time span. 
+ * same time window.
  * <p>
  * This is useful for tasks such as counting the number of page views per user since it:
  *  a) prevent reloads and go-backs from overcounting actual views

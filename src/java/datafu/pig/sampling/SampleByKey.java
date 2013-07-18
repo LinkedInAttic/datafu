@@ -23,17 +23,27 @@ import org.apache.pig.FilterFunc;
 import org.apache.pig.data.Tuple;
 
 /**
+ * Provides a way of sampling tuples based on certain fields.
+ * This is essentially equivalent to grouping on certain fields, applying SAMPLE,
+ * and then flattening.  It is much more efficient though because does not require
+ * a reduce step.
  * 
- * SampleByKey provides easier way of sampling tuples based on certain key field.
+ * <p>
+ * The method of sampling is to convert the key to a hash, derive a double value
+ * from this, and then test this against a supplied probability.  The double value
+ * derived from a key is uniformly distributed between 0 and 1.
+ * </p>
  * 
- * Optional first parameter is salt that will be used for generate seed.
- * Second parameter is sampling probability.
+ * <p>
+ * The only required parameter is the sampling probability.  This may be preceded by an optional
+ * seed value to control the random number generation.
+ * </p>
  * 
  * <p>
  * Example:
  * <pre>
  * {@code
- * DEFINE SampleByKey datafu.pig.sampling.SampleByKey('salt1.5', '0.5');
+ * DEFINE SampleByKey datafu.pig.sampling.SampleByKey('0.5');
  * 
  *-- input: (A,1), (A,2), (A,3), (B,1), (B,3)
  * 
@@ -57,8 +67,8 @@ public class SampleByKey extends FilterFunc
   int seed;
   double size;
   
-  public SampleByKey(String size){
-    this(DEFAULT_SEED, size);
+  public SampleByKey(String probability){
+    this(DEFAULT_SEED, probability);
   }
   
   public SampleByKey(String salt, String size){
@@ -70,7 +80,7 @@ public class SampleByKey extends FilterFunc
   public Boolean exec(Tuple input) throws IOException 
   {    
     int hashCode = 0;
-    for(int i=0; i<input.size(); i++){
+    for(int i=0; i<input.size(); i++) {
       Object each = input.get(i);
       hashCode = hashCode*PRIME_NUMBER + each.hashCode();
     }

@@ -202,12 +202,10 @@ public class PageRankImplTests
   private void performIterations(datafu.pig.linkanalysis.PageRankImpl graph, int maxIters, float tolerance) throws IOException
   {
     System.out.println(String.format("Beginning iteration (maxIters = %d, tolerance=%e)", maxIters, tolerance));
-    
-    datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator progressIndicator = getDummyProgressIndicator();
-    
+        
     System.out.println("Initializing graph");
     long startTime = System.nanoTime();
-    graph.init(progressIndicator);
+    graph.init();
     System.out.println(String.format("Done, took %f ms", (System.nanoTime() - startTime)/10.0e6));
     
     float totalDiff;
@@ -217,22 +215,10 @@ public class PageRankImplTests
     startTime = System.nanoTime();
     do 
     {
-      totalDiff = graph.nextIteration(progressIndicator);
+      totalDiff = graph.nextIteration();
       iter++;      
     } while(iter < maxIters && totalDiff > tolerance);
     System.out.println(String.format("Done, took %f ms", (System.nanoTime() - startTime)/10.0e6));
-  }
-  
-  private datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator getDummyProgressIndicator()
-  {
-    return new datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator()
-    {
-      @Override
-      public void progress()
-      {
-        // do nothing
-      }     
-    };
   }
   
   private void validateExpectedRanks(datafu.pig.linkanalysis.PageRankImpl graph, Map<String,Integer> nodeIds, Map<String,Float> expectedRanks)

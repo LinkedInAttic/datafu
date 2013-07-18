@@ -69,11 +69,6 @@ public class PageRankImpl
   private DataOutputStream edgeDataOutputStream;
   private boolean usingEdgeDiskCache;
   
-  public interface ProgressIndicator
-  {
-    void progress();
-  }
-  
   public void clear() throws IOException
   {
     this.edgeCount = 0;
@@ -332,6 +327,11 @@ public class PageRankImpl
       this.edges.add(data);
     }
   }
+  
+  public void init() throws IOException
+  {
+    init(getDummyIndicator());
+  }
     
   public void init(ProgressIndicator progressIndicator) throws IOException
   {
@@ -413,6 +413,25 @@ public class PageRankImpl
     commit(progressIndicator);
     
     return getTotalRankChange();
+  }
+  
+  public float nextIteration() throws IOException
+  {
+    ProgressIndicator dummyIndicator = getDummyIndicator();
+    distribute(dummyIndicator);
+    commit(dummyIndicator);
+    
+    return getTotalRankChange();
+  }
+  
+  private ProgressIndicator getDummyIndicator()
+  {
+    return new ProgressIndicator() {
+      @Override
+      public void progress()
+      {        
+      }
+    };
   }
   
   public void distribute(ProgressIndicator progressIndicator) throws IOException

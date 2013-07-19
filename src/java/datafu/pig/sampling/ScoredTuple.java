@@ -20,7 +20,7 @@ import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.data.TupleFactory;
 
-public class ScoredTuple implements Comparable<ScoredTuple>
+class ScoredTuple implements Comparable<ScoredTuple>
 {
   Double score;
   private Tuple tuple;

@@ -18,7 +18,7 @@ package datafu.pig.sampling;
 
 import java.util.PriorityQueue;
 
-public class Reservoir extends PriorityQueue<ScoredTuple>
+class Reservoir extends PriorityQueue<ScoredTuple>
 {
   private static final long serialVersionUID = 1L;
   private int numSamples;

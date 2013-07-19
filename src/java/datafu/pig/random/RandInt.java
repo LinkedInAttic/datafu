@@ -25,7 +25,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Generates a uniformly distributed integer between two bounds
+ * Generates a uniformly distributed integer between two bounds.
  */
 public class RandInt extends SimpleEvalFunc<Integer> 
 {

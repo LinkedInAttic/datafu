@@ -17,6 +17,12 @@ package datafu.pig.stats;
 
 import java.util.ArrayList;
 
+/**
+ * Methods used by {@see Quantile}.
+ * 
+ * @author "Matthew Hayes <mhayes@linkedin.com>"
+ *
+ */
 public class QuantileUtil
 { 
   public static ArrayList<Double> getNQuantiles(int numQuantiles)

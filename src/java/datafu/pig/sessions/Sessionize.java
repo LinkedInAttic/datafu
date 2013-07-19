@@ -32,14 +32,17 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 
 /**
- * Sessionizes an input stream.
+ * Sessionizes an input stream, appending a session ID to each tuple.
  *
+ * <p>
  * This UDF takes a constructor argument which is the session timeout (an idle
  * period of this amount indicates that a new session has started) and assumes
  * the first element of the input bag is an ISO8601 timestamp. The input bag
  * must be sorted by this timestamp. It returns the input bag with a new field,
  * session_id, that is a GUID indicating the session of the request.
+ * </p>
  *
+ * <p>
  * Example:
  * <pre>
  * {@code
@@ -62,6 +65,7 @@ import org.joda.time.Period;
  * result = FOREACH rollup GENERATE group AS url, COUNT(SESSIONS) AS session_cnt;
  * }
  * </pre>
+ * </p>
  */
 public class Sessionize extends EvalFunc<DataBag> implements Accumulator<DataBag>
 {

@@ -34,9 +34,6 @@ import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
-import datafu.pig.linkanalysis.PageRankImpl.ProgressIndicator;
-
-
 /**
  * A UDF which implements {@link <a href="http://en.wikipedia.org/wiki/PageRank" target="_blank">PageRank</a>}.
  * 

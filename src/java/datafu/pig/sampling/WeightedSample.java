@@ -29,11 +29,10 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
  * Create a new bag by performing a weighted sampling without replacement
- * from the input bag. Sampling is biased according to a score/weight that
- * is part of the inner tuples in the bag. Optionally, a limit on the number
- * of items to return may be specified.
- * n.b.
- * <em>High scores/weights are more likely to be chosen.</em>
+ * from the input bag. Sampling is biased according to a weight that
+ * is part of the inner tuples in the bag.  That is, tuples with relatively 
+ * high weights are more likely to be chosen over tuples with low weights. 
+ * Optionally, a limit on the number of items to return may be specified.
  * 
  * <p>
  * Example:

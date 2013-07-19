@@ -18,6 +18,8 @@ package datafu.pig.sessions;
 
 import java.io.IOException;
 
+import org.apache.pig.Accumulator;
+import org.apache.pig.EvalFunc;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
 import org.joda.time.DateTime;
@@ -27,8 +29,7 @@ import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * Performs a count of events, ignoring events which occur within the
- * same time window (i.e session).  For events to occur within separate time windows they
- * must be separated by at least the specified time span. 
+ * same time window.
  * <p>
  * This is useful for tasks such as counting the number of page views per user since it:
  *  a) prevent reloads and go-backs from overcounting actual views
@@ -55,22 +56,23 @@ import datafu.pig.util.SimpleEvalFunc;
  * </pre>
  * 
  */
-public class SessionCount extends SimpleEvalFunc<Long>
+public class SessionCount extends EvalFunc<Long> implements Accumulator<Long>
 {
   private final long millis;
+  private DateTime last_date;
+  private long sum;
 
   public SessionCount(String timeSpec)
   {
     Period p = new Period("PT" + timeSpec.toUpperCase());
     this.millis = p.toStandardSeconds().getSeconds() * 1000;
+    cleanup();
   }
 
-  public Long call(DataBag bag) throws IOException
+  @Override
+  public void accumulate(Tuple input) throws IOException
   {
-    DateTime last_date = null;
-    long sum = 0;
-    
-    for (Tuple t : bag) {
+    for (Tuple t : (DataBag) input.get(0)) {
       DateTime date = new DateTime(t.get(0));
 
       if (last_date == null) {
@@ -82,8 +84,29 @@ public class SessionCount extends SimpleEvalFunc<Long>
         throw new IOException("input time series is not sorted");
 
       last_date = date;
-    }
+    }    
+  }
 
+  @Override
+  public Long getValue()
+  {
     return sum;
+  }
+
+  @Override
+  public void cleanup()
+  {
+    this.last_date = null;
+    this.sum = 0;
+  }
+
+  @Override
+  public Long exec(Tuple input) throws IOException
+  {
+    accumulate(input);
+    Long result = getValue();
+    cleanup();
+
+    return result;
   }
 }

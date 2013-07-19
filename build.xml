@@ -359,7 +359,8 @@
         <bottom>${author}</bottom>
         <classpath refid="main-classpath" />
         <fileset dir="@{javadir}">
-          <exclude name="datafu//pig/stats/*?VAR.java"/>
+          <exclude name="datafu/pig/stats/*?VAR.java"/>
+          <exclude name="datafu/pig/sets/SetOperationsBase.java"/>
         </fileset>
       </javadoc>
     </sequential>

@@ -36,7 +36,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
  * @author "William Vaughan <wvaughan@linkedin.com>"
  *
  */
-public class Transpose extends AliasableEvalFunc<DataBag>
+public class TransposeTupleToBag extends AliasableEvalFunc<DataBag>
 {
   private final String TRANSPOSE_TYPE = "TRANSPOSE_TYPE";
 

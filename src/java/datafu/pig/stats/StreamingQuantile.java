@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.pig.Accumulator;
+import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
@@ -117,8 +118,8 @@ import datafu.pig.util.SimpleEvalFunc;
  * @see StreamingMedian
  * @see Quantile
  */
-public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumulator<Tuple> {
-
+public class StreamingQuantile extends AccumulatorEvalFunc<Tuple>
+{
   private final int numQuantiles;
   private final QuantileEstimator estimator;
   private List<Double> quantiles;
@@ -240,14 +241,6 @@ public class StreamingQuantile extends SimpleEvalFunc<Tuple> implements Accumula
       return null;
     }
     return t;
-  }
-
-  public Tuple call(DataBag b) throws IOException
-  {
-    accumulate(TupleFactory.getInstance().newTuple(b));
-    Tuple ret = getValue();
-    cleanup();
-    return ret;
   }
 
   @Override

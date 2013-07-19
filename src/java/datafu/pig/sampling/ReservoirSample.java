@@ -37,7 +37,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * @author wvaughan
  *
  */
-public class ReservoirSample extends AlgebraicEvalFunc<DataBag> implements Algebraic
+public class ReservoirSample extends AlgebraicEvalFunc<DataBag>
 {
   Integer numSamples;
   private Reservoir reservoir;

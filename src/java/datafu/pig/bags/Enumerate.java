@@ -19,6 +19,7 @@ package datafu.pig.bags;
 import java.io.IOException;
 
 import org.apache.pig.Accumulator;
+import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
@@ -53,7 +54,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * }
  * </pre>
  */
-public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<DataBag>
+public class Enumerate extends AccumulatorEvalFunc<DataBag>
 {
   private final int start;
   
@@ -72,15 +73,10 @@ public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<Da
     cleanup();
   }
   
-  public DataBag call(DataBag inputBag) throws IOException
+  @Override
+  public void accumulate(Tuple arg0) throws IOException
   {
-    cleanup();
-    outputBag = BagFactory.getInstance().newDefaultBag();
-    enumerateBag(inputBag);
-    return getValue();
-  }
-  
-  public void enumerateBag(DataBag inputBag){
+    DataBag inputBag = (DataBag)arg0.get(0);
     for (Tuple t : inputBag) {
       Tuple t1 = TupleFactory.getInstance().newTuple(t.getAll());
       t1.append(i);
@@ -93,13 +89,6 @@ public class Enumerate extends SimpleEvalFunc<DataBag> implements Accumulator<Da
       i++;
       count++;
     }
-  }
-  
-  @Override
-  public void accumulate(Tuple arg0) throws IOException
-  {
-    DataBag inputBag = (DataBag)arg0.get(0);
-    enumerateBag(inputBag);
   }
 
   @Override

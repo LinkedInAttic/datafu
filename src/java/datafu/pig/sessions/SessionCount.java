@@ -19,6 +19,7 @@ package datafu.pig.sessions;
 import java.io.IOException;
 
 import org.apache.pig.Accumulator;
+import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
@@ -56,7 +57,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * </pre>
  * 
  */
-public class SessionCount extends EvalFunc<Long> implements Accumulator<Long>
+public class SessionCount extends AccumulatorEvalFunc<Long>
 {
   private final long millis;
   private DateTime last_date;
@@ -98,15 +99,5 @@ public class SessionCount extends EvalFunc<Long> implements Accumulator<Long>
   {
     this.last_date = null;
     this.sum = 0;
-  }
-
-  @Override
-  public Long exec(Tuple input) throws IOException
-  {
-    accumulate(input);
-    Long result = getValue();
-    cleanup();
-
-    return result;
   }
 }

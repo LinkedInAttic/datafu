@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.apache.pig.Accumulator;
+import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -67,7 +68,7 @@ import org.joda.time.Period;
  * </pre>
  * </p>
  */
-public class Sessionize extends EvalFunc<DataBag> implements Accumulator<DataBag>
+public class Sessionize extends AccumulatorEvalFunc<DataBag>
 {
   private final long millis;
 
@@ -81,16 +82,6 @@ public class Sessionize extends EvalFunc<DataBag> implements Accumulator<DataBag
     this.millis = p.toStandardSeconds().getSeconds() * 1000;
 
     cleanup();
-  }
-
-  @Override
-  public DataBag exec(Tuple input) throws IOException
-  {
-    accumulate(input);
-    DataBag outputBag = getValue();
-    cleanup();
-
-    return outputBag;
   }
 
   @Override

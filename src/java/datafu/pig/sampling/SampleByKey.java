@@ -24,7 +24,7 @@ import org.apache.pig.data.Tuple;
 
 /**
  * Provides a way of sampling tuples based on certain fields.
- * This is essentially equivalent to grouping on certain fields, applying SAMPLE,
+ * This is essentially equivalent to grouping on the fields, applying SAMPLE,
  * and then flattening.  It is much more efficient though because does not require
  * a reduce step.
  * 

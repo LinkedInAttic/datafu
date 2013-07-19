@@ -30,7 +30,7 @@ import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
- * Maintains an in-memory reservoir to produce a uniformly random sample set of a given size.
+ * Maintains an in-memory reservoir to produce a uniformly random sample of a given size.
  * This algebraic implementation is backed by a heap and maintains the original roll in order
  * to compensate for skew.
  * 

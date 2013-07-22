@@ -5,12 +5,18 @@ import static org.testng.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.adrianwalker.multilinestring.Multiline;
+import org.apache.pig.data.BagFactory;
+import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
+import org.apache.pig.data.TupleFactory;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
 import datafu.pig.stats.QuantileUtil;
+import datafu.pig.stats.StreamingQuantile;
 import datafu.test.pig.PigTests;
 
 public class QuantileTests  extends PigTests
@@ -402,6 +408,89 @@ public class QuantileTests  extends PigTests
     
     assertEquals(output.size(),1);
     assertEquals(output.get(0).toString(), "(1.0,4.0,7.0,10.0)");
+  }
+  
+  @Test
+  public void streamingQuantileExecTest() throws Exception {
+    StreamingQuantile quantile = new StreamingQuantile("4");
+    
+    DataBag bag;
+    Tuple input;
+    Tuple result;
+    
+    bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=1; i<=10; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, i);
+      bag.add(t);
+    }
+    input = TupleFactory.getInstance().newTuple(bag);
+    result = quantile.exec(input);
+    Assert.assertEquals(4, result.size());
+    Assert.assertEquals(1.0, result.get(0));
+    Assert.assertEquals(4.0, result.get(1));
+    Assert.assertEquals(7.0, result.get(2));
+    Assert.assertEquals(10.0, result.get(3));
+    
+    // do twice to check cleanup works
+    
+    bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=11; i<=20; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, i);
+      bag.add(t);
+    }
+    input = TupleFactory.getInstance().newTuple(bag);
+    result = quantile.exec(input);
+    Assert.assertEquals(4, result.size());
+    Assert.assertEquals(11.0, result.get(0));
+    Assert.assertEquals(14.0, result.get(1));
+    Assert.assertEquals(17.0, result.get(2));
+    Assert.assertEquals(20.0, result.get(3));
+  }
+  
+  @Test
+  public void streamingQuantileAccumulateTest() throws Exception {
+    StreamingQuantile quantile = new StreamingQuantile("4");
+    
+    Tuple result;    
+    
+    for (int i=1; i<=10; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, i);
+      DataBag bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      quantile.accumulate(input);
+    }
+    result = quantile.getValue();
+    Assert.assertEquals(4, result.size());
+    Assert.assertEquals(1.0, result.get(0));
+    Assert.assertEquals(4.0, result.get(1));
+    Assert.assertEquals(7.0, result.get(2));
+    Assert.assertEquals(10.0, result.get(3));
+    
+    // do twice to check cleanup works
+    quantile.cleanup();
+    
+    for (int i=11; i<=20; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, i);
+      DataBag bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      quantile.accumulate(input);
+    }
+    result = quantile.getValue();
+    Assert.assertEquals(4, result.size());
+    Assert.assertEquals(11.0, result.get(0));
+    Assert.assertEquals(14.0, result.get(1));
+    Assert.assertEquals(17.0, result.get(2));
+    Assert.assertEquals(20.0, result.get(3));
   }
   
   @Test

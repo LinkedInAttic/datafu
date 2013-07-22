@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.pig.Accumulator;
+import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -135,7 +136,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * </pre>
  * </p> 
  */
-public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
+public class PageRank extends AccumulatorEvalFunc<DataBag>
 {
   private final datafu.pig.linkanalysis.PageRankImpl graph = new datafu.pig.linkanalysis.PageRankImpl();
 
@@ -364,21 +365,6 @@ public class PageRank extends EvalFunc<DataBag> implements Accumulator<DataBag>
     catch (IOException e)
     { 
       e.printStackTrace();
-    }
-  }
-
-  @Override
-  public DataBag exec(Tuple input) throws IOException
-  {
-    try
-    {
-      accumulate(input);
-      
-      return getValue();
-    }
-    finally
-    {
-      cleanup();
     }
   }
 

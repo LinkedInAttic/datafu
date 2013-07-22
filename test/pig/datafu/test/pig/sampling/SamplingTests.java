@@ -1,9 +1,26 @@
 package datafu.test.pig.sampling;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import junit.framework.Assert;
+
 import org.adrianwalker.multilinestring.Multiline;
+import org.apache.pig.backend.executionengine.ExecException;
+import org.apache.pig.data.BagFactory;
+import org.apache.pig.data.DataBag;
+import org.apache.pig.data.Tuple;
+import org.apache.pig.data.TupleFactory;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
+import datafu.pig.sampling.ReservoirSample;
+import datafu.pig.sampling.SampleByKey;
+import datafu.pig.sampling.WeightedSample;
 import datafu.test.pig.PigTests;
 
 
@@ -66,6 +83,41 @@ public class SamplingTests extends PigTests
             
     assertOutput(test, "data2",
         "({(a,100),(c,5),(b,1)})");
+  }
+  
+  @Test
+  public void weightedSampleLimitExecTest() throws IOException
+  {
+    WeightedSample sampler = new WeightedSample();
+    
+    DataBag bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=0; i<100; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(2);
+      t.set(0, i);
+      t.set(1, 1); // score is equal for all
+      bag.add(t);
+    }
+    
+    Tuple input = TupleFactory.getInstance().newTuple(3);
+    input.set(0, bag);
+    input.set(1, 1); // use index 1 for score
+    input.set(2, 10); // get 10 items
+    
+    DataBag result = sampler.exec(input);
+    
+    Assert.assertEquals(10, result.size());
+    
+    // all must be found, no repeats
+    Set<Integer> found = new HashSet<Integer>();
+    for (Tuple t : result)
+    {
+      Integer i = (Integer)t.get(0);
+      System.out.println(i);
+      Assert.assertTrue(i>=0 && i<100);
+      Assert.assertFalse(String.format("Found duplicate of %d",i), found.contains(i));
+      found.add(i);
+    }
   }
   
   /**
@@ -171,6 +223,45 @@ public class SamplingTests extends PigTests
                    
   }
   
+  @Test
+  public void sampleByKeyExecTest() throws Exception
+  {
+    SampleByKey sampler = new SampleByKey("thesalt","0.10");
+    
+    Map<Integer,Integer> valuesPerKey = new HashMap<Integer,Integer>();
+    
+    // 10,000 keys total
+    for (int i=0; i<10000; i++)
+    {
+      // 5 values per key
+      for (int j=0; j<5; j++)
+      {
+        Tuple t = TupleFactory.getInstance().newTuple(1);
+        t.set(0, i);
+        if (sampler.exec(t))
+        {          
+          if (valuesPerKey.containsKey(i))
+          {
+            valuesPerKey.put(i, valuesPerKey.get(i)+1);
+          }
+          else
+          {
+            valuesPerKey.put(i, 1);
+          }
+        }
+      }
+    }
+    
+    // 10% sample, so should have roughly 1000 keys
+    Assert.assertTrue(Math.abs(1000-valuesPerKey.size()) < 50);
+    
+    // every value should be present for the same key
+    for (Map.Entry<Integer, Integer> pair : valuesPerKey.entrySet())
+    {
+      Assert.assertEquals(5, pair.getValue().intValue());
+    }
+  }
+  
   /**
   register $JAR_PATH
 
@@ -228,6 +319,105 @@ public class SamplingTests extends PigTests
       PigTest test = createPigTestFromString(reservoirSampleTest, "RESERVOIR_SIZE="+reservoirSize);
       test.runScript();
       assertOutput(test, "sampled", "("+reservoirSize+")");
+    }
+  }
+  
+  @Test
+  public void reservoirSampleExecTest() throws IOException
+  {
+    ReservoirSample sampler = new ReservoirSample("10");
+    
+    DataBag bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=0; i<100; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, i);
+      bag.add(t);
+    }
+    
+    Tuple input = TupleFactory.getInstance().newTuple(bag);
+    
+    DataBag result = sampler.exec(input);
+    
+    Assert.assertEquals(10, result.size());
+    
+    // all must be found, no repeats
+    Set<Integer> found = new HashSet<Integer>();
+    for (Tuple t : result)
+    {
+      Integer i = (Integer)t.get(0);
+      System.out.println(i);
+      Assert.assertTrue(i>=0 && i<100);
+      Assert.assertFalse(String.format("Found duplicate of %d",i), found.contains(i));
+      found.add(i);
+    }
+  }
+  
+  @Test
+  public void reservoirSampleAccumulateTest() throws IOException
+  {
+    ReservoirSample sampler = new ReservoirSample("10");
+    
+    for (int i=0; i<100; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, i);
+      DataBag bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      sampler.accumulate(input);
+    }
+        
+    DataBag result = sampler.getValue();
+    
+    Assert.assertEquals(10, result.size());
+    
+    // all must be found, no repeats
+    Set<Integer> found = new HashSet<Integer>();
+    for (Tuple t : result)
+    {
+      Integer i = (Integer)t.get(0);
+      System.out.println(i);
+      Assert.assertTrue(i>=0 && i<100);
+      Assert.assertFalse(String.format("Found duplicate of %d",i), found.contains(i));
+      found.add(i);
+    }
+  }
+  
+  @Test
+  public void reservoirSampleAlgebraicTest() throws IOException
+  {
+    ReservoirSample.Initial initialSampler = new ReservoirSample.Initial("10");
+    ReservoirSample.Intermediate intermediateSampler = new ReservoirSample.Intermediate("10");
+    ReservoirSample.Final finalSampler = new ReservoirSample.Final("10");
+    
+    DataBag bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=0; i<100; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, i);
+      bag.add(t);
+    }
+    
+    Tuple input = TupleFactory.getInstance().newTuple(bag);
+    
+    Tuple intermediateTuple = initialSampler.exec(input);  
+    DataBag intermediateBag = BagFactory.getInstance().newDefaultBag(Arrays.asList(intermediateTuple));
+    intermediateTuple = intermediateSampler.exec(TupleFactory.getInstance().newTuple(intermediateBag));  
+    intermediateBag = BagFactory.getInstance().newDefaultBag(Arrays.asList(intermediateTuple));
+    DataBag result = finalSampler.exec(TupleFactory.getInstance().newTuple(intermediateBag));
+    
+    Assert.assertEquals(10, result.size());
+    
+    // all must be found, no repeats
+    Set<Integer> found = new HashSet<Integer>();
+    for (Tuple t : result)
+    {
+      Integer i = (Integer)t.get(0);
+      System.out.println(i);
+      Assert.assertTrue(i>=0 && i<100);
+      Assert.assertFalse(String.format("Found duplicate of %d",i), found.contains(i));
+      found.add(i);
     }
   }
 }

@@ -16,6 +16,7 @@ import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
 import datafu.pig.sampling.ReservoirSample;
+import datafu.pig.sampling.WeightedSample;
 import datafu.test.pig.PigTests;
 
 
@@ -78,6 +79,41 @@ public class SamplingTests extends PigTests
             
     assertOutput(test, "data2",
         "({(a,100),(c,5),(b,1)})");
+  }
+  
+  @Test
+  public void weightedSampleLimitExecTest() throws IOException
+  {
+    WeightedSample sampler = new WeightedSample();
+    
+    DataBag bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=0; i<100; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(2);
+      t.set(0, i);
+      t.set(1, 1); // score is equal for all
+      bag.add(t);
+    }
+    
+    Tuple input = TupleFactory.getInstance().newTuple(3);
+    input.set(0, bag);
+    input.set(1, 1); // use index 1 for score
+    input.set(2, 10); // get 10 items
+    
+    DataBag result = sampler.exec(input);
+    
+    Assert.assertEquals(10, result.size());
+    
+    // all must be found, no repeats
+    Set<Integer> found = new HashSet<Integer>();
+    for (Tuple t : result)
+    {
+      Integer i = (Integer)t.get(0);
+      System.out.println(i);
+      Assert.assertTrue(i>=0 && i<100);
+      Assert.assertFalse(String.format("Found duplicate of %d",i), found.contains(i));
+      found.add(i);
+    }
   }
   
   /**

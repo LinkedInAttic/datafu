@@ -1,6 +1,7 @@
 package datafu.test.pig.sampling;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -368,6 +369,43 @@ public class SamplingTests extends PigTests
     }
         
     DataBag result = sampler.getValue();
+    
+    Assert.assertEquals(10, result.size());
+    
+    // all must be found, no repeats
+    Set<Integer> found = new HashSet<Integer>();
+    for (Tuple t : result)
+    {
+      Integer i = (Integer)t.get(0);
+      System.out.println(i);
+      Assert.assertTrue(i>=0 && i<100);
+      Assert.assertFalse(String.format("Found duplicate of %d",i), found.contains(i));
+      found.add(i);
+    }
+  }
+  
+  @Test
+  public void reservoirSampleAlgebraicTest() throws IOException
+  {
+    ReservoirSample.Initial initialSampler = new ReservoirSample.Initial("10");
+    ReservoirSample.Intermediate intermediateSampler = new ReservoirSample.Intermediate("10");
+    ReservoirSample.Final finalSampler = new ReservoirSample.Final("10");
+    
+    DataBag bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=0; i<100; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, i);
+      bag.add(t);
+    }
+    
+    Tuple input = TupleFactory.getInstance().newTuple(bag);
+    
+    Tuple intermediateTuple = initialSampler.exec(input);  
+    DataBag intermediateBag = BagFactory.getInstance().newDefaultBag(Arrays.asList(intermediateTuple));
+    intermediateTuple = intermediateSampler.exec(TupleFactory.getInstance().newTuple(intermediateBag));  
+    intermediateBag = BagFactory.getInstance().newDefaultBag(Arrays.asList(intermediateTuple));
+    DataBag result = finalSampler.exec(TupleFactory.getInstance().newTuple(intermediateBag));
     
     Assert.assertEquals(10, result.size());
     

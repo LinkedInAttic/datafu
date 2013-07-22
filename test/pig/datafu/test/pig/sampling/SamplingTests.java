@@ -1,7 +1,9 @@
 package datafu.test.pig.sampling;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -16,6 +18,7 @@ import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
 import datafu.pig.sampling.ReservoirSample;
+import datafu.pig.sampling.SampleByKey;
 import datafu.pig.sampling.WeightedSample;
 import datafu.test.pig.PigTests;
 
@@ -217,6 +220,45 @@ public class SamplingTests extends PigTests
                  "(A10,B2,23)","(A10,B2,1)","(A10,B2,31)"
                  );
                    
+  }
+  
+  @Test
+  public void sampleByKeyExecTest() throws Exception
+  {
+    SampleByKey sampler = new SampleByKey("thesalt","0.10");
+    
+    Map<Integer,Integer> valuesPerKey = new HashMap<Integer,Integer>();
+    
+    // 10,000 keys total
+    for (int i=0; i<10000; i++)
+    {
+      // 5 values per key
+      for (int j=0; j<5; j++)
+      {
+        Tuple t = TupleFactory.getInstance().newTuple(1);
+        t.set(0, i);
+        if (sampler.exec(t))
+        {          
+          if (valuesPerKey.containsKey(i))
+          {
+            valuesPerKey.put(i, valuesPerKey.get(i)+1);
+          }
+          else
+          {
+            valuesPerKey.put(i, 1);
+          }
+        }
+      }
+    }
+    
+    // 10% sample, so should have roughly 1000 keys
+    Assert.assertTrue(Math.abs(1000-valuesPerKey.size()) < 50);
+    
+    // every value should be present for the same key
+    for (Map.Entry<Integer, Integer> pair : valuesPerKey.entrySet())
+    {
+      Assert.assertEquals(5, pair.getValue().intValue());
+    }
   }
   
   /**

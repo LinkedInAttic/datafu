@@ -6,10 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.adrianwalker.multilinestring.Multiline;
+import org.apache.pig.data.BagFactory;
+import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
+import org.apache.pig.data.TupleFactory;
 import org.apache.pig.pigunit.PigTest;
+import org.junit.Assert;
 import org.testng.annotations.Test;
 
+import datafu.pig.stats.DoubleVAR;
+import datafu.pig.stats.VAR;
 import datafu.test.pig.PigTests;
 
 public class VARTests  extends PigTests
@@ -179,5 +185,82 @@ public class VARTests  extends PigTests
     
     assertEquals(output.size(),1);
     assertEquals(output.get(0).toString(), "(8.25)");
+  }
+  
+  @Test
+  public void varExecTest() throws Exception {
+    DoubleVAR var = new DoubleVAR();
+    
+    DataBag bag;
+    Tuple input;
+    Double result;
+    
+    bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=1; i<=1000; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (double)i);
+      bag.add(t);
+    }
+    
+    input = TupleFactory.getInstance().newTuple(1);
+    input.set(0, bag);
+    
+    result = var.exec(input);
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+    
+    // do it again to check cleanup
+        
+    bag = BagFactory.getInstance().newDefaultBag();
+    for (int i=1; i<=2000; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (double)i);
+      bag.add(t);
+    }
+    
+    input = TupleFactory.getInstance().newTuple(1);
+    input.set(0, bag);
+    
+    result = var.exec(input);
+    Assert.assertTrue("Expected about 333333.2 but found " + result,Math.abs(333333.2 - result) < 1);
+  }
+  
+  @Test
+  public void varAccumulateTest() throws Exception {
+    DoubleVAR var = new DoubleVAR();
+    
+    Double result;   
+    
+    for (int i=1; i<=1000; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (double)i);
+      DataBag bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(1);
+      input.set(0, bag);
+      var.accumulate(input);
+    }
+    
+    result = var.getValue();
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+    
+    // do it again to check cleanup
+    var.cleanup();
+        
+    for (int i=1; i<=2000; i++)
+    {
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (double)i);
+      DataBag bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(1);
+      input.set(0, bag);
+      var.accumulate(input);
+    }
+    
+    result = var.getValue();
+    Assert.assertTrue("Expected about 333333.2 but found " + result,Math.abs(333333.2 - result) < 1);
   }
  }

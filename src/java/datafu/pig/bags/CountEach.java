@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.pig.Accumulator;
+import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -53,7 +54,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * } 
  * </pre>
  */
-public class CountEach extends EvalFunc<DataBag> implements Accumulator<DataBag>
+public class CountEach extends AccumulatorEvalFunc<DataBag>
 {
   private boolean flatten = false;
   private Map<Tuple, Integer> counts = new HashMap<Tuple, Integer>();
@@ -107,21 +108,6 @@ public class CountEach extends EvalFunc<DataBag> implements Accumulator<DataBag>
   public void cleanup()
   {
     counts.clear();
-  }
-  
-  @Override
-  public DataBag exec(Tuple input) throws IOException
-  {
-    try
-    {
-      accumulate(input);
-      
-      return getValue();
-    }
-    finally
-    {
-      cleanup();
-    }
   }
   
   @Override

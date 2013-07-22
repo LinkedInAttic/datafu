@@ -89,10 +89,17 @@ public class LongVAR extends EvalFunc<Double> implements Algebraic, Accumulator<
                 // the column we are trying to get variance 
                 DataBag bg = (DataBag) input.get(0);
                 Long l = null;
-                if(bg.iterator().hasNext()) {
-                    Tuple tp = bg.iterator().next();
+                Iterator<Tuple> iter = bg.iterator();
+                if(iter.hasNext()) {
+                    Tuple tp = iter.next();
                     l = (Long)tp.get(0);
                 }
+                
+                if (iter.hasNext())
+                {
+                  throw new RuntimeException("Expected only one tuple in bag");
+                }
+                
                 if (l == null) {
                     t.set(0, null);
                     t.set(1, null);
@@ -105,6 +112,7 @@ public class LongVAR extends EvalFunc<Double> implements Algebraic, Accumulator<
                 }
                 return t;
             } catch(NumberFormatException nfe) {
+                nfe.printStackTrace();
                 // invalid input,
                 // treat this input as null
                 try {
@@ -116,8 +124,10 @@ public class LongVAR extends EvalFunc<Double> implements Algebraic, Accumulator<
                 }
                 return t;
             } catch (ExecException ee) {
+                ee.printStackTrace();
                 throw ee;
             } catch (Exception e) {
+                e.printStackTrace();
                 int errCode = 2106;
                 String msg = "Error while computing variance in " + this.getClass().getSimpleName();
                 throw new ExecException(msg, errCode, PigException.BUG, e);

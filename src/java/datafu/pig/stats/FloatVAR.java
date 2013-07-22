@@ -89,10 +89,17 @@ public class FloatVAR extends EvalFunc<Double> implements Algebraic, Accumulator
                 // the column we are trying to get variance 
                 DataBag bg = (DataBag) input.get(0);
                 Float f = null;
-                if(bg.iterator().hasNext()) {
-                    Tuple tp = bg.iterator().next();
+                Iterator<Tuple> iter = bg.iterator();
+                if(iter.hasNext()) {
+                    Tuple tp = iter.next();
                     f = (Float)tp.get(0);
                 }
+                
+                if (iter.hasNext())
+                {
+                  throw new RuntimeException("Expected only one tuple in bag");
+                }
+                
                 Double d = f!= null ? new Double(f): null;
                 
                 if (f == null){
@@ -107,6 +114,7 @@ public class FloatVAR extends EvalFunc<Double> implements Algebraic, Accumulator
                 }
                 return t;
             } catch(NumberFormatException nfe) {
+                nfe.printStackTrace();
                 // invalid input,
                 // treat this input as null
                 try {
@@ -118,8 +126,10 @@ public class FloatVAR extends EvalFunc<Double> implements Algebraic, Accumulator
                 }
                 return t;
             } catch (ExecException ee) {
+                ee.printStackTrace();
                 throw ee;
             } catch (Exception e) {
+                e.printStackTrace();
                 int errCode = 2106;
                 String msg = "Error while computing variance in " + this.getClass().getSimpleName();
                 throw new ExecException(msg, errCode, PigException.BUG, e);

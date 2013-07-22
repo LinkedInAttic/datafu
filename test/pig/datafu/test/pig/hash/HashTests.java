@@ -42,7 +42,7 @@ public class HashTests  extends PigTests
   /**
   register $JAR_PATH
 
-  define MD5 datafu.pig.hash.MD5Base64();
+  define MD5 datafu.pig.hash.MD5('base64');
   
   data_in = LOAD 'input' as (val:chararray);
   

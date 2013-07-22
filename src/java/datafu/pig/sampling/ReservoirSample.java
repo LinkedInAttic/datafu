@@ -18,8 +18,8 @@ package datafu.pig.sampling;
 
 import java.io.IOException;
 
+import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.Algebraic;
-import org.apache.pig.AlgebraicEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -37,7 +37,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * @author wvaughan
  *
  */
-public class ReservoirSample extends AlgebraicEvalFunc<DataBag>
+public class ReservoirSample extends AccumulatorEvalFunc<DataBag> implements Algebraic
 {
   Integer numSamples;
   private Reservoir reservoir;
@@ -56,23 +56,41 @@ public class ReservoirSample extends AlgebraicEvalFunc<DataBag>
   }
 
   @Override
-  public DataBag exec(Tuple input) throws IOException 
-  {    
+  public void accumulate(Tuple input) throws IOException
+  {
     DataBag samples = (DataBag) input.get(0);
-    if (samples == null || samples.size() <= numSamples) {
-      return samples;
-    }
-    
     for (Tuple sample : samples) {
       getReservoir().consider(new ScoredTuple(Math.random(), sample));
-    }    
-    
+    }  
+  }
+
+  @Override
+  public void cleanup()
+  {
+    this.reservoir = null;
+  }
+
+  @Override
+  public DataBag getValue()
+  {
     DataBag output = BagFactory.getInstance().newDefaultBag();  
     for (ScoredTuple sample : getReservoir()) {
       output.add(sample.getTuple());
     }
-
     return output;
+  }
+
+  @Override
+  public DataBag exec(Tuple input) throws IOException 
+  {    
+    DataBag samples = (DataBag)input.get(0);
+    if (samples.size() <= numSamples) {
+      return samples;
+    }
+    else
+    {
+      return super.exec(input);
+    }
   }
   
   @Override
@@ -146,7 +164,11 @@ public class ReservoirSample extends AlgebraicEvalFunc<DataBag>
       DataBag output = BagFactory.getInstance().newDefaultBag();
       
       DataBag samples = (DataBag) input.get(0);
-      if (samples == null || samples.size() <= numSamples) {
+      if (samples == null)
+      {
+        // do nothing
+      }
+      else if (samples.size() <= numSamples) {
         // no need to construct a reservoir, so just emit intermediate tuples
         for (Tuple sample : samples) {
           // add the score on to the intermediate tuple
@@ -201,7 +223,7 @@ public class ReservoirSample extends AlgebraicEvalFunc<DataBag>
         }
       }
       
-      DataBag output = BagFactory.getInstance().newDefaultBag();  
+      DataBag output = BagFactory.getInstance().newDefaultBag();
       for (ScoredTuple scoredTuple : getReservoir()) {
         // add the score on to the intermediate tuple
         output.add(scoredTuple.getIntermediateTuple(tupleFactory));

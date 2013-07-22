@@ -3,6 +3,7 @@ package datafu.test.pig.stats;
 import static org.testng.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.adrianwalker.multilinestring.Multiline;
@@ -15,6 +16,9 @@ import org.junit.Assert;
 import org.testng.annotations.Test;
 
 import datafu.pig.stats.DoubleVAR;
+import datafu.pig.stats.FloatVAR;
+import datafu.pig.stats.IntVAR;
+import datafu.pig.stats.LongVAR;
 import datafu.pig.stats.VAR;
 import datafu.test.pig.PigTests;
 
@@ -262,5 +266,237 @@ public class VARTests  extends PigTests
     
     result = var.getValue();
     Assert.assertTrue("Expected about 333333.2 but found " + result,Math.abs(333333.2 - result) < 1);
+  }
+  
+  // make sure intermediate works, where initial just passes through a single tuple, and intermediate receives a large bag of the resulting tuples
+  @Test
+  public void varDoubleAlgebraicIntermediateTest() throws Exception {
+    DoubleVAR.Initial initialVar = new DoubleVAR.Initial();
+    DoubleVAR.Intermediate intermediateVar = new DoubleVAR.Intermediate();
+    DoubleVAR.Final finalVar = new DoubleVAR.Final();
+    
+    
+    DataBag intermediateBag = BagFactory.getInstance().newDefaultBag();
+    
+    for (int i=1; i<=1000; i++)
+    {
+      DataBag bag;
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (double)i);
+      bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      Tuple intermediateTuple = initialVar.exec(input);
+      intermediateBag.add(intermediateTuple);
+    }
+           
+    Tuple intermediateTuple = intermediateVar.exec(TupleFactory.getInstance().newTuple(intermediateBag));  
+    intermediateBag = BagFactory.getInstance().newDefaultBag(Arrays.asList(intermediateTuple));
+    Double result = finalVar.exec(TupleFactory.getInstance().newTuple(intermediateBag));
+    
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+  }
+  
+  // make sure final works, where initial just passes through a single tuple, intermediate does the same, and final receives the remainder
+  @Test
+  public void varDoubleAlgebraicFinalTest() throws Exception {
+    DoubleVAR.Initial initialVar = new DoubleVAR.Initial();
+    DoubleVAR.Intermediate intermediateVar = new DoubleVAR.Intermediate();
+    DoubleVAR.Final finalVar = new DoubleVAR.Final();
+    
+    DataBag finalBag = BagFactory.getInstance().newDefaultBag();
+    
+    for (int i=1; i<=1000; i++)
+    {
+      DataBag bag;
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (double)i);
+      bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      Tuple intermediateTuple = initialVar.exec(input);
+      DataBag intermediateBag = BagFactory.getInstance().newDefaultBag();
+      intermediateBag.add(intermediateTuple);
+      intermediateTuple = intermediateVar.exec(TupleFactory.getInstance().newTuple(intermediateBag)); 
+      finalBag.add(intermediateTuple);
+    }
+     
+    Double result = finalVar.exec(TupleFactory.getInstance().newTuple(finalBag));
+    
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+  }
+  
+  // make sure intermediate works, where initial just passes through a single tuple, and intermediate receives a large bag of the resulting tuples
+  @Test
+  public void varFloatAlgebraicIntermediateTest() throws Exception {
+    FloatVAR.Initial initialVar = new FloatVAR.Initial();
+    FloatVAR.Intermediate intermediateVar = new FloatVAR.Intermediate();
+    FloatVAR.Final finalVar = new FloatVAR.Final();
+    
+    
+    DataBag intermediateBag = BagFactory.getInstance().newDefaultBag();
+    
+    for (int i=1; i<=1000; i++)
+    {
+      DataBag bag;
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (float)i);
+      bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      Tuple intermediateTuple = initialVar.exec(input);
+      intermediateBag.add(intermediateTuple);
+    }
+           
+    Tuple intermediateTuple = intermediateVar.exec(TupleFactory.getInstance().newTuple(intermediateBag));  
+    intermediateBag = BagFactory.getInstance().newDefaultBag(Arrays.asList(intermediateTuple));
+    Double result = finalVar.exec(TupleFactory.getInstance().newTuple(intermediateBag));
+    
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+  }
+  
+  // make sure final works, where initial just passes through a single tuple, intermediate does the same, and final receives the remainder
+  @Test
+  public void varFloatAlgebraicFinalTest() throws Exception {
+    FloatVAR.Initial initialVar = new FloatVAR.Initial();
+    FloatVAR.Intermediate intermediateVar = new FloatVAR.Intermediate();
+    FloatVAR.Final finalVar = new FloatVAR.Final();
+    
+    DataBag finalBag = BagFactory.getInstance().newDefaultBag();
+    
+    for (int i=1; i<=1000; i++)
+    {
+      DataBag bag;
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (float)i);
+      bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      Tuple intermediateTuple = initialVar.exec(input);
+      DataBag intermediateBag = BagFactory.getInstance().newDefaultBag();
+      intermediateBag.add(intermediateTuple);
+      intermediateTuple = intermediateVar.exec(TupleFactory.getInstance().newTuple(intermediateBag)); 
+      finalBag.add(intermediateTuple);
+    }
+     
+    Double result = finalVar.exec(TupleFactory.getInstance().newTuple(finalBag));
+    
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+  }
+  
+  // make sure intermediate works, where initial just passes through a single tuple, and intermediate receives a large bag of the resulting tuples
+  @Test
+  public void varIntAlgebraicIntermediateTest() throws Exception {
+    IntVAR.Initial initialVar = new IntVAR.Initial();
+    IntVAR.Intermediate intermediateVar = new IntVAR.Intermediate();
+    IntVAR.Final finalVar = new IntVAR.Final();
+    
+    
+    DataBag intermediateBag = BagFactory.getInstance().newDefaultBag();
+    
+    for (int i=1; i<=1000; i++)
+    {
+      DataBag bag;
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (int)i);
+      bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      Tuple intermediateTuple = initialVar.exec(input);
+      intermediateBag.add(intermediateTuple);
+    }
+           
+    Tuple intermediateTuple = intermediateVar.exec(TupleFactory.getInstance().newTuple(intermediateBag));  
+    intermediateBag = BagFactory.getInstance().newDefaultBag(Arrays.asList(intermediateTuple));
+    Double result = finalVar.exec(TupleFactory.getInstance().newTuple(intermediateBag));
+    
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+  }
+  
+  // make sure final works, where initial just passes through a single tuple, intermediate does the same, and final receives the remainder
+  @Test
+  public void varIntAlgebraicFinalTest() throws Exception {
+    IntVAR.Initial initialVar = new IntVAR.Initial();
+    IntVAR.Intermediate intermediateVar = new IntVAR.Intermediate();
+    IntVAR.Final finalVar = new IntVAR.Final();
+    
+    DataBag finalBag = BagFactory.getInstance().newDefaultBag();
+    
+    for (int i=1; i<=1000; i++)
+    {
+      DataBag bag;
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (int)i);
+      bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      Tuple intermediateTuple = initialVar.exec(input);
+      DataBag intermediateBag = BagFactory.getInstance().newDefaultBag();
+      intermediateBag.add(intermediateTuple);
+      intermediateTuple = intermediateVar.exec(TupleFactory.getInstance().newTuple(intermediateBag)); 
+      finalBag.add(intermediateTuple);
+    }
+     
+    Double result = finalVar.exec(TupleFactory.getInstance().newTuple(finalBag));
+    
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+  }
+  
+  // make sure intermediate works, where initial just passes through a single tuple, and intermediate receives a large bag of the resulting tuples
+  @Test
+  public void varLongAlgebraicIntermediateTest() throws Exception {
+    LongVAR.Initial initialVar = new LongVAR.Initial();
+    LongVAR.Intermediate intermediateVar = new LongVAR.Intermediate();
+    LongVAR.Final finalVar = new LongVAR.Final();
+    
+    
+    DataBag intermediateBag = BagFactory.getInstance().newDefaultBag();
+    
+    for (int i=1; i<=1000; i++)
+    {
+      DataBag bag;
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (long)i);
+      bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      Tuple intermediateTuple = initialVar.exec(input);
+      intermediateBag.add(intermediateTuple);
+    }
+           
+    Tuple intermediateTuple = intermediateVar.exec(TupleFactory.getInstance().newTuple(intermediateBag));  
+    intermediateBag = BagFactory.getInstance().newDefaultBag(Arrays.asList(intermediateTuple));
+    Double result = finalVar.exec(TupleFactory.getInstance().newTuple(intermediateBag));
+    
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
+  }
+  
+  // make sure final works, where initial just passes through a single tuple, intermediate does the same, and final receives the remainder
+  @Test
+  public void varLongAlgebraicFinalTest() throws Exception {
+    LongVAR.Initial initialVar = new LongVAR.Initial();
+    LongVAR.Intermediate intermediateVar = new LongVAR.Intermediate();
+    LongVAR.Final finalVar = new LongVAR.Final();
+    
+    DataBag finalBag = BagFactory.getInstance().newDefaultBag();
+    
+    for (int i=1; i<=1000; i++)
+    {
+      DataBag bag;
+      Tuple t = TupleFactory.getInstance().newTuple(1);
+      t.set(0, (long)i);
+      bag = BagFactory.getInstance().newDefaultBag();
+      bag.add(t);
+      Tuple input = TupleFactory.getInstance().newTuple(bag);
+      Tuple intermediateTuple = initialVar.exec(input);
+      DataBag intermediateBag = BagFactory.getInstance().newDefaultBag();
+      intermediateBag.add(intermediateTuple);
+      intermediateTuple = intermediateVar.exec(TupleFactory.getInstance().newTuple(intermediateBag)); 
+      finalBag.add(intermediateTuple);
+    }
+     
+    Double result = finalVar.exec(TupleFactory.getInstance().newTuple(finalBag));
+    
+    Assert.assertTrue("Expected about 83333.25 but found " + result,Math.abs(83333.25 - result) < 0.0001);
   }
  }

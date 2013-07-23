@@ -27,6 +27,8 @@ public abstract class PigTests
   @org.testng.annotations.BeforeClass
   public void beforeClass()
   {
+    // TODO make it configurable whether this happens, for travis-ci we can't spam the logs so much,
+    // however otherwise it is useful to see the errors
     Logger.getRootLogger().removeAllAppenders();
     Logger.getLogger(JvmMetrics.class).setLevel(Level.OFF);
   }

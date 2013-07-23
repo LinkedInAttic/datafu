@@ -31,9 +31,9 @@ import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
- * This UDF takes an input bag and generates a count 
- * of the number of times each distinct tuple appears.
+ * Generates a count of the number of times each distinct tuple appears in a bag.
  * 
+ * <p>
  * Example:
  * <pre>
  * {@code
@@ -53,6 +53,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * output_flatten = FOREACH input GENERATE CountEachFlatten(B);
  * } 
  * </pre>
+ * </p>
  */
 public class CountEach extends AccumulatorEvalFunc<DataBag>
 {

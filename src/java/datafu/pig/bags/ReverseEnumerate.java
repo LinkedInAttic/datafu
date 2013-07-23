@@ -29,14 +29,18 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Enumerate through a bag, replacing each (elem) with (elem, idx). Indices are being produced in 
- * Decreasing order. For example:
+ * Enumerate a bag, appending to each tuple its index within the bag, with indices being produced in 
+ * descending order. 
+ * 
+ * <p>
+ * For example:
  * <pre>
  *   {(A),(B),(C),(D)} => {(A,3),(B,2),(C,1),(D,0)}
  * </pre>
  * The first constructor parameter (optional) dictates the starting index of the counting. As the
  * UDF requires the size of the bag for reverse counting, this UDF does <b>not</b> implement the
  * accumulator interface and suffers from the slight performance penalty of DataBag materialization.
+ * </p>
  *
  * <p>
  * Example:
@@ -53,6 +57,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * output = FOREACH input GENERATE ReverseEnumerate(B);
  * }
  * </pre>
+ * </p>
  */
 public class ReverseEnumerate extends SimpleEvalFunc<DataBag>
 {

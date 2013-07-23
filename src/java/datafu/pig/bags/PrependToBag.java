@@ -28,7 +28,10 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Prepends a tuple to a bag. N.B. this copies the entire input bag, so don't use it for large bags.
+ * Prepends a tuple to a bag. 
+ * 
+ * <p>N.B. this copies the entire input bag, so don't use it for large bags.</p>
+ * 
  * <p>
  * Example:
  * <pre>
@@ -46,6 +49,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * output = FOREACH input GENERATE PrependToBag(B,T) as B;
  * }
  * </pre>
+ * </p>
  */
 public class PrependToBag extends SimpleEvalFunc<DataBag>
 {

@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 
 /**
  * Generates pairs of all items in a bag.
+ * 
  * <p>
  * Example:
  * <pre>
@@ -47,6 +48,7 @@ import com.google.common.collect.ImmutableList;
  * output = FOREACH input GENERATE UnorderedPairs(B);
  * } 
  * </pre>
+ * </p>
  */
 public class UnorderedPairs extends EvalFunc<DataBag>
 {

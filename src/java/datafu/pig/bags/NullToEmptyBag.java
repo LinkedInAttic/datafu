@@ -25,7 +25,7 @@ import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
- * UDF that, if the input is null, returns an empty bag; otherwise,
+ * Returns an empty bag if the input is null; otherwise,
  * returns the input bag unchanged.
  */
 public class NullToEmptyBag extends EvalFunc<DataBag>

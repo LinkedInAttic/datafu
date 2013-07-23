@@ -18,6 +18,7 @@ package datafu.pig.bags;
 import java.io.IOException;
 import java.util.HashSet;
 
+import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.BagFactory;
@@ -54,21 +55,23 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * 
  * @param map Any number of strings specifying field positions
  */
-public class DistinctBy extends EvalFunc<DataBag>
+public class DistinctBy extends AccumulatorEvalFunc<DataBag>
 {
   private final static String delimiter = "-";
   private HashSet<Integer> fields = new HashSet<Integer>();
+  private HashSet<String> seen = new HashSet<String>();   
+  private DataBag outputBag;
   
   public DistinctBy(String... fields)
   {
     for(String field : fields) {
       this.fields.add(Integer.parseInt(field));
-    }   
+    }
+    cleanup();
   }
 
-
   @Override
-  public DataBag exec(Tuple input) throws IOException
+  public void accumulate(Tuple input) throws IOException
   {
     if (input.size() != 1) {
       throw new RuntimeException("Expected input to have only a single field");
@@ -76,11 +79,8 @@ public class DistinctBy extends EvalFunc<DataBag>
     if (input.getType(0) != DataType.BAG) {
       throw new RuntimeException("Expected a BAG as input");
     }
-    // new hash to record things that have already been seen
-    HashSet<String> seen = new HashSet<String>();    
-
+    
     DataBag inputBag = (DataBag)input.get(0);
-    DataBag outputBag = BagFactory.getInstance().newDefaultBag();
     for (Tuple t : inputBag) {
       String distinctString = getDistinctString(t, this.fields);
       if (!seen.contains(distinctString)) {
@@ -88,7 +88,19 @@ public class DistinctBy extends EvalFunc<DataBag>
         seen.add(distinctString);
       }
     }
-    return outputBag;    
+  }
+
+  @Override
+  public void cleanup()
+  {
+    seen.clear();
+    outputBag = BagFactory.getInstance().newDefaultBag();
+  }
+
+  @Override
+  public DataBag getValue()
+  {
+    return outputBag;
   }
   
   @Override

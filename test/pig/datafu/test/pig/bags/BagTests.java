@@ -3,6 +3,7 @@ package datafu.test.pig.bags;
 import static org.testng.Assert.assertEquals;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -16,6 +17,7 @@ import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
 import datafu.pig.bags.CountEach;
+import datafu.pig.bags.DistinctBy;
 import datafu.pig.bags.Enumerate;
 import datafu.test.pig.PigTests;
 
@@ -602,12 +604,195 @@ public class BagTests extends PigTests
     PigTest test = createPigTestFromString(distinctByTest);
     
     writeLinesToFile("input",
-                     "({(Z,1,0),(A,1,0),(A,1,0),(B,2,0),(B,22,1),(C,3,0),(D,4,0),(E,5,0)})");
+                     "({(Z,1,0),(A,1,0),(A,1,0),(B,2,0),(B,22,1),(C,3,0),(D,4,0),(E,5,0)})",
+                     "({(A,10,2),(M,50,3),(A,34,49), (A,24,42), (Z,49,22),(B,1,1)},(B,2,2))");
     
     test.runScript();
     
     assertOutput(test, "data2",
-                 "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})");
+                 "({(Z,1,0),(A,1,0),(B,2,0),(C,3,0),(D,4,0),(E,5,0)})",
+                 "({(A,10,2),(M,50,3),(Z,49,22),(B,1,1)})");
+  }
+  
+  @Test
+  public void distinctByExecTest() throws Exception
+  {
+    DistinctBy distinct = new DistinctBy("0");
+    
+    DataBag bag;
+    Tuple input;
+    Tuple data;
+   
+    bag = BagFactory.getInstance().newDefaultBag();
+    input = TupleFactory.getInstance().newTuple(bag);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 10);
+    data.set(1, 20);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 11);
+    data.set(1, 50);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 10);
+    data.set(1, 22);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 12);
+    data.set(1, 40);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 11);
+    data.set(1, 50);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 11);
+    data.set(1, 51);
+        
+    DataBag result = distinct.exec(input);
+    
+    Assert.assertEquals(3, result.size());
+    
+    Iterator<Tuple> iter = result.iterator();
+    Assert.assertEquals("(10,20)", iter.next().toString());
+    Assert.assertEquals("(11,50)", iter.next().toString());
+    Assert.assertEquals("(12,40)", iter.next().toString());
+    
+    // do it again to test cleanup
+    bag = BagFactory.getInstance().newDefaultBag();
+    input = TupleFactory.getInstance().newTuple(bag);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 12);
+    data.set(1, 42);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 11);
+    data.set(1, 51);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag.add(data);
+    data.set(0, 11);
+    data.set(1, 50);
+    
+    result = distinct.exec(input);
+    
+    Assert.assertEquals(2, result.size());
+    
+    iter = result.iterator();
+    Assert.assertEquals("(12,42)", iter.next().toString());
+    Assert.assertEquals("(11,51)", iter.next().toString());
+  }
+  
+  @Test
+  public void distinctByAccumulateTest() throws Exception
+  {
+    DistinctBy distinct = new DistinctBy("0");
+    
+    DataBag bag;
+    Tuple input;
+    Tuple data;
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 10);
+    data.set(1, 20);
+    distinct.accumulate(input);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 11);
+    data.set(1, 50);
+    distinct.accumulate(input);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 10);
+    data.set(1, 22);
+    distinct.accumulate(input);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 12);
+    data.set(1, 40);
+    distinct.accumulate(input);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 11);
+    data.set(1, 50);
+    distinct.accumulate(input);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 11);
+    data.set(1, 51);
+    distinct.accumulate(input);
+    
+    DataBag result = distinct.getValue();
+    
+    Assert.assertEquals(3, result.size());
+    
+    Iterator<Tuple> iter = result.iterator();
+    Assert.assertEquals("(10,20)", iter.next().toString());
+    Assert.assertEquals("(11,50)", iter.next().toString());
+    Assert.assertEquals("(12,40)", iter.next().toString());
+    
+    // do it again to test cleanup
+    distinct.cleanup();
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 12);
+    data.set(1, 42);
+    distinct.accumulate(input);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 11);
+    data.set(1, 51);
+    distinct.accumulate(input);
+    
+    data = TupleFactory.getInstance().newTuple(2);
+    bag = BagFactory.getInstance().newDefaultBag();
+    bag.add(data);
+    input = TupleFactory.getInstance().newTuple(bag);
+    data.set(0, 11);
+    data.set(1, 50);
+    distinct.accumulate(input);
+    
+    result = distinct.getValue();
+    
+    Assert.assertEquals(2, result.size());
+    
+    iter = result.iterator();
+    Assert.assertEquals("(12,42)", iter.next().toString());
+    Assert.assertEquals("(11,51)", iter.next().toString());
   }
   
   /**

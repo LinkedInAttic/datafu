@@ -31,12 +31,16 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * Enumerate through a bag, replacing each (elem) with (elem, idx). For example:
+ * Enumerate a bag, appending to each tuple its index within the bag.
+ * 
+ * <p>
+ * For example:
  * <pre>
  *   {(A),(B),(C),(D)} => {(A,0),(B,1),(C,2),(D,3)}
  * </pre>
  * The first constructor parameter (optional) dictates the starting index of the counting.
  * This UDF implements the accumulator interface, reducing DataBag materialization costs.
+ * </p>
  *
  * <p>
  * Example:

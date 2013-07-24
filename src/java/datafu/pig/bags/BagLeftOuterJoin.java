@@ -38,11 +38,15 @@ import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 import datafu.pig.util.AliasableEvalFunc;
 
 /**
- * Allows you to perform an in-memory left outer join across multiple bags.<br/>
- * Format for invocation is BagLeftOuterJoin(bag, 'key',....).  
- * This UDF expects that all bags are non-null and that there is a corresponding key for each bag.  
- * The <em>key</em> that is expected is the alias of the key inside of the preceding bag. 
+ * Performs an in-memory left outer join across multiple bags.
  * 
+ * <p>
+ * The format for invocation is BagLeftOuterJoin(bag, 'key',....).  
+ * This UDF expects that all bags are non-null and that there is a corresponding key for each bag.  
+ * The <em>key</em> that is expected is the alias of the key inside of the preceding bag.
+ * </p> 
+ * 
+ * <p>
  * Example:
  * <code>
  * define BagLeftOuterJoin datafu.pig.bags.BagLeftOuterJoin();
@@ -55,7 +59,7 @@ import datafu.pig.util.AliasableEvalFunc;
  * -- describe bag_joined:
  * -- bag_joined: {joined: {(bag1::key1: chararray, bag1::value1: chararray, bag2::key2: chararray, bag2::value2: int)}} 
  * </code>
- * 
+ * </p>
  * 
  * @author wvaughan
  * 

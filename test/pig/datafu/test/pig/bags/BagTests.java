@@ -156,9 +156,11 @@ public class BagTests extends PigTests
   
   data = LOAD 'input' AS (A: bag{T: tuple(v:INT)}, B: bag{T: tuple(v:INT)}, C: bag{T: tuple(v:INT)});
   
+  describe data;
+  
   data2 = FOREACH data GENERATE BagConcat(A,B,C);
   
-  --describe data2
+  describe data2;
   
   STORE data2 INTO 'output';
    */
@@ -1004,7 +1006,7 @@ public class BagTests extends PigTests
   /**
   register $JAR_PATH
 
-  define BagUnion datafu.pig.bags.BagUnion();
+  define BagUnion datafu.pig.bags.BagConcat();
   
   data = LOAD 'input' AS (input_bag: bag {T: tuple(inner_bag: bag {T2: tuple(k: int, v: chararray)})});
   describe data;

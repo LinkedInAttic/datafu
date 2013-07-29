@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.Algebraic;
 import org.apache.pig.EvalFunc;
+import org.apache.pig.builtin.Nondeterministic;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
@@ -37,6 +38,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * @author wvaughan
  *
  */
+@Nondeterministic
 public class ReservoirSample extends AccumulatorEvalFunc<DataBag> implements Algebraic
 {
   Integer numSamples;

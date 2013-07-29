@@ -22,6 +22,7 @@ import java.util.UUID;
 import org.apache.pig.Accumulator;
 import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.EvalFunc;
+import org.apache.pig.builtin.Nondeterministic;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
@@ -68,6 +69,7 @@ import org.joda.time.Period;
  * </pre>
  * </p>
  */
+@Nondeterministic
 public class Sessionize extends AccumulatorEvalFunc<DataBag>
 {
   private final long millis;

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import org.apache.pig.EvalFunc;
+import org.apache.pig.builtin.Nondeterministic;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
@@ -56,6 +57,7 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * }
  * </pre>
  */
+@Nondeterministic
 public class WeightedSample extends EvalFunc<DataBag>
 {
   BagFactory bagFactory = BagFactory.getInstance();

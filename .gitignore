@@ -13,3 +13,5 @@ test-output/
 .pigunit-input-overriden.txt.crc
 pigunit-input-overriden.txt
 *.asc
+bin/
+.ant-targets-build.xml

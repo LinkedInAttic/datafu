@@ -1,17 +1,21 @@
 # 1.0.0
 
+**This is not a backwards compatible release.**
+
 Additions:
 
 * Created SampleByKey, which provides a way to sample tuples based on certain fields.
-* Created Coalesce, which returns the first non-null value from a list of arguments.
+* Created Coalesce, which returns the first non-null value from a list of arguments like SQL's COALESCE
 * Sessionize now supports long values for timestamp, in addition to string representation of time.
 * Added ReservoirSample
 * BagConcat can now operate on a bag of bags, in addition to a tuple of bags
-* Better documentation and more test cases across the board
 * Created TransposeTupleToBag, which creates a bag of key-value pairs from a tuple
 * SessionCount now implements Accumulator interface
 * DistinctBy now implements Accumulator interface
 * Using pigunit from Maven for testing
+* Added In filter func, which behaves like SQL's IN
+* Added many more test cases to improve coverage
+* Improved documentation
 
 Changes:
 

@@ -9,6 +9,7 @@ import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.pigunit.PigTest;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.annotations.Test;
 
 import datafu.test.pig.PigTests;
@@ -328,8 +329,6 @@ public class CoalesceTests extends PigTests
   */
   @Multiline private static String coalesceCastIntToDatetimeTest;
   
-  // The first parameter is an int, but the fixed parameter is a long.
-  // They are merged to a long.
   @Test
   public void coalesceCastIntToDatetimeTest() throws Exception
   {
@@ -350,7 +349,7 @@ public class CoalesceTests extends PigTests
       switch(testcase)
       {
       case 1:
-        Assert.assertEquals("2013-08-06T14:56:23.000-07:00", t.get(1).toString()); break;
+        Assert.assertEquals("2013-08-06T21:56:23.000Z", ((DateTime)t.get(1)).toDateTime(DateTimeZone.UTC).toString()); break;
       case 2:
         Assert.assertEquals("1970-01-01T00:00:00.000Z", t.get(1).toString()); break;
       default:
@@ -378,8 +377,6 @@ public class CoalesceTests extends PigTests
   */
   @Multiline private static String coalesceCastIntToDatetimeLazyTest;
   
-  // The first parameter is an int, but the fixed parameter is a long.
-  // They are merged to a long.
   @Test
   public void coalesceCastIntToDatetimeLazyTest() throws Exception
   {
@@ -400,7 +397,7 @@ public class CoalesceTests extends PigTests
       switch(testcase)
       {
       case 1:
-        Assert.assertEquals("2013-08-06T14:56:23.000-07:00", t.get(1).toString()); break;
+        Assert.assertEquals("2013-08-06T21:56:23.000Z", ((DateTime)t.get(1)).toDateTime(DateTimeZone.UTC).toString()); break;
       case 2:
         Assert.assertEquals("1970-01-01T00:00:00.000Z", t.get(1).toString()); break;
       default:

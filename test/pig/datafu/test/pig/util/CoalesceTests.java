@@ -118,31 +118,146 @@ public class CoalesceTests extends PigTests
   
   /**
   register $JAR_PATH
-  
+
   define COALESCE datafu.pig.util.Coalesce();
   
-  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2:DOUBLE);
+  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:LONG);
   
-  data2 = FOREACH data GENERATE testcase, COALESCE(val1,val2) as result;
+  data2 = FOREACH data GENERATE testcase, COALESCE(val1,100) as result;
   
   describe data2;
   
   data3 = FOREACH data2 GENERATE testcase, result;
   
-  STORE data3 INTO 'output';
-  */
-  @Multiline private static String coalesceDiffTypesTest;
+  data4 = FOREACH data3 GENERATE testcase, result*100 as result;
   
-  @Test(expectedExceptions=FrontendException.class)
-  public void coalesceDiffTypesTest() throws Exception
+  STORE data4 INTO 'output';
+  */
+  @Multiline private static String coalesceIntAndLongTest;
+  
+  // The first parameter is a long and the fixed value is an int.
+  // They are merged to a long.
+  @Test
+  public void coalesceCastIntToLongTest1() throws Exception
   {
-    PigTest test = createPigTestFromString(coalesceDiffTypesTest);
+    PigTest test = createPigTestFromString(coalesceIntAndLongTest);
     
-    this.writeLinesToFile("input", "1,1,2.0");
+    this.writeLinesToFile("input", "1,5",
+                                   "2,");
     
     test.runScript();
     
-    this.getLinesForAlias(test, "data3");
+    List<Tuple> lines = this.getLinesForAlias(test, "data4");
+    
+    Assert.assertEquals(2, lines.size());
+    for (Tuple t : lines)
+    {
+      switch((Integer)t.get(0))
+      {
+      case 1:
+        Assert.assertEquals(500L, t.get(1)); break;
+      case 2:
+        Assert.assertEquals(10000L, t.get(1)); break;
+      default:
+        Assert.fail("Did not expect: " + t.get(1));                    
+      }
+    }
+  }
+  
+  /**
+  register $JAR_PATH
+
+  define COALESCE datafu.pig.util.Coalesce();
+  
+  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT);
+  
+  data2 = FOREACH data GENERATE testcase, COALESCE(val1,100L) as result;
+  
+  describe data2;
+  
+  data3 = FOREACH data2 GENERATE testcase, result;
+  
+  data4 = FOREACH data3 GENERATE testcase, result*100 as result;
+  
+  STORE data4 INTO 'output';
+  */
+  @Multiline private static String coalesceIntAndLongTest2;
+  
+  // The first parameter is an int, but the fixed parameter is a long.
+  // They are merged to a long.
+  @Test
+  public void coalesceCastIntToLongTest2() throws Exception
+  {
+    PigTest test = createPigTestFromString(coalesceIntAndLongTest2);
+    
+    this.writeLinesToFile("input", "1,5",
+                                   "2,");
+    
+    test.runScript();
+    
+    List<Tuple> lines = this.getLinesForAlias(test, "data4");
+    
+    Assert.assertEquals(2, lines.size());
+    for (Tuple t : lines)
+    {
+      switch((Integer)t.get(0))
+      {
+      case 1:
+        Assert.assertEquals(500L, t.get(1)); break;
+      case 2:
+        Assert.assertEquals(10000L, t.get(1)); break;
+      default:
+        Assert.fail("Did not expect: " + t.get(1));                    
+      }
+    }
+  }
+  
+  /**
+  register $JAR_PATH
+
+  define COALESCE datafu.pig.util.Coalesce();
+  
+  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT);
+  
+  data2 = FOREACH data GENERATE testcase, COALESCE(val1,100.0) as result;
+  
+  describe data2;
+  
+  data3 = FOREACH data2 GENERATE testcase, result;
+  
+  data4 = FOREACH data3 GENERATE testcase, result*100 as result;
+  
+  STORE data4 INTO 'output';
+  */
+  @Multiline private static String coalesceIntAndDoubleTest;
+  
+  // The first parameter is an int, but the fixed parameter is a long.
+  // They are merged to a long.
+  @Test
+  public void coalesceCastIntToDoubleTest() throws Exception
+  {
+    PigTest test = createPigTestFromString(coalesceIntAndDoubleTest);
+    
+    this.writeLinesToFile("input", "1,5",
+                                   "2,");
+    
+    test.runScript();
+    
+    List<Tuple> lines = this.getLinesForAlias(test, "data4");
+    
+    Assert.assertEquals(2, lines.size());
+    for (Tuple t : lines)
+    {
+      switch((Integer)t.get(0))
+      {
+      case 1:
+        Assert.assertEquals(500.0, t.get(1)); break;
+      case 2:
+        Assert.assertEquals(10000.0, t.get(1)); break;
+      default:
+        Assert.fail("Did not expect: " + t.get(1));                    
+      }
+    }
   }
   
   /**
@@ -160,12 +275,12 @@ public class CoalesceTests extends PigTests
   
   STORE data3 INTO 'output';
   */
-  @Multiline private static String coalesceBagTypeTest;
+  @Multiline private static String coalesceBagIncompatibleTypeTest;
   
   @Test(expectedExceptions=FrontendException.class)
-  public void coalesceBagTypeTest() throws Exception
+  public void coalesceBagIncompatibleTypeTest() throws Exception
   {
-    PigTest test = createPigTestFromString(coalesceBagTypeTest);
+    PigTest test = createPigTestFromString(coalesceBagIncompatibleTypeTest);
     
     this.writeLinesToFile("input", "1,1,{(2)}");
     

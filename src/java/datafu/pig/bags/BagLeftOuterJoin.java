@@ -249,7 +249,7 @@ public class BagLeftOuterJoin extends AliasableEvalFunc<DataBag>
         }
       }
       outputSchema = new Schema(new Schema.FieldSchema("joined", bagSchema, DataType.BAG));
-      log.info("output schema: "+outputSchema.toString());
+      log.debug("output schema: "+outputSchema.toString());
     } catch (FrontendException e) {
       e.printStackTrace();
       throw new RuntimeException(e);

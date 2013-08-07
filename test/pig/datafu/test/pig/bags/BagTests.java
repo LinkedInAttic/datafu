@@ -63,6 +63,44 @@ public class BagTests extends PigTests
   /**
   register $JAR_PATH
 
+  define EmptyBagToNull datafu.pig.bags.EmptyBagToNull();
+  
+  data = LOAD 'input' AS (B: bag {T: tuple(v:INT)});
+  
+  dump data;
+  
+  data2 = FOREACH data GENERATE EmptyBagToNull(B) as P;
+  
+  dump data2;
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String emptyBagToNullTest;
+  
+  @Test
+  public void emptyBagToNullTest() throws Exception
+  {
+    PigTest test = createPigTestFromString(emptyBagToNullTest);
+            
+    writeLinesToFile("input", 
+                     "({(1),(2),(3),(4),(5)})",
+                     "()",
+                     "({})",
+                     "{(4),(5)})");
+            
+    test.runScript();
+        
+    assertOutput(test, "data2",
+                 "({(1),(2),(3),(4),(5)})",
+                 "()",
+                 "()",
+                 "({(4),(5)})");
+  }
+  
+  /**
+  register $JAR_PATH
+
   define AppendToBag datafu.pig.bags.AppendToBag();
   
   data = LOAD 'input' AS (key:INT, B: bag{T: tuple(v:INT)}, T: tuple(v:INT));

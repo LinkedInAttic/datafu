@@ -434,4 +434,80 @@ public class CoalesceTests extends PigTests
     
     this.getLinesForAlias(test, "data3");
   }
+  
+  /**
+  register $JAR_PATH
+
+  define COALESCE datafu.pig.util.Coalesce('lazy');
+  define EmptyBagToNullFields datafu.pig.bags.EmptyBagToNullFields();
+  
+  input1 = LOAD 'input1' using PigStorage(',') AS (val1:INT,val2:INT);
+  input2 = LOAD 'input2' using PigStorage(',') AS (val1:INT,val2:INT);
+  input3 = LOAD 'input3' using PigStorage(',') AS (val1:INT,val2:INT);
+  
+  data4 = COGROUP input1 BY val1,
+                  input2 BY val1,
+                  input3 BY val1;
+  
+  dump data4;
+  
+  data4 = FOREACH data4 GENERATE
+    FLATTEN(input1),
+    FLATTEN(EmptyBagToNullFields(input2)),
+    FLATTEN(EmptyBagToNullFields(input3));
+  
+  dump data4;
+    
+  describe data4;
+  
+  data5 = FOREACH data4 GENERATE input1::val1 as val1, COALESCE(input2::val2,0L) as val2, COALESCE(input3::val2,0L) as val3;
+  
+  --describe data5;
+  
+  STORE data5 INTO 'output';
+  */
+  @Multiline private static String leftJoinTest;
+  
+  @Test
+  public void leftJoinTest() throws Exception
+  {
+    PigTest test = createPigTestFromString(leftJoinTest);
+    
+    this.writeLinesToFile("input1", "1,1",
+                                    "2,2",
+                                    "5,5");
+    
+    this.writeLinesToFile("input2", "1,10",
+                                    "3,30",
+                                    "5,50");
+    
+    this.writeLinesToFile("input3", "2,100",
+                                    "5,500");
+    
+    test.runScript();
+    
+    List<Tuple> lines = this.getLinesForAlias(test, "data5");
+    
+    Assert.assertEquals(3, lines.size());
+    for (Tuple t : lines)
+    {
+      switch((Integer)t.get(0))
+      {
+      case 1:
+        Assert.assertEquals(10L, t.get(1));  
+        Assert.assertEquals(0L, t.get(2));  
+        break;
+      case 2:
+        Assert.assertEquals(0L, t.get(1)); 
+        Assert.assertEquals(100L, t.get(2)); 
+        break;
+      case 5:
+        Assert.assertEquals(50L, t.get(1)); 
+        Assert.assertEquals(500L, t.get(2)); 
+        break;
+      default:
+        Assert.fail("Did not expect: " + t.get(0));                    
+      }
+    }
+  }
 }

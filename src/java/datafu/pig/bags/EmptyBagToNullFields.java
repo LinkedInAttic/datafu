@@ -3,7 +3,6 @@ package datafu.pig.bags;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
@@ -12,7 +11,7 @@ import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
-import datafu.pig.util.AliasableEvalFunc;
+import datafu.pig.util.ContextualEvalFunc;
 
 /**
  * For an empty bag, inserts a tuple having null values for all fields; 
@@ -23,7 +22,7 @@ import datafu.pig.util.AliasableEvalFunc;
  * as FLATTEN on an empty bag produces no data.
  * </p>
  */
-public class EmptyBagToNullFields extends AliasableEvalFunc<DataBag>
+public class EmptyBagToNullFields extends ContextualEvalFunc<DataBag>
 {
   @Override
   public DataBag exec(Tuple tuple) throws IOException
@@ -50,7 +49,7 @@ public class EmptyBagToNullFields extends AliasableEvalFunc<DataBag>
   }
 
   @Override
-  public Schema getOutputSchema(Schema input)
+  public Schema outputSchema(Schema input)
   {
     try
     {

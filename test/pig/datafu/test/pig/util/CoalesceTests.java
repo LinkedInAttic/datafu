@@ -411,7 +411,7 @@ public class CoalesceTests extends PigTests
   
   define COALESCE datafu.pig.util.Coalesce();
   
-  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2: bag {tuple(aVal:int)});
+  data = LOAD 'input' using PigStorage(',') AS (testcase:INT,val1:INT,val2:LONG);
   
   data2 = FOREACH data GENERATE testcase, COALESCE(val1,val2) as result;
   
@@ -428,7 +428,7 @@ public class CoalesceTests extends PigTests
   {
     PigTest test = createPigTestFromString(coalesceBagIncompatibleTypeTest);
     
-    this.writeLinesToFile("input", "1,1,{(2)}");
+    this.writeLinesToFile("input", "1,1,2L}");
     
     test.runScript();
     

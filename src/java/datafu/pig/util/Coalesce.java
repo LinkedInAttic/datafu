@@ -17,6 +17,7 @@
 package datafu.pig.util;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.pig.EvalFunc;
@@ -49,7 +50,7 @@ import org.apache.pig.impl.util.UDFContext;
  * @author "Matthew Hayes <mhayes@linkedin.com>"
  *
  */
-public class Coalesce extends EvalFunc<Object>
+public class Coalesce extends AliasableEvalFunc<Object>
 {
   private String instanceName;
   private boolean strict;
@@ -87,7 +88,7 @@ public class Coalesce extends EvalFunc<Object>
     }
     
     Byte type = (Byte)getInstanceProperties().get("type");
-            
+                
     for (Object o : input)
     {
       if (o != null)
@@ -98,18 +99,28 @@ public class Coalesce extends EvalFunc<Object>
         }
         else
         {
-          switch (type)
+          try
           {
-          case DataType.INTEGER:
-            return DataType.toInteger(o);
-          case DataType.LONG:
-            return DataType.toLong(o);
-          case DataType.DOUBLE:
-            return DataType.toDouble(o); 
-          case DataType.FLOAT:
-            return DataType.toFloat(o);      
-          default:
-            return o;
+            switch (type)
+            {
+            case DataType.INTEGER:
+              return DataType.toInteger(o);
+            case DataType.LONG:
+              return DataType.toLong(o);
+            case DataType.DOUBLE:
+              return DataType.toDouble(o); 
+            case DataType.FLOAT:
+              return DataType.toFloat(o);      
+            default:
+              return o;
+            }
+          }
+          catch (Exception e)
+          {
+            DataFuException dfe = new DataFuException(e.getMessage(),e);
+            dfe.setData(o);
+            dfe.setFieldAliases(getFieldAliases());
+            throw dfe;
           }
         }
       }
@@ -119,7 +130,7 @@ public class Coalesce extends EvalFunc<Object>
   }
   
   @Override
-  public Schema outputSchema(Schema input)
+  public Schema getOutputSchema(Schema input)
   {
     if (input.getFields().size() == 0)
     {
@@ -175,50 +186,5 @@ public class Coalesce extends EvalFunc<Object>
     getInstanceProperties().put("type", outputType);
         
     return new Schema(new Schema.FieldSchema("item",outputType));
-  }
-  
-  /**
-   * Helper method to return the context properties for this class
-   * 
-   * @return context properties
-   */
-  protected Properties getContextProperties() {
-    UDFContext context = UDFContext.getUDFContext();
-    Properties properties = context.getUDFProperties(this.getClass());
-    return properties;
-  }
-  
-  /**
-   * Helper method to return the context properties for this instance of this class
-   * 
-   * @return instances properties
-   */
-  protected Properties getInstanceProperties() {
-    Properties contextProperties = getContextProperties();
-    if (!contextProperties.containsKey(getInstanceName())) {
-      contextProperties.put(getInstanceName(), new Properties());
-    }
-    return (Properties)contextProperties.get(getInstanceName());
-  }
-  
-  /**
-   * 
-   * @return the name of this instance corresponding to the UDF Context Signature
-   * @see #setUDFContextSignature(String)
-   */
-  protected String getInstanceName() {
-    if (instanceName == null) {
-      throw new RuntimeException("Instance name is null.  This should not happen unless UDFContextSignature was not set.");
-    }
-    return instanceName;
-  }  
-  
-  private void setInstanceName(String instanceName) {
-    this.instanceName = instanceName;
-  }
-  
-  @Override
-  public void setUDFContextSignature(String signature) {
-    setInstanceName(signature);
   }
 }

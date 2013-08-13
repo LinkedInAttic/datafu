@@ -25,7 +25,6 @@ import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
-import org.apache.pig.impl.util.WrappedIOException;
 import org.apache.pig.tools.pigstats.PigStatusReporter;
 
 import com.google.common.collect.ImmutableList;
@@ -91,7 +90,7 @@ public class UnorderedPairs extends EvalFunc<DataBag>
       return outputBag;
     }
     catch (Exception e) {
-      throw WrappedIOException.wrap("Caught exception processing input of " + this.getClass().getName(), e);
+      throw new RuntimeException("Caught exception processing input of " + this.getClass().getName(), e);
     }
   }
 

@@ -18,7 +18,6 @@ package datafu.pig.bags;
 
 import java.io.IOException;
 
-import org.apache.pig.Accumulator;
 import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -27,8 +26,6 @@ import org.apache.pig.data.Tuple;
 import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
-
-import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * Enumerate a bag, appending to each tuple its index within the bag.

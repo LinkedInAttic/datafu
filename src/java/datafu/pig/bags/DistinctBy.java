@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.HashSet;
 
 import org.apache.pig.AccumulatorEvalFunc;
-import org.apache.pig.EvalFunc;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;

@@ -18,14 +18,11 @@ package datafu.pig.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
-import org.apache.pig.EvalFunc;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
-import org.apache.pig.impl.util.UDFContext;
 
 /**
  * Makes implementing and using UDFs easier by enabling named parameters. 
@@ -79,11 +76,10 @@ import org.apache.pig.impl.util.UDFContext;
  *
  * @param <T>
  */
-public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
+public abstract class AliasableEvalFunc<T> extends ContextualEvalFunc<T>
 {
   private static final String ALIAS_MAP_PROPERTY = "aliasMap";
-  private String instanceName;
-  
+    
   private Map<String, Integer> aliasToPosition = null;
   
   public AliasableEvalFunc() {
@@ -98,11 +94,6 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     storeFieldAliases(input);
     return getOutputSchema(input);
   }
-
-  @Override
-  public void setUDFContextSignature(String signature) {
-    setInstanceName(signature);
-  }
   
   /**
    * Specify the output schema as in {link EvalFunc#outputSchema(Schema)}.
@@ -111,30 +102,6 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
    * @return outputSchema
    */
   public abstract Schema getOutputSchema(Schema input);
-  
-  /**
-   * Helper method to return the context properties for this class
-   * 
-   * @return context properties
-   */
-  protected Properties getContextProperties() {
-    UDFContext context = UDFContext.getUDFContext();
-    Properties properties = context.getUDFProperties(this.getClass());
-    return properties;
-  }
-  
-  /**
-   * Helper method to return the context properties for this instance of this class
-   * 
-   * @return instances properties
-   */
-  protected Properties getInstanceProperties() {
-    Properties contextProperties = getContextProperties();
-    if (!contextProperties.containsKey(getInstanceName())) {
-      contextProperties.put(getInstanceName(), new Properties());
-    }
-    return (Properties)contextProperties.get(getInstanceName());
-  }
 
   @SuppressWarnings("unchecked")
   private Map<String, Integer> getAliasMap() {
@@ -294,21 +261,5 @@ public abstract class AliasableEvalFunc<T> extends EvalFunc<T>
     if (i == null) throw new FieldNotFound("Attempt to reference unknown alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     if (i >= tuple.size()) throw new FieldNotFound("Attempt to reference outside of tuple for alias: "+alias+"\n Instance Properties: "+getInstanceProperties());
     return tuple.get(i);
-  }
-
-  /**
-   * 
-   * @return the name of this instance corresponding to the UDF Context Signature
-   * @see #setUDFContextSignature(String)
-   */
-  protected String getInstanceName() {
-    if (instanceName == null) {
-      throw new RuntimeException("Instance name is null.  This should not happen unless UDFContextSignature was not set.");
-    }
-    return instanceName;
-  }
-  
-  private void setInstanceName(String instanceName) {
-    this.instanceName = instanceName;
   }
 }

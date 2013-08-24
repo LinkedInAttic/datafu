@@ -4,16 +4,18 @@
 
 Additions:
 
-* Created SampleByKey, which provides a way to sample tuples based on certain fields.
-* Created Coalesce, which returns the first non-null value from a list of arguments like SQL's COALESCE
-* Sessionize now supports long values for timestamp, in addition to string representation of time.
+* Added SampleByKey, which provides a way to sample tuples based on certain fields.
+* Added Coalesce, which returns the first non-null value from a list of arguments like SQL's COALESCE.
+* Added BagGroup, which performs an in-memory group operation on a bag.
 * Added ReservoirSample
+* Added In filter func, which behaves like SQL's IN
+* Added EmptyBagToNullFields, which enables multi-relation left joins using COGROUP
+* Sessionize now supports long values for timestamp, in addition to string representation of time.
 * BagConcat can now operate on a bag of bags, in addition to a tuple of bags
 * Created TransposeTupleToBag, which creates a bag of key-value pairs from a tuple
 * SessionCount now implements Accumulator interface
 * DistinctBy now implements Accumulator interface
-* Using pigunit from Maven for testing
-* Added In filter func, which behaves like SQL's IN
+* Using PigUnit from Maven for testing, instead of checked-in JAR
 * Added many more test cases to improve coverage
 * Improved documentation
 

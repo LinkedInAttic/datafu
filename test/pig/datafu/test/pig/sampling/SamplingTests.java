@@ -123,7 +123,7 @@ public class SamplingTests extends PigTests
   /**
   register $JAR_PATH
   
-  DEFINE SampleByKey datafu.pig.sampling.SampleByKey('salt2.5', '0.5');
+  DEFINE SampleByKey datafu.pig.sampling.SampleByKey('0.5', 'salt2.5');
   
   data = LOAD 'input' AS (A_id:chararray, B_id:chararray, C:int);
   sampled = FILTER data BY SampleByKey(A_id);
@@ -163,7 +163,7 @@ public class SamplingTests extends PigTests
   /**
   register $JAR_PATH
   
-  DEFINE SampleByKey datafu.pig.sampling.SampleByKey('salt2.5', '0.5');
+  DEFINE SampleByKey datafu.pig.sampling.SampleByKey('0.5', 'salt2.5');
   
   data = LOAD 'input' AS (A_id:chararray, B_id:chararray, C:int);
   sampled = FILTER data BY SampleByKey(A_id, B_id);
@@ -226,7 +226,7 @@ public class SamplingTests extends PigTests
   @Test
   public void sampleByKeyExecTest() throws Exception
   {
-    SampleByKey sampler = new SampleByKey("thesalt","0.10");
+    SampleByKey sampler = new SampleByKey("0.10", "thesalt");
     
     Map<Integer,Integer> valuesPerKey = new HashMap<Integer,Integer>();
     

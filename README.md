@@ -211,4 +211,4 @@ Now that the repository is closed you can download the artifacts and do some man
 
 The source code is available under the Apache 2.0 license.  
 
-For help please see the [discussion group](http://groups.google.com/group/datafu).  Bugs and feature requests can be filed [here](http://linkedin.jira.com/browse/DATAFU).
+For help please see the [discussion group](http://groups.google.com/group/datafu).  Bugs and feature requests can be filed [here](http://github.com/linkedin/datafu/issues).

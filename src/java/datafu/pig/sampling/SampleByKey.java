@@ -35,8 +35,8 @@ import org.apache.pig.data.Tuple;
  * </p>
  * 
  * <p>
- * The only required parameter is the sampling probability.  This may be preceded by an optional
- * seed value to control the random number generation.
+ * The only required parameter is the sampling probability.  This may be followed
+ * by an optional seed value to control the random number generation.
  * </p>
  * 
  * <p>
@@ -61,24 +61,31 @@ import org.apache.pig.data.Tuple;
 
 public class SampleByKey extends FilterFunc
 {
-  final static String DEFAULT_SEED = "323148";
   final static int PRIME_NUMBER = 31;
   
-  int seed;
-  double size;
+  Integer seed = null;
+  double probability;
   
-  public SampleByKey(String probability){
-    this(DEFAULT_SEED, probability);
+  public SampleByKey(String probability) {
+    this.probability = Double.parseDouble(probability);
   }
   
-  public SampleByKey(String salt, String size){
-    this.seed = salt.hashCode(); 
-    this.size = Double.parseDouble(size);
+  public SampleByKey(String probability, String salt) {
+    this(probability);
+    this.seed = salt.hashCode();
   }
-  
+
+  @Override
+  public void setUDFContextSignature(String signature)
+  {
+    if (this.seed == null)
+      this.seed = signature.hashCode();
+    super.setUDFContextSignature(signature);
+  }
+
   @Override
   public Boolean exec(Tuple input) throws IOException 
-  {    
+  {
     int hashCode = 0;
     for(int i=0; i<input.size(); i++) {
       Object each = input.get(i);
@@ -86,15 +93,16 @@ public class SampleByKey extends FilterFunc
     }
       
     try {
-      if (intToRandomDouble(hashCode) <= size) return true;
-      return false;
-    } catch (Exception e){
-        e.printStackTrace(); 
-        throw new RuntimeException("Exception on intToRandomDouble");
+      return intToRandomDouble(hashCode) <= probability;
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Exception on intToRandomDouble");
     }
   }
   
-  private Double intToRandomDouble(int input) throws Exception{
+  private Double intToRandomDouble(int input) throws Exception
+  {
     MessageDigest hasher = MessageDigest.getInstance("sha-1");
 
     ByteBuffer b = ByteBuffer.allocate(4+4);

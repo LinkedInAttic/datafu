@@ -21,6 +21,7 @@ Each function is unit tested and code coverage is being tracked for the entire l
 ## Presentations
 
 * [A Brief Tour of DataFu](http://www.slideshare.net/matthewterencehayes/datafu)
+* [Building Data Products at LinkedIn with DataFu](http://www.slideshare.net/matthewterencehayes/building-data-products-at-linkedin-with-datafu)
 
 ## What can you do with it?
 

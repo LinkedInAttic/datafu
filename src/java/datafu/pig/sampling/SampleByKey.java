@@ -36,7 +36,12 @@ import org.apache.pig.data.Tuple;
  * 
  * <p>
  * The only required parameter is the sampling probability.  This may be followed
- * by an optional seed value to control the random number generation.
+ * by an optional seed value to control the random number generation.  
+ * </p>
+ * 
+ * <p>
+ * SampleByKey will work deterministically as far as same seed is given as it's parameter. 
+ * If seed is not given, it will randomly generate sample using the random seed value. 
  * </p>
  * 
  * <p>

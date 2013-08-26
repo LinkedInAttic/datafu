@@ -25,7 +25,7 @@ import org.apache.pig.data.Tuple;
 /**
  * Provides a way of sampling tuples based on certain fields.
  * This is essentially equivalent to grouping on the fields, applying SAMPLE,
- * and then flattening.  It is much more efficient though because does not require
+ * and then flattening.  It is much more efficient though because it does not require
  * a reduce step.
  * 
  * <p>
@@ -40,8 +40,7 @@ import org.apache.pig.data.Tuple;
  * </p>
  * 
  * <p>
- * SampleByKey will work deterministically as far as same seed is given as it's parameter. 
- * If seed is not given, it will randomly generate sample using the random seed value. 
+ * SampleByKey will work deterministically as long as the same seed is provided.  
  * </p>
  * 
  * <p>
@@ -59,7 +58,7 @@ import org.apache.pig.data.Tuple;
  * } 
  * 
  * </pre>
- * 
+ * </p>
  * @author evion 
  * 
  */

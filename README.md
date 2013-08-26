@@ -7,12 +7,20 @@
 * Sampling (e.g. weighted, reservoir, etc.)
 * Sessionization
 * Convenience bag functions (e.g. enumerating items)
-* Convenience utility functions (e.g. assertions, easier writing of
-EvalFuncs)
+* Convenience utility functions (e.g. assertions, easier writing of EvalFuncs)
 * Set operations (intersect, union)
 * and [more](http://linkedin.github.com/datafu/docs/javadoc/)...
 
 Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against Pig 0.11.
+
+## Blog Posts
+
+* [Introducing DataFu](http://engineering.linkedin.com/open-source/introducing-datafu-open-source-collection-useful-apache-pig-udfs)
+* [DataFu: The WD-40 of Big Data](http://hortonworks.com/blog/datafu/)
+
+## Presentations
+
+* [A Brief Tour of DataFu](http://www.slideshare.net/matthewterencehayes/datafu)
 
 ## What can you do with it?
 

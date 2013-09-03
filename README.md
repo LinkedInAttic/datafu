@@ -11,7 +11,13 @@
 * Set operations (intersect, union)
 * and [more](http://linkedin.github.com/datafu/docs/javadoc/)...
 
-Each function is unit tested and code coverage is being tracked for the entire library.  It has been tested against Pig 0.11.
+Each function is unit tested and code coverage is being tracked for the entire library.
+
+## Pig Compatibility
+
+The current version of DataFu has been tested against Pig 0.11.1.  DataFu should be compatible with some older versions of Pig, however
+we do not do any sort of testing with prior versions of Pig and do not guarantee compatibility.  
+Our policy is to test against the most recent version of Pig whenever we release and make sure DataFu works with that version. 
 
 ## Blog Posts
 

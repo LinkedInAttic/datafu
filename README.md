@@ -151,14 +151,14 @@ The JAR can be found [here](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22co
 
 If you are using Ivy:
 
-    <dependency org="com.linkedin.datafu" name="datafu" rev="0.0.9"/>
+    <dependency org="com.linkedin.datafu" name="datafu" rev="1.0.0"/>
     
 If you are using Maven:
 
     <dependency>
       <groupId>com.linkedin.datafu</groupId>
       <artifactId>datafu</artifactId>
-      <version>0.0.9</version>
+      <version>1.0.0</version>
     </dependency>
 
 Or [download](https://github.com/linkedin/datafu/archive/master.zip) the code.

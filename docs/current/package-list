@@ -1,0 +1,11 @@
+datafu.pig.bags
+datafu.pig.geo
+datafu.pig.hash
+datafu.pig.linkanalysis
+datafu.pig.random
+datafu.pig.sampling
+datafu.pig.sessions
+datafu.pig.sets
+datafu.pig.stats
+datafu.pig.urls
+datafu.pig.util

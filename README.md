@@ -9,7 +9,7 @@
 * Convenience bag functions (e.g. enumerating items)
 * Convenience utility functions (e.g. assertions, easier writing of EvalFuncs)
 * Set operations (intersect, union)
-* and [more](http://linkedin.github.com/datafu/docs/javadoc/)...
+* and [more](http://linkedin.github.com/datafu/docs/current/)...
 
 Each function is unit tested and code coverage is being tracked for the entire library.
 
@@ -35,7 +35,7 @@ Here's a taste of what you can do in Pig.
 
 ### Statistics
   
-Compute the [median](http://en.wikipedia.org/wiki/Median) with the [Median UDF](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/stats/Median.html):
+Compute the [median](http://en.wikipedia.org/wiki/Median) with the [Median UDF](http://linkedin.github.com/datafu/docs/current/datafu/pig/stats/Median.html):
 
     define Median datafu.pig.stats.StreamingMedian();
 
@@ -46,7 +46,7 @@ Compute the [median](http://en.wikipedia.org/wiki/Median) with the [Median UDF](
     -- produces median of 3
     medians = FOREACH grouped GENERATE Median(sorted.val);
   
-Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quantile) with [StreamingQuantile](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/stats/StreamingQuantile.html):
+Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quantile) with [StreamingQuantile](http://linkedin.github.com/datafu/docs/current/datafu/pig/stats/StreamingQuantile.html):
 
     define Quantile datafu.pig.stats.StreamingQuantile('0.0','0.5','1.0');
 
@@ -57,7 +57,7 @@ Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quanti
     -- produces: (1,5.5,10)
     quantiles = FOREACH grouped GENERATE Quantile(sorted.val);
 
-Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/stats/VAR.html):
+Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](http://linkedin.github.com/datafu/docs/current/datafu/pig/stats/VAR.html):
 
     define VAR datafu.pig.stats.VAR();
 
@@ -70,7 +70,7 @@ Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](h
  
 ### Set Operations
 
-Treat sorted bags as sets and compute their intersection with [SetIntersect](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/bags/sets/SetIntersect.html):
+Treat sorted bags as sets and compute their intersection with [SetIntersect](http://linkedin.github.com/datafu/docs/current/datafu/pig/bags/sets/SetIntersect.html):
 
     define SetIntersect datafu.pig.bags.sets.SetIntersect();
   
@@ -84,7 +84,7 @@ Treat sorted bags as sets and compute their intersection with [SetIntersect](htt
       GENERATE SetIntersect(sorted_b1,sorted_b2);
     }
       
-Compute the set union with [SetUnion](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/bags/sets/SetUnion.html):
+Compute the set union with [SetUnion](http://linkedin.github.com/datafu/docs/current/datafu/pig/bags/sets/SetUnion.html):
 
     define SetUnion datafu.pig.bags.sets.SetUnion();
 
@@ -100,7 +100,7 @@ Operate on several bags even:
 
 ### Bag operations
 
-Concatenate two or more bags with [BagConcat](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/bags/BagConcat.html):
+Concatenate two or more bags with [BagConcat](http://linkedin.github.com/datafu/docs/current/datafu/pig/bags/BagConcat.html):
 
     define BagConcat datafu.pig.bags.BagConcat();
 
@@ -110,7 +110,7 @@ Concatenate two or more bags with [BagConcat](http://linkedin.github.com/datafu/
     -- ({(1),(2),(3),(4),(5),(6),(7)})
     output = FOREACH input GENERATE BagConcat(B1,B2,B3);
 
-Append a tuple to a bag with [AppendToBag](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/bags/AppendToBag.html):
+Append a tuple to a bag with [AppendToBag](http://linkedin.github.com/datafu/docs/current/datafu/pig/bags/AppendToBag.html):
 
     define AppendToBag datafu.pig.bags.AppendToBag();
 

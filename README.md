@@ -71,9 +71,9 @@ Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](h
  
 ### Set Operations
 
-Treat sorted bags as sets and compute their intersection with [SetIntersect](http://linkedin.github.com/datafu/docs/current/datafu/pig/bags/sets/SetIntersect.html):
+Treat sorted bags as sets and compute their intersection with [SetIntersect](http://linkedin.github.com/datafu/docs/current/datafu/pig/sets/SetIntersect.html):
 
-    define SetIntersect datafu.pig.bags.sets.SetIntersect();
+    define SetIntersect datafu.pig.sets.SetIntersect();
   
     -- ({(3),(4),(1),(2),(7),(5),(6)},{(0),(5),(10),(1),(4)})
     input = LOAD 'input' AS (B1:bag{T:tuple(val:int)},B2:bag{T:tuple(val:int)});
@@ -85,9 +85,9 @@ Treat sorted bags as sets and compute their intersection with [SetIntersect](htt
       GENERATE SetIntersect(sorted_b1,sorted_b2);
     }
       
-Compute the set union with [SetUnion](http://linkedin.github.com/datafu/docs/current/datafu/pig/bags/sets/SetUnion.html):
+Compute the set union with [SetUnion](http://linkedin.github.com/datafu/docs/current/datafu/pig/sets/SetUnion.html):
 
-    define SetUnion datafu.pig.bags.sets.SetUnion();
+    define SetUnion datafu.pig.sets.SetUnion();
 
     -- ({(3),(4),(1),(2),(7),(5),(6)},{(0),(5),(10),(1),(4)})
     input = LOAD 'input' AS (B1:bag{T:tuple(val:int)},B2:bag{T:tuple(val:int)});
@@ -123,7 +123,7 @@ Append a tuple to a bag with [AppendToBag](http://linkedin.github.com/datafu/doc
 
 ### PageRank
 
-Run PageRank on a large number of independent graphs through the [PageRank UDF](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/linkanalysis/PageRank.html):
+Run PageRank on a large number of independent graphs through the [PageRank UDF](http://linkedin.github.com/datafu/docs/current/datafu/pig/linkanalysis/PageRank.html):
 
     define PageRank datafu.pig.linkanalysis.PageRank('dangling_nodes','true');
 

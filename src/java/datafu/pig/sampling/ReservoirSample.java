@@ -31,9 +31,21 @@ import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
- * Maintains an in-memory reservoir to produce a uniformly random sample of a given size.
+ * Performs a simple random sample using an in-memory reservoir to produce
+ * a uniformly random sample of a given size.
+ * 
+ * <p>
+ * This is similar to {@see SimpleRandomSample}, however it is guaranteed to produce
+ * a sample of the given size.  This comes at the cost of scalability.
+ * {@see SimpleRandomSample} produces a sample of the desired size with likelihood of 99.99%,
+ * while using less internal storage.  ReservoirSample on the other hand uses internal storage
+ * with size equaling the desired sample to guarantee the exact sample size.
+ * </p>
+ * 
+ * <p>
  * This algebraic implementation is backed by a heap and maintains the original roll in order
  * to compensate for skew.
+ * </p>
  * 
  * @author wvaughan
  *

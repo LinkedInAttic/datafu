@@ -23,6 +23,7 @@ Our policy is to test against the most recent version of Pig whenever we release
 
 * [Introducing DataFu](http://engineering.linkedin.com/open-source/introducing-datafu-open-source-collection-useful-apache-pig-udfs)
 * [DataFu: The WD-40 of Big Data](http://hortonworks.com/blog/datafu/)
+* [DataFu 1.0](http://engineering.linkedin.com/datafu/datafu-10)
 
 ## Presentations
 

@@ -13,6 +13,9 @@
 
 Each function is unit tested and code coverage is being tracked for the entire library.
 
+We have also contributed a framework called [Hourglass](https://github.com/linkedin/datafu/tree/master/contrib/hourglass) for incrementally
+processing data in Hadoop.
+
 ## Pig Compatibility
 
 The current version of DataFu has been tested against Pig 0.11.1.  DataFu should be compatible with some older versions of Pig, however
@@ -24,6 +27,7 @@ Our policy is to test against the most recent version of Pig whenever we release
 * [Introducing DataFu](http://engineering.linkedin.com/open-source/introducing-datafu-open-source-collection-useful-apache-pig-udfs)
 * [DataFu: The WD-40 of Big Data](http://hortonworks.com/blog/datafu/)
 * [DataFu 1.0](http://engineering.linkedin.com/datafu/datafu-10)
+* [DataFu's Hourglass: Incremental Data Processing in Hadoop](http://engineering.linkedin.com/datafu/datafus-hourglass-incremental-data-processing-hadoop)
 
 ## Presentations
 

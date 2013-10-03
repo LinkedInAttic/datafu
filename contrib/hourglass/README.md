@@ -30,7 +30,7 @@ the previous result with the new data?  With Hourglass you can.
 To continue our example, let's say there are two days of data currently available, 2013/03/15 and 2013/03/16, and that
 their contents are:
 
-```json
+```
 2013/03/15:
 {"id": 1}
 {"id": 1}

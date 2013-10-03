@@ -1,0 +1,15 @@
+DataFu Hourglass
+Copyright 2013 LinkedIn, Inc
+
+This product includes/uses software developed by The Apache Software
+Foundation (http://www.apache.org/).
+
+This product includes/uses hadoop (http://hadoop.apache.org/)
+
+This product includes/uses log4j (http://logging.apache.org/log4j/)
+
+This product includes/uses avro (http://avro.apache.org/)
+
+This product includes/uses commons-io (http://commons.apache.org/io/)
+
+This product includes/uses testng (http://testng.org/doc/index.html)

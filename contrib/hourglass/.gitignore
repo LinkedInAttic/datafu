@@ -1,4 +1,5 @@
 docs/
+pom.xml
 report/
 build/
 test-logs/

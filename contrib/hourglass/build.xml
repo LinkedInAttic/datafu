@@ -2,12 +2,35 @@
          xmlns:ivy="antlib:org.apache.ivy.ant"
          xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
+  <property name="name" value="datafu-hourglass" />
+  <property name="display.name" value="DataFu Hourglass" />
+  <property name="author" value="Matthew Hayes" />
+  <property name="datafu.hourglass.version" value="0.1.0" />
+  <property name="version" value="${datafu.hourglass.version}-SNAPSHOT" />
+
+  <!-- ivy -->
   <property name="ivy.jar.version" value="2.2.0" />
   <property name="ivy.jar.dir" value="${basedir}/ivy" />
   <property name="lib.dir" value="${basedir}/lib" />
   <property name="mvnrepo" value="http://repo2.maven.org/maven2"/>
   <property name="ivy.jar.repo.url" value="${mvnrepo}/org/apache/ivy/ivy/${ivy.jar.version}/ivy-${ivy.jar.version}.jar"/>
   <property name="ivy.jar" value="${ivy.jar.dir}/ivy-${ivy.jar.version}.jar" />
+
+  <!-- maven -->
+  <property name="maven-snapshots-repository-id" value="sonatype-nexus-snapshots" />
+  <property name="maven-snapshots-repository-url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+  <property name="maven-staging-repository-id" value="sonatype-nexus-staging" />
+  <property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2" />
+  <property name="pom.name" value="pom.xml"/>
+  <property name="pomfile" value="${basedir}/${pom.name}" />
+  <property name="pomfile.template" value="${basedir}/pom-template.xml" />
+  <property name="maven.jar.version" value="2.0.8" />
+  <property name="mvnrepo" value="http://repo2.maven.org/maven2"/>
+  <property name="maven.jar.repo.url" value="${mvnrepo}/org/apache/maven/maven-ant-tasks/${maven.jar.version}/maven-ant-tasks-${maven.jar.version}.jar"/>
+  <property name="maven.jar" location="${ivy.jar.dir}/maven-ant-tasks-${maven.jar.version}.jar"/>
+  <property name="wagon-http.version" value="1.0-beta-2" />
+
+  <!-- hourglass paths, files -->
   <property name="dist.dir" value="${basedir}/dist" />
   <property name="classes.dir" value="${dist.dir}/classes" />
   <property name="test.classes.dir" value="${dist.dir}/testclasses" />
@@ -22,22 +45,23 @@
   <property name="report.dir" value="${basedir}/report" />
   <property name="docs.dir" value="${basedir}/docs" />
   <property name="javadoc.dir" value="${docs.dir}/javadoc" />
-  <condition property="jar.name" value="datafu-hourglass-${version}" else="datafu-hourglass">
+  <condition property="jar.name" value="${name}-${version}" else="${name}">
     <isset property="version" />
   </condition>
-  <condition property="sources.jar.name" value="datafu-hourglass-${version}-sources" else="datafu-hourglass-sources">
+  <condition property="sources.jar.name" value="${name}-${version}-sources" else="${name}-sources">
     <isset property="version" />
   </condition>
-  <condition property="javadoc.jar.name" value="datafu-hourglass-${version}-javadoc" else="datafu-hourglass-javadoc">
+  <condition property="javadoc.jar.name" value="${name}-${version}-javadoc" else="${name}-javadoc">
     <isset property="version" />
   </condition>
   <property name="jar.file" value="${jar.name}.jar" />
   <property name="jar.path" value="${build.dir}/${jar.file}" />
   <property name="sources.jar.path" value="${build.dir}/${sources.jar.name}.jar" />
   <property name="javadoc.jar.path" value="${build.dir}/${javadoc.jar.name}.jar" />
-  <property name="test.jar.name" value="datafu-hourglass-test.jar" />
+  <property name="test.jar.name" value="${name}-test.jar" />
   <property name="test.jar.path" value="${build.dir}/${test.jar.name}" />
   <property name="classes.pattern" value="**/*.class" />
+
 
   <target name="ivy-jar-download" description="Download ivy jar">
     <mkdir dir="${ivy.jar.dir}"/>
@@ -56,6 +80,18 @@
     <delete dir="${lib.dir}" />
     <ivy:retrieve pattern="${lib.dir}/[conf]/[artifact]-[type]-[revision].[ext]"/>
     <ivy:report todir="ivy/report" />
+  </target>
+    
+  <target name="maven-ant-tasks-jar-download" description="Download maven tasks jar">
+    <mkdir dir="${ivy.jar.dir}"/>
+    <get src="${maven.jar.repo.url}" dest="${maven.jar}" usetimestamp="true"/>
+  </target>
+  
+  <target name="maven-taskdef" depends="maven-ant-tasks-jar-download">
+    <path id="mvn-ant-task.classpath" path="${maven.jar}"/>
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+        uri="urn:maven-artifact-ant"
+        classpathref="mvn-ant-task.classpath"/>
   </target>
     
   <target name="clean-logs">
@@ -193,9 +229,9 @@
     <attribute name="javadir" />
     <sequential>
       <replace-dir dir="@{dir}" />
-      <javadoc destdir="@{dir}" windowtitle="DataFu Hourglass" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}" Overview="overview.html">
-        <doctitle>DataFu Hourglass</doctitle>
-        <bottom>Matthew Hayes</bottom>
+      <javadoc destdir="@{dir}" windowtitle="${display.name}" source="1.5" author="true" version="true" use="true" packagenames="@{packagenames}" Overview="overview.html">
+        <doctitle>${display.name}</doctitle>
+        <bottom>${author}</bottom>
         <classpath refid="compile-classpath" />
         <fileset dir="@{javadir}">
         </fileset>
@@ -213,5 +249,63 @@
         <include name="**/*.*" />
       </fileset>
     </jar>
+  </target>
+
+  <target name="deploy" depends="clean,jar,sources-jar,javadoc-jar,set-version,sign">
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+         uri="antlib:org.apache.maven.artifact.ant"
+         classpathref="test-classpath" />
+
+    <artifact:pom file="${pomfile}" id="datafu-pom"/>
+    <artifact:install-provider artifactId="wagon-ssh" version="${wagon-http.version}"/>
+    <artifact:deploy file="${jar.path}">
+      <remoteRepository id="${maven-staging-repository-id}" url="${maven-staging-repository-url}"/>
+      <pom refid="datafu-pom"/>
+      <attach file="${jar.path}.asc" type="jar.asc"/>
+      <attach file="${pomfile}.asc" type="pom.asc"/>
+      <attach file="${sources.jar.path}.asc" type="jar.asc" classifier="sources" />
+      <attach file="${sources.jar.path}" classifier="sources" />
+      <attach file="${javadoc.jar.path}.asc" type="jar.asc" classifier="javadoc" />
+      <attach file="${javadoc.jar.path}" classifier="javadoc" />
+    </artifact:deploy>
+ </target>
+ 
+ <target name="sign" depends="clean-sign">
+   <macrodef name="sign-artifact" description="Signs the artifact">
+     <attribute name="input.file"/>
+     <attribute name="output.file" default="@{input.file}.asc"/>
+     <sequential>
+       <echo>Signing @{input.file} Sig File: @{output.file}</echo>
+       <exec executable="gpg" >
+         <arg value="--armor"/>
+         <arg value="--output"/>
+         <arg value="@{output.file}"/>
+         <arg value="--detach-sig"/>
+         <arg value="@{input.file}"/>
+       </exec>
+     </sequential>
+   </macrodef>
+   <sign-artifact input.file="${jar.path}"/>
+   <sign-artifact input.file="${sources.jar.path}"/>
+   <sign-artifact input.file="${javadoc.jar.path}"/>
+   <sign-artifact input.file="${pomfile}"/>
+  </target>
+
+  <target name="set-version">
+    <delete file="${pomfile}"/>
+    <copy file="${pomfile.template}" tofile="${pomfile}"/>
+    <replaceregexp byline="true">
+      <regexp pattern="@version"/>
+      <substitution expression="${datafu.hourglass.version}"/>
+      <fileset dir="${basedir}">
+        <include name="${pom.name}"/>
+      </fileset>
+    </replaceregexp>
+  </target>
+
+  <target name="clean-sign" description="Clean.  Delete .asc files">
+    <delete>
+      <fileset dir="." includes="**/**/*.asc"/>
+    </delete>
   </target>
 </project>

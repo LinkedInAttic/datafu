@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -39,12 +40,10 @@ public class PartitionPreservingSchemas implements Serializable
   
   private static String KEY_SCHEMA = "key.schema";
   private static String INTERMEDIATE_VALUE_SCHEMA = "intermediate.value.schema";
-  private static String INPUT_SCHEMA = "input.schema";
   private static String OUPUT_VALUE_SCHEMA = "output.value.schema";
   
   private transient Schema _keySchema;
   private transient Schema _intermediateValueSchema;
-  private transient Schema _inputSchema;
   private transient Schema _outputValueSchema;
   private final String _outputSchemaName;
   private final String _outputSchemaNamespace;
@@ -53,11 +52,14 @@ public class PartitionPreservingSchemas implements Serializable
   private transient Schema _reduceOutputSchema;
   private transient Schema _mapOutputKeySchema;
   private transient Schema _mapOutputSchema;
+  private transient Map<String,Schema> _inputSchemasParsed;
   
   // schemas are stored here so the object can be serialized
   private Map<String,String> conf;
   
-  public PartitionPreservingSchemas(TaskSchemas schemas, List<Schema> inputSchemas, String outputSchemaName, String outputSchemaNamespace)
+  private Map<String,String> _inputSchemas;
+  
+  public PartitionPreservingSchemas(TaskSchemas schemas, Map<String,Schema> inputSchemas, String outputSchemaName, String outputSchemaNamespace)
   {
     _outputSchemaName = outputSchemaName;
     _outputSchemaNamespace = outputSchemaNamespace;
@@ -65,17 +67,26 @@ public class PartitionPreservingSchemas implements Serializable
     conf = new HashMap<String,String>();
     conf.put(KEY_SCHEMA, schemas.getKeySchema().toString());
     conf.put(INTERMEDIATE_VALUE_SCHEMA, schemas.getIntermediateValueSchema().toString());
-    conf.put(INPUT_SCHEMA, Schema.createUnion(inputSchemas).toString());
     conf.put(OUPUT_VALUE_SCHEMA, schemas.getOutputValueSchema().toString());
+    
+    _inputSchemas = new HashMap<String,String>();
+    for (Entry<String,Schema> schema : inputSchemas.entrySet())
+    {
+      _inputSchemas.put(schema.getKey(), schema.getValue().toString());
+    }
   }
   
-  public Schema getMapInputSchema()
+  public Map<String,Schema> getMapInputSchemas()
   {
-    if (_inputSchema == null)
+    if (_inputSchemasParsed == null)
     {
-      _inputSchema = new Schema.Parser().parse(conf.get(INPUT_SCHEMA));
+      _inputSchemasParsed = new HashMap<String,Schema>(); 
+      for (Entry<String,String> schema : _inputSchemas.entrySet())
+      {
+        _inputSchemasParsed.put(schema.getKey(), new Schema.Parser().parse(schema.getValue()));
+      }
     }
-    return _inputSchema;
+    return _inputSchemasParsed;
   }
     
   public Schema getMapOutputSchema()

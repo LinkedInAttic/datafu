@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapreduce.AvroJob;
-import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.avro.mapreduce.AvroKeyOutputFormat;
 import org.apache.avro.mapreduce.AvroMultipleOutputs;
 import org.apache.hadoop.conf.Configuration;
@@ -38,6 +38,8 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.log4j.Logger;
 
 
+import datafu.hourglass.avro.AvroMultipleInputsKeyInputFormat;
+import datafu.hourglass.avro.AvroMultipleInputsUtil;
 import datafu.hourglass.fs.DatePath;
 import datafu.hourglass.fs.PathUtils;
 import datafu.hourglass.mapreduce.DelegatingCombiner;
@@ -373,12 +375,21 @@ public abstract class AbstractPartitionPreservingIncrementalJob extends Incremen
       
       config(conf);
       
-      PartitionPreservingSchemas fpSchemas = new PartitionPreservingSchemas(getSchemas(), planner.getInputSchemas(), getOutputSchemaName(), getOutputSchemaNamespace() );
+      PartitionPreservingSchemas fpSchemas = new PartitionPreservingSchemas(getSchemas(), planner.getInputSchemasByPath(), getOutputSchemaName(), getOutputSchemaNamespace() );
       
-      job.setInputFormatClass(AvroKeyInputFormat.class);
+      job.setInputFormatClass(AvroMultipleInputsKeyInputFormat.class);
+      
       job.setOutputFormatClass(AvroKeyOutputFormat.class);
       
-      AvroJob.setInputKeySchema(job, fpSchemas.getMapInputSchema());
+      _log.info("Setting input path to schema mappings");
+      for (String path : fpSchemas.getMapInputSchemas().keySet())
+      {
+        Schema schema = fpSchemas.getMapInputSchemas().get(path);
+        _log.info("*** " + path);
+        _log.info("*** => " + schema.toString());
+        AvroMultipleInputsUtil.setInputKeySchemaForPath(job, schema, path);
+      }
+            
       AvroJob.setMapOutputKeySchema(job, fpSchemas.getMapOutputKeySchema());
       AvroJob.setMapOutputValueSchema(job, fpSchemas.getMapOutputValueSchema());
       AvroJob.setOutputKeySchema(job, fpSchemas.getReduceOutputSchema());

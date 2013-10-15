@@ -9,6 +9,7 @@
 
         <!-- common: core dependencies, listed as dependencies in pom -->
         <dependency org="log4j" name="log4j" rev="1.2.17" conf="common->default"/>
+        <dependency org="org.json" name="json" rev="20090211" conf="common->default"/>
         <dependency org="org.apache.avro" name="avro" rev="1.7.4" conf="common->default"/>
         <dependency org="org.apache.avro" name="avro-mapred" rev="1.7.4" conf="common->default"/>
         <dependency org="org.apache.avro" name="avro-compiler" rev="1.7.4" conf="common->default"/>

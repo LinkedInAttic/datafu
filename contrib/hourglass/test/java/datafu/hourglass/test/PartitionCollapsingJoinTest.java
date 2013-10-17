@@ -18,6 +18,7 @@ package datafu.hourglass.test;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -34,6 +35,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.node.NullNode;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -73,10 +75,22 @@ private Logger _log = Logger.getLogger(PartitionPreservingJoinTests.class);
     
   static
   {
+    // Create two schemas having the same name, but different types (int vs long).  The fields using this schema are not used.  This simply
+    // tests that we can join two conflicting schemas.
+    Schema intSchema = Schema.createRecord("Dummy", null, "datafu.hourglass", false);
+    intSchema.setFields(Arrays.asList(
+        new Field("dummy",Schema.create(Type.INT), null,null)));    
+    Schema longSchema = Schema.createRecord("Dummy", null, "datafu.hourglass", false);
+    longSchema.setFields(Arrays.asList(
+        new Field("dummy",Schema.create(Type.LONG), null,null)));
+    
     IMPRESSION_SCHEMA = Schemas.createRecordSchema(PartitionPreservingJoinTests.class, "Impression",
-                                               new Field("id", Schema.create(Type.LONG), "ID", null));
+                                               new Field("id", Schema.create(Type.LONG), "ID", null),
+                                               new Field("dummy", Schema.createUnion(Arrays.asList(Schema.create(Type.NULL),intSchema)), null, NullNode.instance));
+    
     CLICK_SCHEMA = Schemas.createRecordSchema(PartitionPreservingJoinTests.class, "Click",
-                                               new Field("id", Schema.create(Type.LONG), "ID", null));
+                                               new Field("id", Schema.create(Type.LONG), "ID", null),
+                                               new Field("dummy", Schema.createUnion(Arrays.asList(Schema.create(Type.NULL),longSchema)), null, NullNode.instance));
   }
   
   public PartitionCollapsingJoinTest() throws IOException

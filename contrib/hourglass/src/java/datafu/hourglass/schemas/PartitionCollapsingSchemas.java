@@ -19,9 +19,11 @@ package datafu.hourglass.schemas;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -39,7 +41,6 @@ public class PartitionCollapsingSchemas implements Serializable
 {  
   private static String DATED_INTERMEDIATE_VALUE_SCHEMA_NAME = "DatedMapValue";
   private static String KEY_SCHEMA = "key.schema";
-  private static String INPUT_SCHEMA = "input.schema";
   private static String INTERMEDIATE_VALUE_SCHEMA = "intermediate.value.schema";
   private static String OUTPUT_VALUE_SCHEMA = "output.value.schema";
   
@@ -47,7 +48,6 @@ public class PartitionCollapsingSchemas implements Serializable
   private final String _outputSchemaNamespace;
   private transient Schema _keySchema;
   private transient Schema _intermediateValueSchema;
-  private transient Schema _inputSchema;
   private transient Schema _outputValueSchema;
   
   // generated schemas
@@ -55,12 +55,14 @@ public class PartitionCollapsingSchemas implements Serializable
   private transient Schema _dateIntermediateValueSchema;
   private transient Schema _mapOutputValueSchema;
   private transient Schema _reduceOutputSchema;
-  private transient Schema _mapInputSchema;
+  private transient Map<String,Schema> _mapInputSchemas;
   
   //schemas are stored here so the object can be serialized
   private Map<String,String> conf;
+
+  private Map<String,String> _inputSchemas;
   
-  public PartitionCollapsingSchemas(TaskSchemas schemas, List<Schema> inputSchemas, String outputSchemaName, String outputSchemaNamespace)
+  public PartitionCollapsingSchemas(TaskSchemas schemas, Map<String,Schema> inputSchemas, String outputSchemaName, String outputSchemaNamespace)
   {
     if (schemas == null)
     {
@@ -82,42 +84,47 @@ public class PartitionCollapsingSchemas implements Serializable
     _outputSchemaNamespace = outputSchemaNamespace;
     
     conf = new HashMap<String,String>();
-    conf.put(INPUT_SCHEMA, Schema.createUnion(inputSchemas).toString());
     conf.put(KEY_SCHEMA, schemas.getKeySchema().toString());
     conf.put(INTERMEDIATE_VALUE_SCHEMA, schemas.getIntermediateValueSchema().toString());
     conf.put(OUTPUT_VALUE_SCHEMA, schemas.getOutputValueSchema().toString());
-  }
-  
-  public Schema getInputSchema()
-  {
-    if (_inputSchema == null)
+    
+    _inputSchemas = new HashMap<String,String>();
+    for (Entry<String,Schema> schema : inputSchemas.entrySet())
     {
-      _inputSchema = new Schema.Parser().parse(conf.get(INPUT_SCHEMA));
+      _inputSchemas.put(schema.getKey(), schema.getValue().toString());
     }
-    return _inputSchema;
   }
-  
-  public Schema getMapInputSchema()
+    
+  public Map<String,Schema> getMapInputSchemas()
   {    
-    if (_mapInputSchema == null)
+    if (_mapInputSchemas == null)
     {
-      List<Schema> mapInputSchemas = new ArrayList<Schema>();
+      _mapInputSchemas = new HashMap<String,Schema>();
       
-      if (getInputSchema().getType() == Type.UNION)
+      for (Entry<String,String> schemaPair : _inputSchemas.entrySet())
       {
-        mapInputSchemas.addAll(getInputSchema().getTypes());
-      }
-      else
-      {
-        mapInputSchemas.add(getInputSchema());
+        Schema schema = new Schema.Parser().parse(schemaPair.getValue());
+        
+        List<Schema> mapInputSchemas = new ArrayList<Schema>();
+        
+        if (schema.getType() == Type.UNION)
+        {
+          mapInputSchemas.addAll(schema.getTypes());
+        }
+        else
+        {
+          mapInputSchemas.add(schema);
+        }
+        
+        // feedback from output (optional)
+        mapInputSchemas.add(getReduceOutputSchema());
+        
+        _mapInputSchemas.put(schemaPair.getKey(), Schema.createUnion(mapInputSchemas));
       }
       
-      // feedback from output (optional)
-      mapInputSchemas.add(getReduceOutputSchema());
       
-      _mapInputSchema = Schema.createUnion(mapInputSchemas);
     }
-    return _mapInputSchema;
+    return Collections.unmodifiableMap(_mapInputSchemas);
   }
     
   public Schema getMapOutputSchema()

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
@@ -35,6 +36,8 @@ import org.apache.log4j.Logger;
 
 import datafu.hourglass.avro.AvroDateRangeMetadata;
 import datafu.hourglass.avro.AvroKeyWithMetadataOutputFormat;
+import datafu.hourglass.avro.AvroMultipleInputsKeyInputFormat;
+import datafu.hourglass.avro.AvroMultipleInputsUtil;
 import datafu.hourglass.fs.DatePath;
 import datafu.hourglass.fs.DateRange;
 import datafu.hourglass.fs.PathUtils;
@@ -436,7 +439,7 @@ public abstract class AbstractPartitionCollapsingIncrementalJob extends Incremen
         for (DatePath inputPath : planner.getNewInputsToProcess())
         {
           _log.info(inputPath.getPath());
-          MultipleInputs.addInputPath(job, inputPath.getPath(), AvroKeyInputFormat.class, DelegatingMapper.class);
+          MultipleInputs.addInputPath(job, inputPath.getPath(), AvroMultipleInputsKeyInputFormat.class, DelegatingMapper.class);
         }
       }
       
@@ -446,7 +449,7 @@ public abstract class AbstractPartitionCollapsingIncrementalJob extends Incremen
         for (DatePath inputPath : planner.getOldInputsToProcess())
         {
           _log.info(inputPath.getPath());
-          MultipleInputs.addInputPath(job, inputPath.getPath(), AvroKeyInputFormat.class, DelegatingMapper.class);
+          MultipleInputs.addInputPath(job, inputPath.getPath(), AvroMultipleInputsKeyInputFormat.class, DelegatingMapper.class);
         }
       }
       
@@ -463,11 +466,19 @@ public abstract class AbstractPartitionCollapsingIncrementalJob extends Incremen
       
       AvroDateRangeMetadata.configureOutputDateRange(conf, planner.getCurrentDateRange());
                   
-      PartitionCollapsingSchemas spSchemas = new PartitionCollapsingSchemas(getSchemas(), planner.getInputSchemas(), getOutputSchemaName(), getOutputSchemaNamespace());
+      PartitionCollapsingSchemas spSchemas = new PartitionCollapsingSchemas(getSchemas(), planner.getInputSchemasByPath(), getOutputSchemaName(), getOutputSchemaNamespace());
       
       job.setOutputFormatClass(AvroKeyWithMetadataOutputFormat.class);
       
-      AvroJob.setInputKeySchema(job, spSchemas.getMapInputSchema());
+      _log.info("Setting input path to schema mappings");
+      for (String path : spSchemas.getMapInputSchemas().keySet())
+      {
+        Schema schema = spSchemas.getMapInputSchemas().get(path);
+        _log.info("*** " + path);
+        _log.info("*** => " + schema.toString());
+        AvroMultipleInputsUtil.setInputKeySchemaForPath(job, schema, path);
+      }
+      
       AvroJob.setMapOutputKeySchema(job, spSchemas.getMapOutputKeySchema());
       AvroJob.setMapOutputValueSchema(job, spSchemas.getMapOutputValueSchema());
       AvroJob.setOutputKeySchema(job, spSchemas.getReduceOutputSchema());

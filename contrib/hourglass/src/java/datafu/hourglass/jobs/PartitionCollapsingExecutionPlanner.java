@@ -83,6 +83,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
   private Map<Date,List<DatePath>> _inputsToProcessByDate = new HashMap<Date,List<DatePath>>();
   private DatePath _previousOutputToProcess;
   private List<Schema> _inputSchemas = new ArrayList<Schema>();
+  private Map<String,Schema> _inputSchemasByPath = new HashMap<String,Schema>();
   private boolean _needAnotherPass;
   private DateRange _currentDateRange;
   private boolean _planExists;
@@ -235,6 +236,18 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
   }
   
   /**
+   * Gets a map from input path to schema.  Because multiple inputs are allowed, there may be multiple schemas.
+   * Must call {@link #createPlan()} first.
+   * 
+   * @return map from path to input schema
+   */
+  public Map<String,Schema> getInputSchemasByPath()
+  {
+    checkPlanExists();
+    return _inputSchemasByPath;
+  }
+  
+  /**
    * Determines the number of reducers to use based on the input data size and the previous output,
    * if it exists and is being reused.
    * The number of reducers to use is based on the input data size and the 
@@ -277,7 +290,9 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
       List<DatePath> lastInputs = _inputsToProcessByDate.get(lastDate);
       for (DatePath input : lastInputs)
       {
-        _inputSchemas.add(PathUtils.getSchemaFromPath(getFileSystem(),input.getPath()));
+        Schema schema = PathUtils.getSchemaFromPath(getFileSystem(),input.getPath());
+        _inputSchemas.add(schema);
+        _inputSchemasByPath.put(input.getPath().toString(), schema);
       }
     }
   }

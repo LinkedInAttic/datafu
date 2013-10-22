@@ -1,3 +1,9 @@
+# 0.1.2
+
+Fixes:
+
+* Correctly load schema for input paths.
+
 # 0.1.1
 
 Additions:

@@ -36,13 +36,18 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
  * container files store only records (not key/value pairs), the value from
  * this InputFormat is a NullWritable.</p>
  */
-public class AvroMultipleInputsKeyInputFormat<T> extends FileInputFormat<AvroKey<T>, NullWritable> {
+public class AvroMultipleInputsKeyInputFormat<T> extends FileInputFormat<AvroKey<T>, NullWritable> 
+{  
   /** {@inheritDoc} */
   @Override
   public RecordReader<AvroKey<T>, NullWritable> createRecordReader(
       InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException 
   {    
-    Schema readerSchema = AvroMultipleInputsUtil.getInputKeySchemaForSplit(context.getConfiguration(), split);    
+    Schema readerSchema = AvroMultipleInputsUtil.getInputKeySchemaForSplit(context.getConfiguration(), split);
+    if (readerSchema == null)
+    {
+      throw new RuntimeException("Could not determine input schema");
+    }
     return new AvroKeyRecordReader<T>(readerSchema);
   }
 }

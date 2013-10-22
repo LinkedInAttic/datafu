@@ -94,7 +94,7 @@ public class ImpressionClickPartitionCollapsingJob extends AbstractPartitionColl
     @Override
     public GenericRecord getFinal()
     {
-      if (clicks > 0 && impressions > 0)
+      if (clicks > 0 || impressions > 0)
       {
         GenericRecord output = new GenericData.Record(OUTPUT_VALUE_SCHEMA);
         output.put("clicks", clicks);

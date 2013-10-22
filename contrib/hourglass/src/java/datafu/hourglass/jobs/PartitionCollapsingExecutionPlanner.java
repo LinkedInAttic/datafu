@@ -24,11 +24,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.SortedMap;
 
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
 
@@ -80,7 +82,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
   private List<DatePath> _inputsToProcess = new ArrayList<DatePath>();
   private List<DatePath> _newInputsToProcess = new ArrayList<DatePath>();
   private List<DatePath> _oldInputsToProcess = new ArrayList<DatePath>();
-  private Map<Date,List<DatePath>> _inputsToProcessByDate = new HashMap<Date,List<DatePath>>();
+  private Map<String,String> _latestInputByPath = new HashMap<String,String>();
   private DatePath _previousOutputToProcess;
   private List<Schema> _inputSchemas = new ArrayList<Schema>();
   private Map<String,Schema> _inputSchemasByPath = new HashMap<String,Schema>();
@@ -282,17 +284,17 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   private void determineInputSchemas() throws IOException
   {
-    List<Date> dates = new ArrayList<Date>(_inputsToProcessByDate.keySet());
-    if (dates.size() > 0)
+    if (_latestInputByPath.size() > 0)
     {
-      Collections.sort(dates);
-      Date lastDate = dates.get(dates.size()-1);
-      List<DatePath> lastInputs = _inputsToProcessByDate.get(lastDate);
-      for (DatePath input : lastInputs)
+      _log.info("Determining input schemas");
+      for (Entry<String,String> entry : _latestInputByPath.entrySet())
       {
-        Schema schema = PathUtils.getSchemaFromPath(getFileSystem(),input.getPath());
+        String root = entry.getKey();
+        String input = entry.getValue();
+        _log.info("Loading schema for " + input);
+        Schema schema = PathUtils.getSchemaFromPath(getFileSystem(),new Path(input));
         _inputSchemas.add(schema);
-        _inputSchemasByPath.put(input.getPath().toString(), schema);
+        _inputSchemasByPath.put(root, schema);
       }
     }
   }
@@ -331,7 +333,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
     Calendar cal = Calendar.getInstance(PathUtils.timeZone);    
     
     _inputsToProcess.clear();
-    _inputsToProcessByDate.clear();
+    _latestInputByPath.clear();
     _previousOutputToProcess = null;
     
     DateRange outputDateRange = null;
@@ -359,10 +361,11 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
           _log.info(String.format("Input: %s",input.getPath()));
           _inputsToProcess.add(input);
           _oldInputsToProcess.add(input);
+          
+          Path root = PathUtils.getNestedPathRoot(input.getPath());
+          _latestInputByPath.put(root.toString(), input.getPath().toString());
         }
-        
-        _inputsToProcessByDate.put(currentDate, inputs);
-                
+                                
         cal.setTime(currentDate);
         cal.add(Calendar.DAY_OF_MONTH, 1);
         currentDate = cal.getTime();
@@ -414,10 +417,11 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
             _log.info(String.format("Input: %s",input.getPath()));
             _inputsToProcess.add(input);
             _newInputsToProcess.add(input);
+            
+            Path root = PathUtils.getNestedPathRoot(input.getPath());
+            _latestInputByPath.put(root.toString(), input.getPath().toString());
           }
-          
-          _inputsToProcessByDate.put(currentDate, inputs);
-          
+                    
           newDataCount++;
         }
       }

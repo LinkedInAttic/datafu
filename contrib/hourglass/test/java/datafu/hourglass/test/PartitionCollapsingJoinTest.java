@@ -173,14 +173,64 @@ private Logger _log = Logger.getLogger(PartitionPreservingJoinTests.class);
     HashMap<Long,ImpressionClick> counts;
     
     counts = loadOutputCounts("20130317");    
-    checkSize(counts,7);    
+    checkSize(counts,10);    
     checkIdCount(counts,1,1,1);
     checkIdCount(counts,2,1,2);
+    checkIdCount(counts,3,2,0);
     checkIdCount(counts,4,1,1);
     checkIdCount(counts,5,1,1);
     checkIdCount(counts,6,2,1);
+    checkIdCount(counts,7,2,0);
     checkIdCount(counts,8,1,3);
+    checkIdCount(counts,9,1,0);
     checkIdCount(counts,10,1,2);
+  }
+  
+  @Test
+  public void joinMissingClicksTest() throws IOException, InterruptedException, ClassNotFoundException
+  {    
+    startImpressions(2013, 3, 15);
+    startClicks(2013, 3, 15);
+    impression(1); click(1);
+    impression(2); click(2); click(2);
+    impression(3); impression(3);
+    impression(4); click(4);
+    stopImpressions();
+    stopClicks();
+    
+    startImpressions(2013, 3, 16);
+    startClicks(2013, 3, 16);
+    impression(5); click(5);
+    impression(6); impression(6); click(6);
+    impression(7);
+    impression(7);
+    stopImpressions();
+    stopClicks();
+    
+    startImpressions(2013, 3, 17);
+    impression(8);
+    impression(9);
+    impression(10);
+    stopImpressions();
+    
+    runJob();
+    
+    checkOutputFolderCount(1);
+        
+    HashMap<Long,ImpressionClick> counts;
+    
+    counts = loadOutputCounts("20130317");    
+    checkSize(counts,10);    
+    checkIdCount(counts,1,1,1);
+    checkIdCount(counts,2,1,2);
+    checkIdCount(counts,3,2,0);
+    checkIdCount(counts,4,1,1);
+    checkIdCount(counts,5,1,1);
+    checkIdCount(counts,6,2,1);
+    checkIdCount(counts,7,2,0);
+    checkIdCount(counts,8,1,0);
+    checkIdCount(counts,9,1,0);
+    checkIdCount(counts,10,1,0);
   }
   
   private AbstractPartitionCollapsingIncrementalJob runJob() throws IOException, InterruptedException, ClassNotFoundException

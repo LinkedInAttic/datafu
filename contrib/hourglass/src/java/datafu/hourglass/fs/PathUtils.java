@@ -56,7 +56,7 @@ public class PathUtils
   public static final SimpleDateFormat datedPathFormat = new SimpleDateFormat("yyyyMMdd");  
   public static final SimpleDateFormat nestedDatedPathFormat = new SimpleDateFormat("yyyy/MM/dd");  
   private static final Pattern timestampPathPattern = Pattern.compile(".+/(\\d{8})");
-  private static final Pattern dailyPathPattern = Pattern.compile(".+/(\\d{4}/\\d{2}/\\d{2})");
+  private static final Pattern dailyPathPattern = Pattern.compile("(.+)/(\\d{4}/\\d{2}/\\d{2})");
 
   /**
    * Filters out paths starting with "." and "_".
@@ -144,7 +144,7 @@ public class PathUtils
       Matcher matcher = dailyPathPattern.matcher(pathStatus.getPath().toString());
       if (matcher.matches())
       {
-        String datePath = matcher.group(1);
+        String datePath = matcher.group(2);
         Date date;
         try
         {
@@ -299,11 +299,30 @@ public class PathUtils
     
     try
     {
-      return PathUtils.nestedDatedPathFormat.parse(matcher.group(1));
+      return PathUtils.nestedDatedPathFormat.parse(matcher.group(2));
     }
     catch (ParseException e)
     {
       throw new RuntimeException("Unexpected input filename: " + path);
     }
+  }
+  
+  /**
+   * Gets the root path for a path in the "yyyy/MM/dd" format.  This is part of the path preceding the
+   * "yyyy/MM/dd" portion.
+   * 
+   * @param path
+   * @return
+   */
+  public static Path getNestedPathRoot(Path path)
+  {
+    Matcher matcher = dailyPathPattern.matcher(path.toString());
+    
+    if (!matcher.matches())
+    {
+      throw new RuntimeException("Unexpected input filename: " + path);
+    }
+    
+    return new Path(matcher.group(1));
   }
 }

@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,6 +35,8 @@ import org.json.JSONObject;
  */
 public class AvroMultipleInputsUtil
 {
+  private static final Logger _log = Logger.getLogger(AvroMultipleInputsUtil.class);
+  
   private static final String CONF_INPUT_KEY_SCHEMA = "avro.schema.multiple.inputs.keys";
   
   /**
@@ -46,6 +49,7 @@ public class AvroMultipleInputsUtil
   public static Schema getInputKeySchemaForSplit(Configuration conf, InputSplit split) 
   {
     String path = ((FileSplit)split).getPath().toString();
+    _log.info("Determining schema for input path " + path);
     JSONObject schemas;
     try
     {
@@ -55,16 +59,18 @@ public class AvroMultipleInputsUtil
     {
       throw new RuntimeException(e1);
     }
-    String schemaString = null;
+    Schema schema = null;
     if (schemas != null)
     {
       for (String key : JSONObject.getNames(schemas))
       {
+        _log.info("Checking against " + key);
         if (path.startsWith(key))
         {
           try
           {
-            schemaString = schemas.getString(key);
+            schema = new Schema.Parser().parse(schemas.getString(key));
+            _log.info("Input schema found: " + schema.toString(true));
             break;
           }
           catch (JSONException e)
@@ -74,7 +80,11 @@ public class AvroMultipleInputsUtil
         }
       }
     }
-    return schemaString != null ? new Schema.Parser().parse(schemaString) : null;
+    if (schema == null)
+    {
+      _log.info("Could not determine input schema");
+    }
+    return schema;
   }
   
   /**

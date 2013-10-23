@@ -40,13 +40,18 @@
   <property name="instrumented.dir" value="${basedir}/instrumented" />
   <property name="pigtestclasses.dir" value="${dist.dir}/pigtestclasses" />
   <property name="fastutil.jar" value="fastutil-jar-6.3.jar" />
-  
+
+  <!-- Java configuration -->
+  <property name="targetJavaVersion" value="1.5" />
+  <property name="sourceJavaVersion" value="${targetJavaVersion}" />
+
   <!-- output names -->
   <property name="output.jarfile" value="${dist.dir}/${final.name}.jar" />
   <property name="output.jarfile.sources" value="${dist.dir}/${final.name}-sources.jar" />
   <property name="output.jarfile.javadoc" value="${dist.dir}/${final.name}-javadoc.jar" />
   
   <property name="testclasses.pattern" value="**/*.class" />
+  <property name="test.methods" value="" />
       
   <property name="ivy.jar.dir" value="${basedir}/ivy" />
   <property name="datafu.pom.name" value="pom.xml" />
@@ -207,7 +212,7 @@
   
   <target name="build" depends="init" description="Compile main source tree java files">
     <replace-dir dir="${classes.dir}" />
-    <javac destdir="${classes.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
+    <javac destdir="${classes.dir}" source="${sourceJavaVersion}" target="${targetJavaVersion}" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
       <src path="${java.dir}" />
       <exclude name="datafu/linkedin/**"/>
       <classpath refid="main-classpath" />
@@ -216,7 +221,7 @@
 
   <target name="build-plugins" depends="init" description="Compile main source tree java files">
     <replace-dir dir="${plugin.classes.dir}" />
-    <javac destdir="${plugin.classes.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
+    <javac destdir="${plugin.classes.dir}" source="${sourceJavaVersion}" target="${targetJavaVersion}" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
       <src path="${plugin.java.dir}" />
       <classpath refid="plugin-classpath" />
     </javac>
@@ -239,7 +244,7 @@
         <exclude name="**/*.java" />
       </fileset>
     </copy>
-    <javac destdir="${pigtestclasses.dir}" target="1.5" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
+    <javac destdir="${pigtestclasses.dir}" source="${sourceJavaVersion}" target="${targetJavaVersion}" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
       <src path="${pigtestsrc.dir}" />
       <compilerarg line="-processor org.adrianwalker.multilinestring.MultilineProcessor"/>
       <classpath refid="test-classpath" />
@@ -313,7 +318,7 @@
   
   <target name="test" depends="build-pig-tests, jar" description="Runs the pig tests">
     <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-jar-6.2.jar"/>
-    <testng classpathref="test-classpath"
+    <testng classpathref="test-classpath" methods="${test.methods}"
             outputDir="${report.dir}" verbose="2" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
@@ -323,7 +328,7 @@
   
   <target name="test-instrumented" depends="build-pig-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
     <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-6.2.jar"/>
-    <testng classpathref="instrumented-test-classpath"
+    <testng classpathref="instrumented-test-classpath" methods="${test.methods}"
             outputDir="${report.dir}" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${instrumented.dir}" />

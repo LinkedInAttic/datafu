@@ -25,7 +25,9 @@ import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.data.TupleFactory;
+import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
+import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 
 import datafu.pig.util.SimpleEvalFunc;
 
@@ -192,7 +194,12 @@ public class Quantile extends SimpleEvalFunc<Tuple>
       for (Double x : this.quantiles)
         tupleSchema.add(new Schema.FieldSchema("quantile_" + x.toString().replace(".", "_"), DataType.DOUBLE));
     }
-    return tupleSchema;
+
+    try {
+      return new Schema(new FieldSchema(null, tupleSchema, DataType.TUPLE));
+    } catch(FrontendException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
 

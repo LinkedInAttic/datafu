@@ -22,46 +22,13 @@ import org.apache.pig.FilterFunc;
 import org.apache.pig.data.Tuple;
 
 /**
- * Filter function which asserts that a value is true.
+ * Assert has been renamed to AssertUDF.
  * 
- * <p>
- * Unfortunately, the Pig interpreter doesn't recognize boolean expressions nested as function
- * arguments, so this uses C-style booleans.  That is, the first argument should be
- * an integer.  0 is interpreted as "false", and anything else is considered "true".
- * The function will cause the Pig script to fail if a "false" value is encountered.
- * </p>
- * 
- * <p>
- * There is a unary and a binary version. The unary version just takes a boolean, and throws out a generic exception message when the
- * assertion is violated.  The binary version takes a String as a second argument and throws that out when the assertion
- * is violated.
- * </p>
- * 
- * <p>
- * Example:
- * <pre>
- * {@code
- * FILTER members BY ASSERT( (member_id >= 0 ? 1 : 0), 'Doh! Some member ID is negative.' );
- * }
- * </pre>
- * </p>
+ * This class is provided for backward compatibility.
+ *
+ * @deprecated Use {@link AssertUDF()} instead.
  */
-public class Assert extends FilterFunc
+ @Deprecated
+public class Assert extends AssertUDF
 {
-  @Override
-  public Boolean exec(Tuple tuple)
-      throws IOException
-  {
-    if ((Integer) tuple.get(0) == 0) {
-      if (tuple.size() > 1) {
-        throw new IOException("Assertion violated: " + tuple.get(1).toString());
-      }
-      else {
-        throw new IOException("Assertion violated.  What assertion, I do not know, but it was officially violated.");
-      }
-    }
-    else {
-      return true;
-    }
-  }
 }

@@ -51,6 +51,7 @@
   <property name="output.jarfile.javadoc" value="${dist.dir}/${final.name}-javadoc.jar" />
   
   <property name="testclasses.pattern" value="**/*.class" />
+  <property name="test.methods" value="" />
       
   <property name="ivy.jar.dir" value="${basedir}/ivy" />
   <property name="datafu.pom.name" value="pom.xml" />
@@ -317,7 +318,7 @@
   
   <target name="test" depends="build-pig-tests, jar" description="Runs the pig tests">
     <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-jar-6.2.jar"/>
-    <testng classpathref="test-classpath"
+    <testng classpathref="test-classpath" methods="${test.methods}"
             outputDir="${report.dir}" verbose="2" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${dist.dir}" />
@@ -327,7 +328,7 @@
   
   <target name="test-instrumented" depends="build-pig-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
     <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-6.2.jar"/>
-    <testng classpathref="instrumented-test-classpath"
+    <testng classpathref="instrumented-test-classpath" methods="${test.methods}"
             outputDir="${report.dir}" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${instrumented.dir}" />

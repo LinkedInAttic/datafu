@@ -11,12 +11,12 @@ public class InTests extends PigTests
   /**
   register $JAR_PATH
 
-  define In datafu.pig.util.In();
+  define I datafu.pig.util.InUDF();
   
   data = LOAD 'input' AS (B: bag {T: tuple(v:INT)});
   
   data2 = FOREACH data {
-    C = FILTER B By In(v, 1,2,3);
+    C = FILTER B By I(v, 1,2,3);
     GENERATE C;
   }
   
@@ -47,12 +47,12 @@ public class InTests extends PigTests
   /**
   register $JAR_PATH
 
-  define In datafu.pig.util.In();
+  define I datafu.pig.util.InUDF();
   
   data = LOAD 'input' AS (B: bag {T: tuple(v:chararray)});
   
   data2 = FOREACH data {
-    C = FILTER B By In(v, 'will','matt','sam');
+    C = FILTER B By I(v, 'will','matt','sam');
     GENERATE C;
   }
   
@@ -83,11 +83,11 @@ public class InTests extends PigTests
   /**
   register $JAR_PATH
   
-  define In datafu.pig.util.In();
+  define I datafu.pig.util.InUDF();
   
   data = LOAD 'input' AS (owner:chararray, color:chararray);
   describe data;
-  data2 = FILTER data BY In(color, 'red','blue');
+  data2 = FILTER data BY I(color, 'red','blue');
   describe data2;
   STORE data2 INTO 'output';
   */

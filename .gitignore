@@ -5,7 +5,7 @@ annotation-plugin.jar
 .classpath
 docs/
 input
-lib/
+/lib/
 report/
 ivy/*.jar
 ivy/pom.xml

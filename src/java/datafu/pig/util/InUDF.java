@@ -14,7 +14,7 @@ import org.apache.pig.data.Tuple;
  * Example:
  * <pre>
  * {@code
- * define In datafu.pig.util.In();
+ * define In datafu.pig.util.InUDF();
  * -- cars: (alice, red), (bob, blue), (charlie, green), (dave, red);
  * cars = LOAD cars AS (owner:chararray, color:chararray);
  * 

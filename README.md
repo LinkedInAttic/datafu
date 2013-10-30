@@ -18,7 +18,7 @@ processing data in Hadoop.
 
 ## Pig Compatibility
 
-The current version of DataFu has been tested against Pig 0.11.1.  DataFu should be compatible with some older versions of Pig, however
+The current version of DataFu has been tested against Pig 0.11.1 and 0.12.0.  DataFu should be compatible with some older versions of Pig, however
 we do not do any sort of testing with prior versions of Pig and do not guarantee compatibility.  
 Our policy is to test against the most recent version of Pig whenever we release and make sure DataFu works with that version. 
 

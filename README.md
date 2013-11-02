@@ -33,6 +33,11 @@ Our policy is to test against the most recent version of Pig whenever we release
 
 * [A Brief Tour of DataFu](http://www.slideshare.net/matthewterencehayes/datafu)
 * [Building Data Products at LinkedIn with DataFu](http://www.slideshare.net/matthewterencehayes/building-data-products-at-linkedin-with-datafu)
+* [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://www.slideshare.net/matthewterencehayes/hourglass-a-library-for-incremental-processing-on-hadoop)
+
+## Papers
+
+* [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://www.slideshare.net/matthewterencehayes/hourglass-27038297)
 
 ## What can you do with it?
 

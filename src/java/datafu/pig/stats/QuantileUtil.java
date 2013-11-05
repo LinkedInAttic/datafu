@@ -18,7 +18,7 @@ package datafu.pig.stats;
 import java.util.ArrayList;
 
 /**
- * Methods used by {@see Quantile}.
+ * Methods used by {@link Quantile}.
  * 
  * @author "Matthew Hayes <mhayes@linkedin.com>"
  *

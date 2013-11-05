@@ -16,17 +16,12 @@
  
 package datafu.pig.util;
 
-import java.io.IOException;
-
-import org.apache.pig.FilterFunc;
-import org.apache.pig.data.Tuple;
-
 /**
  * Assert has been renamed to AssertUDF.
  * 
  * This class is provided for backward compatibility.
  *
- * @deprecated Use {@link AssertUDF()} instead.
+ * @deprecated Use {@link AssertUDF} instead.
  */
  @Deprecated
 public class Assert extends AssertUDF

@@ -17,15 +17,11 @@
 package datafu.pig.util;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
 
-import org.apache.pig.EvalFunc;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
-import org.apache.pig.impl.util.UDFContext;
 
 /**
  * Returns the first non-null value from a tuple, just like {@link <a href="http://msdn.microsoft.com/en-us/library/ms190349.aspx" target="_blank">COALESCE</a>} in SQL. 
@@ -52,7 +48,6 @@ import org.apache.pig.impl.util.UDFContext;
  */
 public class Coalesce extends AliasableEvalFunc<Object>
 {
-  private String instanceName;
   private boolean strict;
   
   private static String STRICT_OPTION = "strict";

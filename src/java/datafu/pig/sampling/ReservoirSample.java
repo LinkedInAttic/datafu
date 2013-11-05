@@ -35,9 +35,9 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * a uniformly random sample of a given size.
  * 
  * <p>
- * This is similar to {@see SimpleRandomSample}, however it is guaranteed to produce
+ * This is similar to {@link SimpleRandomSample}, however it is guaranteed to produce
  * a sample of the given size.  This comes at the cost of scalability.
- * {@see SimpleRandomSample} produces a sample of the desired size with likelihood of 99.99%,
+ * {@link SimpleRandomSample} produces a sample of the desired size with likelihood of 99.99%,
  * while using less internal storage.  ReservoirSample on the other hand uses internal storage
  * with size equaling the desired sample to guarantee the exact sample size.
  * </p>

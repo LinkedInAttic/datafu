@@ -15,6 +15,8 @@
         
         <!-- use the right avro version which pig 0.10.0 was built against -->
         <dependency org="org.apache.avro" name="avro" rev="${avro.version}" conf="common->default"/>
+
+        <dependency org="com.clearspring.analytics" name="stream" rev="2.5.0" conf="common->default" />
         
         <dependency org="it.unimi.dsi" name="fastutil" rev="${fastutil.version}" conf="common->default"/>
         <dependency org="joda-time" name="joda-time" rev="${joda-time.version}" conf="common->default"/>

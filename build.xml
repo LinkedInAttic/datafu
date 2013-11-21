@@ -3,6 +3,9 @@
          xmlns:artifact="antlib:org.apache.maven.artifact.ant">
   <property file="build.properties" />
 
+  <property name="ivy.jar.dir" value="${basedir}/ivy" />
+  <loadproperties srcfile="${ivy.jar.dir}/libraries.properties"/>
+
   <property name="name" value="datafu" />
   <property name="display.name" value="DataFu" />
   <property name="author" value="Matthew Hayes, Sam Shah" />
@@ -39,7 +42,7 @@
   <property name="coveragereport.dir" value="${basedir}/coverage-report" />
   <property name="instrumented.dir" value="${basedir}/instrumented" />
   <property name="pigtestclasses.dir" value="${dist.dir}/pigtestclasses" />
-  <property name="fastutil.jar" value="fastutil-jar-6.3.jar" />
+  <property name="fastutil.jar" value="fastutil-jar-${fastutil.version}.jar" />
 
   <!-- Java configuration -->
   <property name="targetJavaVersion" value="1.5" />
@@ -52,8 +55,7 @@
   
   <property name="testclasses.pattern" value="**/*.class" />
   <property name="test.methods" value="" />
-      
-  <property name="ivy.jar.dir" value="${basedir}/ivy" />
+    
   <property name="datafu.pom.name" value="pom.xml" />
   <property name="datafu.pomfile" value="${ivy.jar.dir}/${datafu.pom.name}" />
   <property name="datafu.pomfile.template" value="${ivy.jar.dir}/pom-template.xml" />
@@ -65,8 +67,6 @@
 	<property name="ivy.jar" value="${ivy.jar.dir}/ivy-${ivy.jar.version}.jar" />
 	<property name="ivy.settings.file" value="ivysettings.xml" />
 	<property name="maven.jar" location="${ivy.jar.dir}/maven-ant-tasks-${maven.jar.version}.jar"/>
-  
-  <loadproperties srcfile="${ivy.jar.dir}/libraries.properties"/>
 
   <basename property="basedirname" file="${basedir}"/>
   

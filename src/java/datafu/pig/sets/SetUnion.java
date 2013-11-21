@@ -31,7 +31,7 @@ import org.apache.pig.data.TupleFactory;
  * Example:
  * <pre>
  * {@code
- * define SetUnion datafu.pig.bags.sets.SetUnion();
+ * define SetUnion datafu.pig.sets.SetUnion();
  * 
  * -- input:
  * -- ({(2,20),(3,30),(4,40)},{(1,10),(2,20),(4,40),(8,80)})

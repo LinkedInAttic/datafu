@@ -31,7 +31,7 @@ import org.apache.pig.data.TupleFactory;
  * Example:
  * <pre>
  * {@code
- * define SetIntersect datafu.pig.bags.sets.SetIntersect();
+ * define SetIntersect datafu.pig.sets.SetIntersect();
  *
  * -- input:
  * -- ({(1,10),(2,20),(3,30),(4,40)},{(2,20),(4,40),(8,80)})

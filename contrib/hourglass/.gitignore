@@ -1,0 +1,13 @@
+docs/
+pom.xml
+report/
+build/
+test-logs/
+test-output/
+.ant-targets-build.xml
+bin/
+ivy/
+lib/
+*.swp
+*.log
+*.pid

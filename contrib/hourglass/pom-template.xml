@@ -1,0 +1,58 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.linkedin.datafu</groupId>
+  <artifactId>datafu-hourglass</artifactId>
+  <packaging>jar</packaging>
+  <name>DataFu Hourglass</name>
+  <version>@version</version>
+  <description>A framework for incrementally processing data in Hadoop</description>
+  <url>http://data.linkedin.com/opensource/datafu</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>git@github.com:linkedin/datafu.git</url>
+    <connection>scm:git:git@github.com:linkedin/datafu.git</connection>
+    <developerConnection>scm:git:git@github.com:linkedin/datafu.git</developerConnection>
+  </scm>
+  <developers>
+    <developer>
+      <id>mhayes</id>
+      <name>Matthew Hayes</name>
+      <email>mhayes@linkedin.com</email>
+      <organization>LinkedIn</organization>
+      <organizationUrl>http://www.linkedin.com</organizationUrl>
+    </developer>
+  </developers>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>1.7.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-mapred</artifactId>
+      <version>1.7.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-compiler</artifactId>
+      <version>1.7.4</version>
+    </dependency>
+  </dependencies>
+</project>

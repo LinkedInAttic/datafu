@@ -1,0 +1,8 @@
+<ivysettings>
+<settings defaultResolver="ivyrep"/>
+<resolvers>
+  <chain name="ivyrep" returnFirst="true">
+    <ibiblio name="ibiblio" m2compatible="true"/>
+  </chain>
+</resolvers>
+</ivysettings>

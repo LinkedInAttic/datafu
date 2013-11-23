@@ -139,6 +139,7 @@ public abstract class SimpleEvalFunc<T> extends EvalFunc<T>
   @SuppressWarnings("unchecked")
   public T exec(Tuple input) throws IOException
   {
+    @SuppressWarnings("rawtypes")
     Class pvec[] = m.getParameterTypes();
 
     if (input == null || input.size() == 0)
@@ -183,6 +184,7 @@ public abstract class SimpleEvalFunc<T> extends EvalFunc<T>
     }
 
     // check correct number of arguments
+    @SuppressWarnings("rawtypes")
     Class parameterTypes[] = m.getParameterTypes();
     if (inputSchema.size() != parameterTypes.length) {
       throw new IllegalArgumentException(String.format("%s: got %d arguments, expected %d.",

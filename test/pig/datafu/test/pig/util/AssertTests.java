@@ -17,11 +17,11 @@ public class AssertTests extends PigTests
   /**
   register $JAR_PATH
   
-  define ASSERT datafu.pig.util.Assert();
+  define ASRT datafu.pig.util.AssertUDF();
   
   data = LOAD 'input' AS (val:INT);
   
-  data2 = FILTER data BY ASSERT(val,'assertion appears to have failed, doh!');
+  data2 = FILTER data BY ASRT(val,'assertion appears to have failed, doh!');
   
   STORE data2 INTO 'output';
   */
@@ -65,11 +65,11 @@ public class AssertTests extends PigTests
   /**
   register $JAR_PATH
   
-  define ASSERT datafu.pig.util.Assert();
+  define ASRT datafu.pig.util.AssertUDF();
   
   data = LOAD 'input' AS (val:INT);
   
-  data2 = FILTER data BY ASSERT(val);
+  data2 = FILTER data BY ASRT(val);
   
   STORE data2 INTO 'output';
   */

@@ -1,3 +1,17 @@
+# 1.1.0
+
+This release adds compatibility with Pig 0.12 (courtesy of jarcec).
+
+Additions:
+
+* Added SHA hash UDF.
+* InUDF and AssertUDF added for Pig 0.12 compatibility.  These are the same as In and Assert.
+* SimpleRandomSample, which implements a scalable simple random sampling algorithm.
+
+Fixes:
+
+* Fixed the schema declarations of several UDFs for compatibility with Pig 0.12, which is now stricter with schemas.
+
 # 1.0.0
 
 **This is not a backwards compatible release.**

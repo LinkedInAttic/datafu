@@ -34,6 +34,13 @@
       <organization>LinkedIn</organization>
       <organizationUrl>http://www.linkedin.com</organizationUrl>
     </developer>
+    <developer>
+      <id>wvaughan</id>
+      <name>William Vaughan</name>
+      <email>wvaughan@linkedin.com</email>
+      <organization>LinkedIn</organization>
+      <organizationUrl>http://www.linkedin.com</organizationUrl>
+    </developer>
   </developers>
   <contributors>
     <contributor>
@@ -42,20 +49,9 @@
       <organizationUrl>http://www.cloudera.com</organizationUrl>
     </contributor>
     <contributor>
-      <name>Mitul Tiwari</name>
-      <email>mtiwari@linkedin.com</email>
+      <name>Evion Kim</name>
       <organization>LinkedIn</organization>
       <organizationUrl>http://www.linkedin.com</organizationUrl>
-    </contributor>
-    <contributor>
-      <name>William Vaughan</name>
-      <email>wvaughan@linkedin.com</email>
-      <organization>LinkedIn</organization>
-      <organizationUrl>http://www.linkedin.com</organizationUrl>
-    </contributor>
-    <contributor>
-      <name>Azarias Reda</name>
-      <url>http://www.eecs.umich.edu/~azarias/</url>
     </contributor>
   </contributors>
   <parent>

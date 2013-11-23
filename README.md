@@ -9,13 +9,16 @@
 * Convenience bag functions (e.g. enumerating items)
 * Convenience utility functions (e.g. assertions, easier writing of EvalFuncs)
 * Set operations (intersect, union)
-* and [more](http://linkedin.github.com/datafu/docs/javadoc/)...
+* and [more](http://linkedin.github.com/datafu/docs/current/)...
 
 Each function is unit tested and code coverage is being tracked for the entire library.
 
+We have also contributed a framework called [Hourglass](https://github.com/linkedin/datafu/tree/master/contrib/hourglass) for incrementally
+processing data in Hadoop.
+
 ## Pig Compatibility
 
-The current version of DataFu has been tested against Pig 0.11.1.  DataFu should be compatible with some older versions of Pig, however
+The current version of DataFu has been tested against Pig 0.11.1 and 0.12.0.  DataFu should be compatible with some older versions of Pig, however
 we do not do any sort of testing with prior versions of Pig and do not guarantee compatibility.  
 Our policy is to test against the most recent version of Pig whenever we release and make sure DataFu works with that version. 
 
@@ -23,11 +26,18 @@ Our policy is to test against the most recent version of Pig whenever we release
 
 * [Introducing DataFu](http://engineering.linkedin.com/open-source/introducing-datafu-open-source-collection-useful-apache-pig-udfs)
 * [DataFu: The WD-40 of Big Data](http://hortonworks.com/blog/datafu/)
+* [DataFu 1.0](http://engineering.linkedin.com/datafu/datafu-10)
+* [DataFu's Hourglass: Incremental Data Processing in Hadoop](http://engineering.linkedin.com/datafu/datafus-hourglass-incremental-data-processing-hadoop)
 
 ## Presentations
 
 * [A Brief Tour of DataFu](http://www.slideshare.net/matthewterencehayes/datafu)
 * [Building Data Products at LinkedIn with DataFu](http://www.slideshare.net/matthewterencehayes/building-data-products-at-linkedin-with-datafu)
+* [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://www.slideshare.net/matthewterencehayes/hourglass-a-library-for-incremental-processing-on-hadoop)
+
+## Papers
+
+* [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://www.slideshare.net/matthewterencehayes/hourglass-27038297)
 
 ## What can you do with it?
 
@@ -35,7 +45,7 @@ Here's a taste of what you can do in Pig.
 
 ### Statistics
   
-Compute the [median](http://en.wikipedia.org/wiki/Median) with the [Median UDF](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/stats/Median.html):
+Compute the [median](http://en.wikipedia.org/wiki/Median) with the [Median UDF](http://linkedin.github.com/datafu/docs/current/datafu/pig/stats/Median.html):
 
     define Median datafu.pig.stats.StreamingMedian();
 
@@ -46,7 +56,7 @@ Compute the [median](http://en.wikipedia.org/wiki/Median) with the [Median UDF](
     -- produces median of 3
     medians = FOREACH grouped GENERATE Median(sorted.val);
   
-Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quantile) with [StreamingQuantile](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/stats/StreamingQuantile.html):
+Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quantile) with [StreamingQuantile](http://linkedin.github.com/datafu/docs/current/datafu/pig/stats/StreamingQuantile.html):
 
     define Quantile datafu.pig.stats.StreamingQuantile('0.0','0.5','1.0');
 
@@ -57,7 +67,7 @@ Similarly, compute any arbitrary [quantiles](http://en.wikipedia.org/wiki/Quanti
     -- produces: (1,5.5,10)
     quantiles = FOREACH grouped GENERATE Quantile(sorted.val);
 
-Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/stats/VAR.html):
+Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](http://linkedin.github.com/datafu/docs/current/datafu/pig/stats/VAR.html):
 
     define VAR datafu.pig.stats.VAR();
 
@@ -70,9 +80,9 @@ Or how about the [variance](http://en.wikipedia.org/wiki/Variance) using [VAR](h
  
 ### Set Operations
 
-Treat sorted bags as sets and compute their intersection with [SetIntersect](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/bags/sets/SetIntersect.html):
+Treat sorted bags as sets and compute their intersection with [SetIntersect](http://linkedin.github.com/datafu/docs/current/datafu/pig/sets/SetIntersect.html):
 
-    define SetIntersect datafu.pig.bags.sets.SetIntersect();
+    define SetIntersect datafu.pig.sets.SetIntersect();
   
     -- ({(3),(4),(1),(2),(7),(5),(6)},{(0),(5),(10),(1),(4)})
     input = LOAD 'input' AS (B1:bag{T:tuple(val:int)},B2:bag{T:tuple(val:int)});
@@ -84,9 +94,9 @@ Treat sorted bags as sets and compute their intersection with [SetIntersect](htt
       GENERATE SetIntersect(sorted_b1,sorted_b2);
     }
       
-Compute the set union with [SetUnion](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/bags/sets/SetUnion.html):
+Compute the set union with [SetUnion](http://linkedin.github.com/datafu/docs/current/datafu/pig/sets/SetUnion.html):
 
-    define SetUnion datafu.pig.bags.sets.SetUnion();
+    define SetUnion datafu.pig.sets.SetUnion();
 
     -- ({(3),(4),(1),(2),(7),(5),(6)},{(0),(5),(10),(1),(4)})
     input = LOAD 'input' AS (B1:bag{T:tuple(val:int)},B2:bag{T:tuple(val:int)});
@@ -100,7 +110,7 @@ Operate on several bags even:
 
 ### Bag operations
 
-Concatenate two or more bags with [BagConcat](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/bags/BagConcat.html):
+Concatenate two or more bags with [BagConcat](http://linkedin.github.com/datafu/docs/current/datafu/pig/bags/BagConcat.html):
 
     define BagConcat datafu.pig.bags.BagConcat();
 
@@ -110,7 +120,7 @@ Concatenate two or more bags with [BagConcat](http://linkedin.github.com/datafu/
     -- ({(1),(2),(3),(4),(5),(6),(7)})
     output = FOREACH input GENERATE BagConcat(B1,B2,B3);
 
-Append a tuple to a bag with [AppendToBag](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/bags/AppendToBag.html):
+Append a tuple to a bag with [AppendToBag](http://linkedin.github.com/datafu/docs/current/datafu/pig/bags/AppendToBag.html):
 
     define AppendToBag datafu.pig.bags.AppendToBag();
 
@@ -122,7 +132,7 @@ Append a tuple to a bag with [AppendToBag](http://linkedin.github.com/datafu/doc
 
 ### PageRank
 
-Run PageRank on a large number of independent graphs through the [PageRank UDF](http://linkedin.github.com/datafu/docs/javadoc/datafu/pig/linkanalysis/PageRank.html):
+Run PageRank on a large number of independent graphs through the [PageRank UDF](http://linkedin.github.com/datafu/docs/current/datafu/pig/linkanalysis/PageRank.html):
 
     define PageRank datafu.pig.linkanalysis.PageRank('dangling_nodes','true');
 

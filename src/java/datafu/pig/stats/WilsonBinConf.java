@@ -24,7 +24,9 @@ import org.apache.commons.math.distribution.NormalDistributionImpl;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.data.TupleFactory;
+import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
+import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 
 import com.google.common.collect.ImmutableList;
 
@@ -125,8 +127,14 @@ public class WilsonBinConf extends SimpleEvalFunc<Tuple>
   @Override
   public Schema outputSchema(Schema input)
   {
-    return new Schema(ImmutableList.of(
-            new Schema.FieldSchema("lower", DataType.DOUBLE),
-            new Schema.FieldSchema("upper", DataType.DOUBLE)));
+    try {
+      Schema innerSchema =  new  Schema(ImmutableList.of(
+              new Schema.FieldSchema("lower", DataType.DOUBLE),
+              new Schema.FieldSchema("upper", DataType.DOUBLE)));
+
+      return new Schema(new FieldSchema(null, innerSchema, DataType.TUPLE));
+    } catch(FrontendException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

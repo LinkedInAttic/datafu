@@ -2,8 +2,8 @@ package datafu.pig.sampling;
 
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.Random;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.pig.AlgebraicEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
@@ -45,8 +45,8 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  */
 public class SimpleRandomSample extends AlgebraicEvalFunc<DataBag>
 {
-  public static final TupleFactory tupleFactory = TupleFactory.getInstance();
-  public static final BagFactory bagFactory = BagFactory.getInstance();
+  private static final TupleFactory tupleFactory = TupleFactory.getInstance();
+  private static final BagFactory bagFactory = BagFactory.getInstance();
 
   public SimpleRandomSample()
   {
@@ -108,7 +108,7 @@ public class SimpleRandomSample extends AlgebraicEvalFunc<DataBag>
   static public class Initial extends EvalFunc<Tuple>
   {
     private double _samplingProbability;
-    private Random _random = new Random(System.nanoTime() % 996209L);
+    private RandomDataGenerator _rdg = new RandomDataGenerator();
 
     public Initial()
     {
@@ -137,7 +137,7 @@ public class SimpleRandomSample extends AlgebraicEvalFunc<DataBag>
 
         for (Tuple item : items)
         {
-          double key = _random.nextDouble();
+          double key = _rdg.nextUniform(0.0d, 1.0d);
 
           if (key < q1)
           {

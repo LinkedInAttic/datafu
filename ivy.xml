@@ -19,6 +19,7 @@
         <dependency org="it.unimi.dsi" name="fastutil" rev="6.3" conf="common->default"/>
         <dependency org="joda-time" name="joda-time" rev="1.6" conf="common->default"/>
         <dependency org="org.apache.commons" name="commons-math" rev="2.1" conf="common->default"/>
+        <dependency org="org.apache.commons" name="commons-math3" rev="3.2" conf="common->default"/>
         <dependency org="commons-io" name="commons-io" rev="1.4" conf="common->default"/>
         <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2" conf="common->default"/>
         <dependency org="org.testng" name="testng" rev="6.2" conf="common->default"/>

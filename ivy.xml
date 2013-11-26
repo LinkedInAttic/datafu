@@ -9,17 +9,17 @@
     </configurations>
     <dependencies>      
 
-        <!-- dependencies explicitly listed in the pom that are required -->
-        <dependency org="com.clearspring.analytics" name="stream" rev="2.5.0" conf="common->default">
-            <!-- don't include fastutil, as we will include it below and don't want it in the common directory -->
-            <exclude org="it.unimi.dsi" name="fastutil" />
-        </dependency>
+        <!-- dependencies explicitly listed in the pom that are required -->        
         <dependency org="joda-time" name="joda-time" rev="${joda-time.version}" conf="common->default"/>
-        <dependency org="org.apache.commons" name="commons-math" rev="${commons-math.version}" conf="common->default"/>
         <dependency org="com.google.guava" name="guava" rev="${guava.version}" conf="common->default"/>         
 
         <!-- dependencies that are packaged within the datafu jar and are therefore not listed in the pom -->
         <dependency org="it.unimi.dsi" name="fastutil" rev="${fastutil.version}" conf="packaged->default"/>
+        <dependency org="org.apache.commons" name="commons-math" rev="${commons-math.version}" conf="packaged->default"/>
+        <dependency org="com.clearspring.analytics" name="stream" rev="${stream.version}" conf="packaged->default">
+            <!-- don't include fastutil, as we will include it below and don't want it in the common directory -->
+            <exclude org="it.unimi.dsi" name="fastutil" />
+        </dependency>
 
         <!-- hadoop and pig dependencies required for building but which are not included in the pom because
              we don't want to require a specific version -->

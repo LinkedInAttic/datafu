@@ -46,6 +46,8 @@
   <property name="instrumented.dir" value="${basedir}/instrumented" />
   <property name="pigtestclasses.dir" value="${dist.dir}/pigtestclasses" />
   <property name="fastutil.jar" value="fastutil-jar-${fastutil.version}.jar" />
+  <property name="commons-math.jar" value="commons-math-jar-${commons-math.version}.jar" />
+  <property name="stream.jar" value="stream-jar-${stream.version}.jar" />
 
   <!-- Java configuration -->
   <property name="targetJavaVersion" value="1.5" />
@@ -307,12 +309,31 @@
           </not>
       </condition>
     </fail>
+    <fail message="Could not find commons-math jar">
+      <condition>
+          <not>
+              <resourcecount count="1">
+                  <fileset id="fs" dir="${packaged.lib.dir}" includes="${commons-math.jar}"/>
+              </resourcecount>
+          </not>
+      </condition>
+    </fail>
+    <fail message="Could not find stream jar">
+      <condition>
+          <not>
+              <resourcecount count="1">
+                  <fileset id="fs" dir="${packaged.lib.dir}" includes="${stream.jar}"/>
+              </resourcecount>
+          </not>
+      </condition>
+    </fail>
     
-    <!-- add fastutil classese to the core jar -->
+    <!-- add fastutil classes to the core jar -->
+    <echo message="Adding to ${final.name}.jar with autojar" />
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     <move file="${dist.dir}/${final.name}.jar" tofile="${dist.dir}/${final.name}-orig.jar" />
     <java jar="${tools.dir}/autojar.jar" fork="true">
-      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${packaged.lib.dir}/${fastutil.jar} ${dist.dir}/${final.name}-orig.jar" />
+      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${packaged.lib.dir}/${fastutil.jar}:${packaged.lib.dir}/${commons-math.jar}:${packaged.lib.dir}/${stream.jar} ${dist.dir}/${final.name}-orig.jar" />
     </java>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     
@@ -323,6 +344,8 @@
     <jarjar jarfile="${dist.dir}/${final.name}.jar">
         <zipfileset src="${dist.dir}/${final.name}-orig.jar"/>
         <rule pattern="it.unimi.dsi.fastutil.**" result="datafu.it.unimi.dsi.fastutil.@1"/>
+        <rule pattern="org.apache.commons.math.**" result="datafu.org.apache.commons.math.@1"/>
+        <rule pattern="com.clearspring.analytics.**" result="datafu.com.clearspring.analytics.@1"/>
     </jarjar>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
   </target>

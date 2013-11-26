@@ -30,6 +30,8 @@
   <property name="tools.dir" value="${basedir}/tools" />
   <property name="lib.dir" value="${basedir}/lib" />
   <property name="common.lib.dir" value="${lib.dir}/common" />
+  <property name="test.lib.dir" value="${lib.dir}/test" />
+  <property name="hadoop.lib.dir" value="${lib.dir}/hadoop" />
   <property name="tools.lib.dir" value="${lib.dir}/tools" />
   <property name="static.lib.dir" value="${basedir}/staticlibs" />
   <property name="classes.dir" value="${dist.dir}/classes" />
@@ -140,6 +142,9 @@
     <fileset dir="${common.lib.dir}">
       <include name="*.jar" />
     </fileset>
+    <fileset dir="${hadoop.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
     <pathelement path="${classes.dir}" />
   </path>  
   
@@ -166,6 +171,15 @@
       <include name="*.jar" />
     </fileset>
     <fileset dir="${static.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <fileset dir="${hadoop.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <fileset dir="${test.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <fileset dir="${tools.lib.dir}">
       <include name="*.jar" />
     </fileset>
     <pathelement path="${classes.dir}" />
@@ -297,8 +311,6 @@
       <includeClasses regex=".*datafu.*" />
       <excludeClasses regex=".*fastutil.*" />
       <excludeClasses regex=".*test.*" />
-      <!-- Code coverage on LinkedIn specific code is not a priority right now -->
-      <excludeClasses regex=".*linkedin.*"/>
       <instrumentationClasspath>
         <pathelement location="${dist.dir}"/>
       </instrumentationClasspath>
@@ -317,7 +329,7 @@
   </target>
   
   <target name="test" depends="build-pig-tests, jar" description="Runs the pig tests">
-    <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-jar-6.2.jar"/>
+    <taskdef resource="testngtasks" classpath="${tools.lib.dir}/testng-jar-${testng.version}.jar"/>
     <testng classpathref="test-classpath" methods="${test.methods}"
             outputDir="${report.dir}" verbose="2" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
@@ -327,7 +339,7 @@
   </target>
   
   <target name="test-instrumented" depends="build-pig-tests, jar-instrumented" description="Runs the tests with instrumented JARs">
-    <taskdef resource="testngtasks" classpath="${common.lib.dir}/testng-6.2.jar"/>
+    <taskdef resource="testngtasks" classpath="${tools.lib.dir}/testng-jar-${testng.version}.jar"/>
     <testng classpathref="instrumented-test-classpath" methods="${test.methods}"
             outputDir="${report.dir}" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />

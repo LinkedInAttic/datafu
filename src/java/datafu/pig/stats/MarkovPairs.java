@@ -18,6 +18,7 @@ package datafu.pig.stats;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.pig.EvalFunc;
 import org.apache.pig.backend.executionengine.ExecException;
@@ -28,8 +29,6 @@ import org.apache.pig.data.Tuple;
 import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
-
-import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -79,7 +78,7 @@ public class MarkovPairs extends EvalFunc<DataBag>
           outputBag.spill();
           count = 0;
         }
-        outputBag.add(tupleFactory.newTuple(ImmutableList.of(elem1, elem2)));
+        outputBag.add(tupleFactory.newTuple(Arrays.asList(elem1, elem2)));
         count ++;
       }
     }

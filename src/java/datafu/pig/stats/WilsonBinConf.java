@@ -17,6 +17,7 @@
 package datafu.pig.stats;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistribution;
@@ -27,8 +28,6 @@ import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
-
-import com.google.common.collect.ImmutableList;
 
 import datafu.pig.util.SimpleEvalFunc;
 
@@ -92,7 +91,7 @@ public class WilsonBinConf extends SimpleEvalFunc<Tuple>
     if (x > n)
       throw new IllegalArgumentException("invariant violation: number of successes > number of obs");
     if (n == 0)
-      return tupleFactory.newTuple(ImmutableList.of(Double.valueOf(0), Double.valueOf(0)));
+      return tupleFactory.newTuple(Arrays.asList(Double.valueOf(0), Double.valueOf(0)));
 
     try {
       double zcrit = -1.0 * normalDist.inverseCumulativeProbability(alpha/2);
@@ -117,7 +116,7 @@ public class WilsonBinConf extends SimpleEvalFunc<Tuple>
       if (x == (n - 1))
         upper = 1 + Math.log(1 - alpha)/n;
 
-      return tupleFactory.newTuple(ImmutableList.of(lower, upper));
+      return tupleFactory.newTuple(Arrays.asList(lower, upper));
     }
     catch (MathException e) {
       throw new IOException("math error", e);
@@ -128,7 +127,7 @@ public class WilsonBinConf extends SimpleEvalFunc<Tuple>
   public Schema outputSchema(Schema input)
   {
     try {
-      Schema innerSchema =  new  Schema(ImmutableList.of(
+      Schema innerSchema =  new  Schema(Arrays.asList(
               new Schema.FieldSchema("lower", DataType.DOUBLE),
               new Schema.FieldSchema("upper", DataType.DOUBLE)));
 

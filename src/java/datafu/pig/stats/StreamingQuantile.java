@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.pig.Accumulator;
 import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataType;
@@ -29,10 +28,6 @@ import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
-
-import com.google.common.collect.Lists;
-
-import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * Computes approximate {@link <a href="http://en.wikipedia.org/wiki/Quantile" target="_blank">quantiles</a>} 
@@ -273,7 +268,7 @@ public class StreamingQuantile extends AccumulatorEvalFunc<Tuple>
   {
     private static final long MAX_TOT_ELEMS = 1024L * 1024L * 1024L * 1024L;
 
-    private final List<List<Double>> buffer = Lists.newArrayList();
+    private final List<List<Double>> buffer = new ArrayList<List<Double>>();
     private final int numQuantiles;
     private final int maxElementsPerBuffer;
     private int totalElements;
@@ -302,7 +297,7 @@ public class StreamingQuantile extends AccumulatorEvalFunc<Tuple>
         buffer.add(null);
       }
       if (buffer.get(level) == null) {
-        buffer.set(level, Lists.<Double>newArrayList());
+        buffer.set(level, new ArrayList<Double>());
       }
     }
     
@@ -334,7 +329,7 @@ public class StreamingQuantile extends AccumulatorEvalFunc<Tuple>
       if (buffer.get(level + 1).isEmpty()) {
         merged = buffer.get(level + 1);
       } else {
-        merged = Lists.newArrayListWithCapacity(maxElementsPerBuffer);
+        merged = new ArrayList<Double>(maxElementsPerBuffer);
       }
       
       collapse(buffer.get(level), buf, merged);
@@ -373,7 +368,7 @@ public class StreamingQuantile extends AccumulatorEvalFunc<Tuple>
 
     public List<Double> getQuantiles()
     {
-      List<Double> quantiles = Lists.newArrayList();
+      List<Double> quantiles = new ArrayList<Double>();
       quantiles.add(min);
       
       if (buffer.get(0) != null) {

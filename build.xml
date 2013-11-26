@@ -30,6 +30,7 @@
   <property name="tools.dir" value="${basedir}/tools" />
   <property name="lib.dir" value="${basedir}/lib" />
   <property name="common.lib.dir" value="${lib.dir}/common" />
+  <property name="packaged.lib.dir" value="${lib.dir}/packaged" />
   <property name="test.lib.dir" value="${lib.dir}/test" />
   <property name="hadoop.lib.dir" value="${lib.dir}/hadoop" />
   <property name="tools.lib.dir" value="${lib.dir}/tools" />
@@ -142,6 +143,9 @@
     <fileset dir="${common.lib.dir}">
       <include name="*.jar" />
     </fileset>
+    <fileset dir="${packaged.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
     <fileset dir="${hadoop.lib.dir}">
       <include name="*.jar" />
     </fileset>
@@ -166,7 +170,7 @@
     </fileset>
   </path>
 
-  <path id="base-test-classpath">    
+  <path id="build-tests-classpath">
     <fileset dir="${common.lib.dir}">
       <include name="*.jar" />
     </fileset>
@@ -183,20 +187,39 @@
       <include name="*.jar" />
     </fileset>
     <pathelement path="${classes.dir}" />
-    <pathelement path="${pigtestclasses.dir}" />
-  </path>
-  
-  <path id="test-classpath">
-    <path refid="base-test-classpath" />
-    <!-- Use non-instrumented JARs for normal testing, otherwise it is 15% slower to run the tests -->
-    <fileset dir="${dist.dir}">
-      <include name="*.jar" />
-    </fileset>
     <pathelement path="${plugin.classes.dir}" />
   </path>
   
+  <path id="run-tests-base-classpath">
+    <!-- these common libs are assumed to be downloaded and available when using datafu
+         as they are listed in the pom -->
+    <fileset dir="${common.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <!-- we do not include the packaged directory since classes from these jars 
+         should be in the datafu jar -->
+    <fileset dir="${hadoop.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <fileset dir="${test.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <fileset dir="${tools.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+    <pathelement path="${pigtestclasses.dir}" />
+  </path>
+
+  <path id="run-tests-classpath">
+    <path refid="run-tests-base-classpath" />
+    <!-- pick up the datafu jar -->
+    <fileset dir="${dist.dir}">
+      <include name="datafu-*.jar" />
+    </fileset>
+  </path>
+  
   <path id="instrumented-test-classpath">
-    <path refid="base-test-classpath" />
+    <path refid="run-tests-base-classpath" />
     <path refid="cobertura.classpath" />
     <!-- Use instrumented JARs -->
     <fileset dir="${instrumented.dir}">
@@ -261,7 +284,7 @@
     <javac destdir="${pigtestclasses.dir}" source="${sourceJavaVersion}" target="${targetJavaVersion}" debug="true" deprecation="false" failonerror="true" includeantruntime="false">
       <src path="${pigtestsrc.dir}" />
       <compilerarg line="-processor org.adrianwalker.multilinestring.MultilineProcessor"/>
-      <classpath refid="test-classpath" />
+      <classpath refid="build-tests-classpath" />
     </javac>
   </target>
     
@@ -279,7 +302,7 @@
       <condition>
           <not>
               <resourcecount count="1">
-                  <fileset id="fs" dir="${common.lib.dir}" includes="${fastutil.jar}"/>
+                  <fileset id="fs" dir="${packaged.lib.dir}" includes="${fastutil.jar}"/>
               </resourcecount>
           </not>
       </condition>
@@ -289,7 +312,7 @@
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     <move file="${dist.dir}/${final.name}.jar" tofile="${dist.dir}/${final.name}-orig.jar" />
     <java jar="${tools.dir}/autojar.jar" fork="true">
-      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${common.lib.dir}/${fastutil.jar} ${dist.dir}/${final.name}-orig.jar" />
+      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${packaged.lib.dir}/${fastutil.jar} ${dist.dir}/${final.name}-orig.jar" />
     </java>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     
@@ -330,7 +353,7 @@
   
   <target name="test" depends="build-pig-tests, jar" description="Runs the pig tests">
     <taskdef resource="testngtasks" classpath="${tools.lib.dir}/testng-jar-${testng.version}.jar"/>
-    <testng classpathref="test-classpath" methods="${test.methods}"
+    <testng classpathref="run-tests-classpath" methods="${test.methods}"
             outputDir="${report.dir}" verbose="2" haltonfailure="true" haltonskipped="true">
       <jvmarg value="-Xmx1G" />
       <sysproperty key="datafu.jar.dir" value="${dist.dir}" />

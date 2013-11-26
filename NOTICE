@@ -31,3 +31,5 @@ This product includes/uses autojar (http://autojar.sourceforge.net/en_d/index.ht
 This product includes/uses jarjar (http://code.google.com/p/jarjar/)
 
 This product includes/uses cobertura (http://cobertura.sourceforge.net/index.html)
+
+This product includes/uses stream (https://github.com/addthis/stream-lib)

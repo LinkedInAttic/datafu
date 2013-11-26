@@ -21,13 +21,13 @@ import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
  * <pre>
  * {@code
  *
- * define Transpose datafu.pig.util.Transpose();
+ * define TransposeTupleToBag datafu.pig.util.TransposeTupleToBag();
 
  * -- input: 1,10,11,12
  * input = LOAD 'input' AS (id:int,val1:int,val2:int,val3:int);
  *
  * -- produces: 1,{("val1",10),("val2",11),("val3",12)}
- * output = FOREACH input GENERATE id, Transpose(val1 .. val3);
+ * output = FOREACH input GENERATE id, TransposeTupleToBag(val1 .. val3);
  *
  * }
  * </pre>

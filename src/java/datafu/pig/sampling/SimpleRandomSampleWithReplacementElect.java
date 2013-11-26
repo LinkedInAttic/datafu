@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 LinkedIn Corp. and contributors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package datafu.pig.sampling;
 
 import java.io.IOException;
@@ -15,8 +31,8 @@ import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
- * Select the candidate with the smallest key for each position from the candidates proposed
- * by {@link SimpleRandomSampleWithReplacementVote}.
+ * Select the candidate with the smallest score for each position from the candidates
+ * proposed by {@link SimpleRandomSampleWithReplacementVote}.
  * 
  * @see SimpleRandomSampleWithReplacementVote
  * 
@@ -60,7 +76,7 @@ public class SimpleRandomSampleWithReplacementElect extends AlgebraicEvalFunc<Da
         }
         else
         {
-          // then by key
+          // then by score
           return ((Double) o1.get(1)).compareTo((Double) o2.get(1));
         }
       }
@@ -168,7 +184,8 @@ public class SimpleRandomSampleWithReplacementElect extends AlgebraicEvalFunc<Da
 
       // the output is a bag of selected items
       Schema outputSchema =
-          new Schema(new Schema.FieldSchema(super.getSchemaName(OUTPUT_BAG_NAME_PREFIX, input),
+          new Schema(new Schema.FieldSchema(super.getSchemaName(OUTPUT_BAG_NAME_PREFIX,
+                                                                input),
                                             inputFieldSchema.schema.getField(0).schema.getField(2).schema,
                                             DataType.BAG));
 

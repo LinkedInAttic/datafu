@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 LinkedIn Corp. and contributors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package datafu.pig.sampling;
 
 import java.io.IOException;
@@ -38,8 +54,8 @@ import com.google.common.primitives.Ints;
  * {@link SimpleRandomSampleWithReplacementVote} is a tuple that consists of a bag of
  * items, the desired sample size (int), and the population size (long) or a good lower
  * bound of it, where the latter two must be scalars. The output from the vote UDF is a
- * tuple that consists of position:int, key:double, and candidate. The input to the elect
- * UDF {@link SimpleRandomSampleWithReplacementElect} is a tuple that contains all
+ * tuple that consists of position:int, score:double, and candidate. The input to the
+ * elect UDF {@link SimpleRandomSampleWithReplacementElect} is a tuple that contains all
  * candidates voted by the vote UDF for some positions. The output from the elect UDF is a
  * bag of sampled items.
  * <p/>
@@ -84,15 +100,15 @@ import com.google.common.primitives.Ints;
  * </pre>
  * 
  * Basically, for each output position, it performs a random sort on the population
- * (associates each item with a random key independently drawn from the uniform
- * distribution and then sorts items based on the key), and picks the one that has the
- * smallest key. However, a probabilistic threshold is used to avoid sorting the entire
- * population. For example, if the population size is one billion and the random key
- * generated for an item is 0.9, very likely it won't become the smallest key and hence we
- * do not need to propose it as a candidate. With the threshold, the expected number of
- * candidates is (1 - exp(log(delta/s)/n1)*n, where delta is the failure rate, s is the
- * sample size, n1 is the input lower bound of the population size n. When n1 equals n,
- * this number is approximately s*log(s/delta).
+ * (associates each item with a random score independently drawn from the uniform
+ * distribution and then sorts items based on the scores), and picks the one that has the
+ * smallest score. However, a probabilistic threshold is used to avoid sorting the entire
+ * population. For example, if the population size is one billion and the random score
+ * generated for an item is 0.9, very likely it won't become the smallest and hence we do
+ * not need to propose it as a candidate. With threshold q = 1 - exp(log(delta/s)/n1), the
+ * expected number of candidates is (1 - exp(log(delta/s)/n1)*s*n, where delta is the
+ * failure rate, s is the sample size, n1 is the input lower bound of the population size
+ * n. When n1 equals n, this number is approximately s*log(s/delta).
  * 
  * @see SimpleRandomSampleWithReplacementElect
  * @see <a href="http://en.wikipedia.org/wiki/Bootstrapping_(statistics) target="_blank
@@ -104,6 +120,9 @@ import com.google.common.primitives.Ints;
 public class SimpleRandomSampleWithReplacementVote extends EvalFunc<DataBag>
 {
   public static final String OUTPUT_BAG_NAME_PREFIX = "SRSWR_VOTE";
+  public static final String CANDIDATE_FIELD_NAME = "candidate";
+  public static final String POSITION_FIELD_NAME = "position";
+  public static final String SCORE_FIELD_NAME = "score";
   public static final double FAILURE_RATE = 1e-4;
 
   private static final TupleFactory tupleFactory = TupleFactory.getInstance();
@@ -181,12 +200,13 @@ public class SimpleRandomSampleWithReplacementVote extends EvalFunc<DataBag>
 
     for (Tuple item : items)
     {
+      // Should be able to support long sample size if nextBinomial supports long.
       int numOutputPositions = _rdg.nextBinomial(sampleSize, threshold);
       for (int outputPosition : sampleWithoutReplacement(sampleSize, numOutputPositions))
       {
         Tuple candidate = tupleFactory.newTuple();
         candidate.append(outputPosition);
-        candidate.append(_rdg.nextUniform(0.0d, 1.0d));
+        candidate.append(_rdg.nextUniform(0.0d, 1.0d)); // generate a random score
         candidate.append(item);
         candidates.add(candidate);
       }
@@ -209,13 +229,16 @@ public class SimpleRandomSampleWithReplacementVote extends EvalFunc<DataBag>
 
       List<Schema.FieldSchema> fieldSchemas = Lists.newArrayList();
 
-      fieldSchemas.add(new Schema.FieldSchema("position", DataType.INTEGER));
-      fieldSchemas.add(new Schema.FieldSchema("key", DataType.DOUBLE));
-      fieldSchemas.add(new Schema.FieldSchema("candidate",
+      fieldSchemas.add(new Schema.FieldSchema(POSITION_FIELD_NAME, DataType.INTEGER));
+      fieldSchemas.add(new Schema.FieldSchema(SCORE_FIELD_NAME, DataType.DOUBLE));
+      fieldSchemas.add(new Schema.FieldSchema(CANDIDATE_FIELD_NAME,
                                               inputFieldSchema.schema.getField(0).schema));
 
       Schema outputSchema =
-          new Schema(new Schema.FieldSchema(null, new Schema(fieldSchemas), DataType.BAG));
+          new Schema(new Schema.FieldSchema(super.getSchemaName(OUTPUT_BAG_NAME_PREFIX,
+                                                                input),
+                                            new Schema(fieldSchemas),
+                                            DataType.BAG));
 
       return outputSchema;
     }

@@ -2,35 +2,41 @@
     <info organisation="datafu" module="datafu"/>
     <configurations>
       <conf name="common" description="common libraries" />
+      <conf name="packaged" description="packaged libraries" />
+      <conf name="hadoop" description="hadoop/pig libraries" />
+      <conf name="test" description="test libraries" />
       <conf name="tools" description="tools libraries" />
     </configurations>
-    <dependencies>
-      
-        <dependency org="org.apache.pig" name="pig" rev="${pig.version}" conf="common->default">
-          <!-- pig 0.10.0 pom lists wrong version of avro -->
-          <exclude org="org.apache.hadoop" name="avro" />
+    <dependencies>      
+
+        <!-- dependencies explicitly listed in the pom that are required -->        
+        <dependency org="joda-time" name="joda-time" rev="${joda-time.version}" conf="common->default"/>
+        <dependency org="com.google.guava" name="guava" rev="${guava.version}" conf="common->default"/>         
+
+        <!-- dependencies that are packaged within the datafu jar and are therefore not listed in the pom -->
+        <dependency org="it.unimi.dsi" name="fastutil" rev="${fastutil.version}" conf="packaged->default"/>
+        <dependency org="org.apache.commons" name="commons-math" rev="${commons-math.version}" conf="packaged->default"/>
+        <dependency org="com.clearspring.analytics" name="stream" rev="${stream.version}" conf="packaged->default">
+            <!-- don't include fastutil, as we will include it below and don't want it in the common directory -->
+            <exclude org="it.unimi.dsi" name="fastutil" />
         </dependency>
 
-        <dependency org="org.apache.pig" name="pigunit" rev="${pig.version}" conf="common->default"/>
-        
-        <!-- use the right avro version which pig 0.10.0 was built against -->
-        <dependency org="org.apache.avro" name="avro" rev="${avro.version}" conf="common->default"/>
-        
-        <dependency org="it.unimi.dsi" name="fastutil" rev="${fastutil.version}" conf="common->default"/>
-        <dependency org="joda-time" name="joda-time" rev="${joda-time.version}" conf="common->default"/>
-        <dependency org="org.apache.commons" name="commons-math" rev="${commons-math.version}" conf="common->default"/>
-        <dependency org="commons-io" name="commons-io" rev="${commons-io.version}" conf="common->default"/>
-        <dependency org="org.apache.hadoop" name="hadoop-core" rev="${hadoop.version}" conf="common->default"/>
-        <dependency org="org.testng" name="testng" rev="${testng.version}" conf="common->default"/>
-        <dependency org="com.google.guava" name="guava" rev="${guava.version}" conf="common->default"/>
-          
-        <!-- needed for pigunit to work -->
-        <dependency org="log4j" name="log4j" rev="${log4j.version}" conf="common->default"/>
-        <dependency org="jline" name="jline" rev="${jline.version}" conf="common->default"/>
-        <dependency org="org.antlr" name="antlr" rev="${antlr.version}" conf="common->default"/>
+        <!-- hadoop and pig dependencies required for building but which are not included in the pom because
+             we don't want to require a specific version -->
+        <dependency org="org.apache.pig" name="pig" rev="${pig.version}" conf="hadoop->default"/>
+        <dependency org="org.apache.hadoop" name="hadoop-core" rev="${hadoop.version}" conf="hadoop->default"/>
 
-        <dependency org="org.apache.maven" name="maven-ant-tasks" rev="${maven.version}" conf="common->default" />
-        
+        <!-- dependencies only needed for testing and are not listed in the pom -->
+        <dependency org="org.apache.pig" name="pigunit" rev="${pig.version}" conf="test->default"/>
+        <!-- log4j, jline, and anltr are needed for pigunit to work -->
+        <dependency org="log4j" name="log4j" rev="${log4j.version}" conf="test->default"/>
+        <dependency org="jline" name="jline" rev="${jline.version}" conf="test->default"/>
+        <dependency org="org.antlr" name="antlr" rev="${antlr.version}" conf="test->default"/>
+        <dependency org="commons-io" name="commons-io" rev="${commons-io.version}" conf="test->default"/>
+
+        <!-- dependencies used by the build tool or for testing -->
         <dependency org="com.sun" name="tools" rev="${tools.version}" conf="tools->default"/>
+        <dependency org="org.testng" name="testng" rev="${testng.version}" conf="tools->default"/>
+        
     </dependencies>
 </ivy-module>

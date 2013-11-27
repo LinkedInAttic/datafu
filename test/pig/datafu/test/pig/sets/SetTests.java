@@ -162,4 +162,108 @@ public class SetTests extends PigTests
                  "({(1,10),(1,20),(1,30),(1,40),(1,50)})",
                  "({})");
   }
+  
+  /**
+  register $JAR_PATH
+
+  define SetDifference datafu.pig.sets.SetDifference();
+  
+  data = LOAD 'input' AS (B1:bag{T:tuple(val:int)},B2:bag{T:tuple(val:int)});
+  
+  data2 = FOREACH data GENERATE SetDifference(B1,B2);
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String setDifferenceTwoBagsTest;
+  
+  @Test
+  public void setDifferenceTwoBagsTest() throws Exception
+  {    
+    PigTest test = createPigTestFromString(setDifferenceTwoBagsTest);    
+    
+    writeLinesToFile("input", 
+                     "{(1),(2),(3)}\t",
+                     "{(1),(2),(3)}\t{}",
+                     "\t{(1),(2),(3)}",
+                     "{}\t{(1),(2),(3)}",
+                     "{(1),(2),(3)}\t{(1)}",
+                     "{(1),(2),(3)}\t{(1),(2)}",
+                     "{(1),(2),(3)}\t{(1),(2),(3)}",
+                     "{(1),(2),(3)}\t{(1),(2),(3),(4)}",
+                     "{(1),(2),(3),(4),(5),(6)}\t{(3),(4)}");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data2",
+                 "({(1),(2),(3)})",
+                 "({(1),(2),(3)})",
+                 "({})",
+                 "({})",
+                 "({(2),(3)})",
+                 "({(3)})",
+                 "({})",
+                 "({})",
+                 "({(1),(2),(5),(6)})");
+  }
+  
+  /**
+  register $JAR_PATH
+
+  define SetDifference datafu.pig.sets.SetDifference();
+  
+  data = LOAD 'input' AS (B1:bag{T:tuple(val:int)},B2:bag{T:tuple(val:int)},B3:bag{T:tuple(val:int)});
+  
+  data2 = FOREACH data GENERATE SetDifference(B1,B2,B3);
+  
+  STORE data2 INTO 'output';
+   */
+  @Multiline
+  private String setDifferenceThreeBagsTest;
+  
+  @Test
+  public void setDifferenceThreeBagsTest() throws Exception
+  {    
+    PigTest test = createPigTestFromString(setDifferenceThreeBagsTest);    
+    
+    writeLinesToFile("input", 
+                     "{(1),(2),(3)}\t\t",
+                     "{(1),(2),(3)}\t{}\t",
+                     "{(1),(2),(3)}\t\t{}",
+                     "{(1),(2),(3)}\t{}\t{}",
+                     "{(1),(2),(2),(2),(3),(3)}\t{}\t{}",
+                     
+                     "{(1),(2),(3)}\t{(2)}\t{}",
+                     "{(1),(2),(3)}\t{}\t{(2)}",
+                     
+                     "{(1),(2),(3)}\t{(2)}\t{(3)}",
+                     
+                     "{(1),(2),(3)}\t{(2),(2)}\t{(3),(3)}",
+                     "{(1),(1),(1),(2),(2),(3),(3),(3)}\t{(2),(2)}\t{(3),(3)}",
+                     "{(1),(2),(3)}\t{(0),(2)}\t{(3)}",
+                     
+                     "{(1),(2),(3)}\t{(0),(2)}\t{(1),(3)}",
+                     "{(1),(2),(3)}\t{(0),(2)}\t{(1),(3),(4)}");
+                  
+    test.runScript();
+            
+    assertOutput(test, "data2",
+                 "({(1),(2),(3)})",
+                 "({(1),(2),(3)})",
+                 "({(1),(2),(3)})",
+                 "({(1),(2),(3)})",
+                 "({(1),(2),(3)})",
+
+                 "({(1),(3)})",
+                 "({(1),(3)})",
+                 
+                 "({(1)})",
+                 
+                 "({(1)})",
+                 "({(1)})",
+                 "({(1)})",
+                 
+                 "({})",
+                 "({})");
+  }
 }

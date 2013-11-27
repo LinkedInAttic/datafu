@@ -20,7 +20,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math.MathException;
+import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
@@ -128,7 +129,7 @@ public class SimpleRandomSampleWithReplacementVote extends EvalFunc<DataBag>
   private static final TupleFactory tupleFactory = TupleFactory.getInstance();
   private static final BagFactory bagFactory = BagFactory.getInstance();
 
-  private RandomDataGenerator _rdg = new RandomDataGenerator();
+  private RandomDataImpl _rdg = new RandomDataImpl();
 
   /**
    * Samples k integers from [0, n) without replacement efficiently.
@@ -201,7 +202,16 @@ public class SimpleRandomSampleWithReplacementVote extends EvalFunc<DataBag>
     for (Tuple item : items)
     {
       // Should be able to support long sample size if nextBinomial supports long.
-      int numOutputPositions = _rdg.nextBinomial(sampleSize, threshold);
+      int numOutputPositions;
+      try
+      {
+        numOutputPositions = _rdg.nextBinomial(sampleSize, threshold);
+      }
+      catch (MathException e)
+      {
+        throw new RuntimeException("Failed to generate a binomial value with n = "
+            + sampleSize + " and p = " + threshold, e);
+      }
       for (int outputPosition : sampleWithoutReplacement(sampleSize, numOutputPositions))
       {
         Tuple candidate = tupleFactory.newTuple();

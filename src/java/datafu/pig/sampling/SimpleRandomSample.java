@@ -19,7 +19,7 @@ package datafu.pig.sampling;
 import java.io.IOException;
 import java.util.Comparator;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.pig.AlgebraicEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
@@ -124,7 +124,7 @@ public class SimpleRandomSample extends AlgebraicEvalFunc<DataBag>
   static public class Initial extends EvalFunc<Tuple>
   {
     private double _samplingProbability;
-    private RandomDataGenerator _rdg = new RandomDataGenerator();
+    private RandomDataImpl _rdg = new RandomDataImpl();
 
     public Initial()
     {

@@ -106,10 +106,18 @@ import com.google.common.primitives.Ints;
  * smallest score. However, a probabilistic threshold is used to avoid sorting the entire
  * population. For example, if the population size is one billion and the random score
  * generated for an item is 0.9, very likely it won't become the smallest and hence we do
- * not need to propose it as a candidate. With threshold q = 1 - exp(log(delta/s)/n1), the
- * expected number of candidates is (1 - exp(log(delta/s)/n1)*s*n, where delta is the
- * failure rate, s is the sample size, n1 is the input lower bound of the population size
- * n. When n1 equals n, this number is approximately s*log(s/delta).
+ * not need to propose it as a candidate.
+ * <p/>
+ * More precisely, let n be the population size, n1 be a good lower bound of n, s be the
+ * sample size, delta be the failure rate, and q be the threshold. For each output
+ * position the probability of all random scores being greater than q is (1-q)^n. Thus, if
+ * we throw away items with associated keys greater than q, with probability at least 1 -
+ * s*(1-q)^n, we can still capture the item with the smallest score for each position. Fix
+ * delta = s*(1-q)^n and solve for q, we get q = 1-exp(log(delta/s)/n), Note that
+ * replacing n by n1 < n can only decrease the failure rate, though at the cost of
+ * increased number of candidates. The expected number of candidates is (1 -
+ * exp(log(delta/s)/n1)*s*n. When n1 equals n, this number is approximately
+ * s*log(s/delta).
  * 
  * @see SimpleRandomSampleWithReplacementElect
  * @see <a href="http://en.wikipedia.org/wiki/Bootstrapping_(statistics) target="_blank

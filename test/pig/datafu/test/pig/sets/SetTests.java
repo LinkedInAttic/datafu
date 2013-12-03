@@ -46,6 +46,64 @@ public class SetTests extends PigTests
                  "({(1,10),(3,30)})");
   }
   
+  /**
+  register $JAR_PATH
+
+  define SetIntersect datafu.pig.sets.SetIntersect();
+  
+  docs = LOAD 'docs' USING PigStorage(',') AS (id:int, line:chararray);
+  B = FOREACH docs GENERATE id, line;
+  C = FOREACH B GENERATE id, TOKENIZE(line) as gu;
+  
+  filtered = FOREACH C {
+    uniq = DISTINCT gu;
+    GENERATE id, uniq;
+  }
+    
+  query = LOAD 'query' AS (line_query:chararray);
+  bag_query = FOREACH query GENERATE TOKENIZE(line_query) AS query;
+  -- sort the bag of tokens, since SetIntersect requires it
+  bag_query = FOREACH bag_query {
+    query_sorted = ORDER query BY token;
+    GENERATE query_sorted;
+  }
+    
+  result = FOREACH filtered {
+    -- sort the tokens, since SetIntersect requires it
+    tokens_sorted = ORDER uniq BY token;
+    GENERATE id, 
+             SIZE(SetIntersect(tokens_sorted,bag_query.query_sorted)) as cnt;
+  }
+    
+  DUMP result;
+  
+   */
+  @Multiline
+  private String setIntersectTestExample;
+  
+  @Test
+  public void setIntersectTestExample() throws Exception
+  {    
+    PigTest test = createPigTestFromString(setIntersectTestExample);    
+    
+    // document with words to check for
+    writeLinesToFile("docs", 
+                     "1,word1 word4 word2 word1",
+                     "2,word2 word6 word1 word5 word3 word7",
+                     "3,word1 word3 word4 word5");
+    
+    // query to apply to document
+    writeLinesToFile("query", 
+                     "word2 word7 word5");
+                  
+    test.runScript();
+    
+    assertOutput(test, "result",
+                 "(1,1)",
+                 "(2,3)",
+                 "(3,1)");
+  }
+  
   @Test
   public void setIntersectEmptyBagsTest() throws Exception
   { 

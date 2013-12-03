@@ -111,13 +111,23 @@ import com.google.common.primitives.Ints;
  * More precisely, let n be the population size, n1 be a good lower bound of n, s be the
  * sample size, delta be the failure rate, and q be the threshold. For each output
  * position the probability of all random scores being greater than q is (1-q)^n. Thus, if
- * we throw away items with associated keys greater than q, with probability at least 1 -
- * s*(1-q)^n, we can still capture the item with the smallest score for each position. Fix
- * delta = s*(1-q)^n and solve for q, we get q = 1-exp(log(delta/s)/n), Note that
+ * we throw away items with associated scores greater than q, with probability at least 1
+ * - s*(1-q)^n, we can still capture the item with the smallest score for each position.
+ * Fix delta = s*(1-q)^n and solve for q, we get q = 1-exp(log(delta/s)/n), Note that
  * replacing n by n1 < n can only decrease the failure rate, though at the cost of
  * increased number of candidates. The expected number of candidates is (1 -
  * exp(log(delta/s)/n1)*s*n. When n1 equals n, this number is approximately
  * s*log(s/delta).
+ * <p/>
+ * Generating a random score for each (item, position) pair is very expensive and
+ * unnecessary. For each item, the number of positions for which it gets voted follows a
+ * binomial distribution B(s,q). We can simply draw a number from this distribution,
+ * determine the positions by sampling without replacement, and then generate random
+ * scores for those positions. This reduces the running time significantly.
+ * <p/>
+ * Since for each position we only need the candidate with the smallest score, we
+ * implement a combiner to reduce the size of intermediate data in the elect UDF
+ * {@link SimpleRandomSampleWithReplacementElect}.
  * 
  * @see SimpleRandomSampleWithReplacementElect
  * @see <a href="http://en.wikipedia.org/wiki/Bootstrapping_(statistics) target="_blank

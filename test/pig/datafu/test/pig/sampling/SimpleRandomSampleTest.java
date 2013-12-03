@@ -27,7 +27,7 @@ import datafu.test.pig.PigTests;
  * Tests for {@link SimpleRandomSample}.
  * 
  * @author ximeng
- *
+ * 
  */
 public class SimpleRandomSampleTest extends PigTests
 {

@@ -10,7 +10,7 @@
   <property name="display.name" value="DataFu" />
   <property name="author" value="Matthew Hayes, Sam Shah" />
   <property environment="env" />
-  <property name="datafu.version" value="1.1.1" />
+  <property name="datafu.version" value="1.2.0" />
   <property name="version" value="${datafu.version}-SNAPSHOT" />
   <property name="final.name" value="${name}-${version}" />
   

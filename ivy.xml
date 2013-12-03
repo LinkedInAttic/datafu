@@ -10,8 +10,7 @@
     <dependencies>      
 
         <!-- dependencies explicitly listed in the pom that are required -->        
-        <dependency org="joda-time" name="joda-time" rev="${joda-time.version}" conf="common->default"/>
-        <dependency org="com.google.guava" name="guava" rev="${guava.version}" conf="common->default"/>         
+        <dependency org="joda-time" name="joda-time" rev="${joda-time.version}" conf="common->default"/>  
 
         <!-- dependencies that are packaged within the datafu jar and are therefore not listed in the pom -->
         <dependency org="it.unimi.dsi" name="fastutil" rev="${fastutil.version}" conf="packaged->default"/>
@@ -20,6 +19,7 @@
             <!-- don't include fastutil, as we will include it below and don't want it in the common directory -->
             <exclude org="it.unimi.dsi" name="fastutil" />
         </dependency>
+        <dependency org="com.google.guava" name="guava" rev="${guava.version}" conf="packaged->default"/>       
 
         <!-- hadoop and pig dependencies required for building but which are not included in the pom because
              we don't want to require a specific version -->

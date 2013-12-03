@@ -17,6 +17,7 @@
 package datafu.pig.bags;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
@@ -26,8 +27,6 @@ import org.apache.pig.data.Tuple;
 import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.tools.pigstats.PigStatusReporter;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Generates pairs of all items in a bag.
@@ -70,7 +69,7 @@ public class UnorderedPairs extends EvalFunc<DataBag>
           j = 0; 
           for (Tuple elem2 : inputBag) {
             if (j > i) {
-              outputBag.add(tupleFactory.newTuple(ImmutableList.of(elem1, elem2)));
+              outputBag.add(tupleFactory.newTuple(Arrays.asList(elem1, elem2)));
               cnt++;
             }
             j++;

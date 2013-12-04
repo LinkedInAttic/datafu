@@ -358,7 +358,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
         
         for (DatePath input : inputs)
         {
-          _log.info(String.format("Input: %s",input.getPath()));
+          _log.info(String.format("Old Input: %s",input.getPath()));
           _inputsToProcess.add(input);
           _oldInputsToProcess.add(input);
           
@@ -372,7 +372,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
       }
         
       _previousOutputToProcess = latestPriorOutput;
-      _log.info("Including previous output: " + _previousOutputToProcess.getPath());
+      _log.info("Previous Output: " + _previousOutputToProcess.getPath());
     }
     
     // consume the incremental data and produce the final output
@@ -414,7 +414,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
           
           for (DatePath input : inputs)
           {
-            _log.info(String.format("Input: %s",input.getPath()));
+            _log.info(String.format("New Input: %s",input.getPath()));
             _inputsToProcess.add(input);
             _newInputsToProcess.add(input);
             

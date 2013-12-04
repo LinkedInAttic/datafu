@@ -68,7 +68,7 @@ public class TestAvroJob extends TestBase
     
   static
   {
-    EVENT_SCHEMA = Schemas.createRecordSchema(FirstPassCountJobTests.class, "Event",
+    EVENT_SCHEMA = Schemas.createRecordSchema(PartitionPreservingTests.class, "Event",
                                               new Field("id", Schema.create(Type.LONG), "ID", null));
   }
   

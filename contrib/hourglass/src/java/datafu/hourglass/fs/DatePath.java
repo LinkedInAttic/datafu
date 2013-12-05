@@ -18,6 +18,7 @@ package datafu.hourglass.fs;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.hadoop.fs.Path;
 
@@ -34,6 +35,11 @@ public class DatePath implements Comparable<DatePath>
   private final Date date;
   private final Path path;
   
+  static
+  {
+    timestampFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+  }
+  
   public DatePath(Date date, Path path)
   {
     this.date = date;
@@ -48,6 +54,11 @@ public class DatePath implements Comparable<DatePath>
     return new DatePath(date,new Path(parent,PathUtils.datedPathFormat.format(date)));
   }
   
+  public static DatePath createNestedDatedPath(Path parent, Date date)
+  {
+    return new DatePath(date,new Path(parent,PathUtils.nestedDatedPathFormat.format(date)));
+  }
+  
   @Override
   public String toString()
   {
@@ -58,5 +69,42 @@ public class DatePath implements Comparable<DatePath>
   public int compareTo(DatePath o)
   {
     return this.date.compareTo(o.date);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((date == null) ? 0 : date.hashCode());
+    result = prime * result + ((path == null) ? 0 : path.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    DatePath other = (DatePath) obj;
+    if (date == null)
+    {
+      if (other.date != null)
+        return false;
+    }
+    else if (!date.equals(other.date))
+      return false;
+    if (path == null)
+    {
+      if (other.path != null)
+        return false;
+    }
+    else if (!path.equals(other.path))
+      return false;
+    return true;
   }
 }

@@ -41,8 +41,8 @@ import datafu.hourglass.fs.PathUtils;
  */
 public class AvroDateRangeMetadata
 {
-  private static String METADATA_DATE_START = "hourglass.date.start";
-  private static String METADATA_DATE_END = "hourglass.date.end";
+  public static String METADATA_DATE_START = "hourglass.date.start";
+  public static String METADATA_DATE_END = "hourglass.date.end";
   
   /**
    * Reads the date range from the metadata stored in an Avro file.

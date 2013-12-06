@@ -1,3 +1,12 @@
+# 1.2.0
+
+Additions:
+
+* Pair of UDFs for simple random sampling with replacement.
+* More dependencies now packaged in DataFu so fewer JAR dependencies required.
+* SetDifference UDF for computing set difference A-B or A-B-C.
+* HyperLogLogPlusPlus UDF for efficient cardinality estimation.
+
 # 1.1.0
 
 This release adds compatibility with Pig 0.12 (courtesy of jarcec).

@@ -123,6 +123,13 @@ public class PartitionCollapsingExecutionPlannerTests extends TestBase
     checkReusingOutput(false);
   }
   
+  /**
+   * Tests that the most recent data is used. 
+   * 
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
   @Test
   public void latestThreeDays() throws IOException, InterruptedException, ClassNotFoundException
   {
@@ -149,6 +156,14 @@ public class PartitionCollapsingExecutionPlannerTests extends TestBase
     checkReusingOutput(false);
   }
   
+  /**
+   * Tests that the previous output can be reused, even when there are two new days since the previous
+   * result.
+   * 
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
   @Test
   public void previousOutputReuse() throws IOException, InterruptedException, ClassNotFoundException
   {
@@ -187,8 +202,53 @@ public class PartitionCollapsingExecutionPlannerTests extends TestBase
     checkReusingOutput(true);
   }
   
+  /**
+   * Tests that the previous output will not be reused when the window size is small.
+   * It is more work to reuse the previous output in this case because the old input has
+   * to be subtracted from the previous result.
+   * 
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
   @Test
-  public void previousOutputNoReuse() throws IOException, InterruptedException, ClassNotFoundException
+  public void previousOutputNoReuseSmallWindow() throws IOException, InterruptedException, ClassNotFoundException
+  {
+    _numDays = 2;
+    _reusePreviousOutput = true;
+    
+    createInput(2012,10,1);
+    createInput(2012,10,2);
+    createInput(2012,10,3);
+    
+    createOutput(2012,10,3,new DateRange(getDate(2012,10,1),getDate(2012,10,2)));
+    
+    createPlan();
+    
+    checkNewInputSize(2);
+    checkForNewInput(2012,10,2);
+    checkForNewInput(2012,10,3);
+    
+    checkOldInputSize(0);
+    
+    checkInputSize(2);    
+    checkForInput(2012,10,2);
+    checkForInput(2012,10,3);
+    
+    checkReusingOutput(false);
+  }
+  
+  /**
+   * Tests that the previous output won't be reused when it is too old.  This would require subtracting off
+   * all the old input data, then adding the new data.  It is better to just use the new data and not reuse
+   * the previous output.
+   * 
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
+  @Test
+  public void previousOutputNoReuseTooOld() throws IOException, InterruptedException, ClassNotFoundException
   {
     _numDays = 8;
     _reusePreviousOutput = true;

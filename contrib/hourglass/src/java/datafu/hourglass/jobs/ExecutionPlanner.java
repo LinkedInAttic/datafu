@@ -316,7 +316,7 @@ public abstract class ExecutionPlanner
     _inputPathsByDate = new ArrayList<SortedMap<Date,DatePath>>();
     for (Path inputPath : getInputPaths())
     {
-      _log.info(String.format("Checking input data in " + inputPath));
+      _log.info(String.format("Searching for available input data in " + inputPath));
       _inputPathsByDate.add(getDailyData(inputPath));
     }
   }
@@ -418,6 +418,7 @@ public abstract class ExecutionPlanner
    */
   protected void determineDateRange()
   {
+    _log.info("Determining range of input data to consume");
     _range = DateRangePlanner.getDateRange(getStartDate(), getEndDate(), getAvailableInputsByDate().keySet(), getDaysAgo(), getNumDays());
     if (_range.getBeginDate() == null || _range.getEndDate() == null)
     {

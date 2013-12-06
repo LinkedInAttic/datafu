@@ -33,7 +33,6 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
-import org.mortbay.log.Log;
 
 import datafu.hourglass.avro.AvroDateRangeMetadata;
 import datafu.hourglass.fs.DatePath;
@@ -201,6 +200,8 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
   {
     if (_plan != null) throw new RuntimeException("Plan already exists");
     
+    _log.info("Creating execution plan");
+    
     loadInputData();
     loadOutputData();    
     determineAvailableInputDates();
@@ -211,6 +212,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
     
     if (_reusePreviousOutput)
     {
+      _log.info("Output may be reused, will create alternative plan that does not reuse output");
       plan = new Plan();
       try
       {
@@ -224,6 +226,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
       }
     }
     
+    _log.info(String.format("Creating plan that %s previous output",(_reusePreviousOutput ? "reuses" : "does not reuse")));
     plan = new Plan();
     try
     {
@@ -236,17 +239,35 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
     plan.finalizePlan();
     plans.add(plan);
     
-    // choose plan with least bytes consumed
-    Collections.sort(plans, new Comparator<Plan>() {
-      @Override
-      public int compare(Plan o1, Plan o2)
+    if (plans.size() > 1)
+    { 
+      _log.info(String.format("There are %d alternative execution plans:",plans.size()));
+      
+      for (Plan option : plans)
       {
-        return o1._totalBytes.compareTo(o2._totalBytes);
-      }      
-    });
-    _plan = plans.get(0);
-    
-    Log.info(String.format("Choosing plan consuming %d bytes",_plan._totalBytes));
+        _log.info(String.format("* Consume %d new inputs, %d old inputs, %s previous output (%d bytes)",
+                                option._newInputsToProcess.size(),
+                                option._oldInputsToProcess.size(),
+                                option._previousOutputToProcess != null ? "reuse" : "no",
+                                option._totalBytes));
+      }
+      
+      // choose plan with least bytes consumed
+      Collections.sort(plans, new Comparator<Plan>() {
+        @Override
+        public int compare(Plan o1, Plan o2)
+        {
+          return o1._totalBytes.compareTo(o2._totalBytes);
+        }      
+      });
+      _plan = plans.get(0);
+      
+      _log.info(String.format("Choosing plan consuming %d bytes",_plan._totalBytes));
+    }
+    else
+    {
+      _plan = plans.get(0);
+    }
   } 
 
   /**
@@ -383,7 +404,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
     {
       throw new RuntimeException("No output path specified");
     }
-    _log.info(String.format("Checking output data in " + getOutputPath()));
+    _log.info(String.format("Searching for existing output data in " + getOutputPath()));
     _outputPathsByDate = getDatedData(getOutputPath());
     _log.info(String.format("Found %d output paths",_outputPathsByDate.size()));
   }

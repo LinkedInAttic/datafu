@@ -181,7 +181,7 @@ public class PartitionCollapsingExecutionPlannerTests extends TestBase
     createInput(2012,10,9);
     createInput(2012,10,10);
     
-    createOutput(2012,10,3,new DateRange(getDate(2012,10,1),getDate(2012,10,8)));
+    createOutput(2012,10,8,new DateRange(getDate(2012,10,1),getDate(2012,10,8)));
     
     createPlan();
     
@@ -221,7 +221,7 @@ public class PartitionCollapsingExecutionPlannerTests extends TestBase
     createInput(2012,10,2);
     createInput(2012,10,3);
     
-    createOutput(2012,10,3,new DateRange(getDate(2012,10,1),getDate(2012,10,2)));
+    createOutput(2012,10,2,new DateRange(getDate(2012,10,1),getDate(2012,10,2)));
     
     createPlan();
     
@@ -259,7 +259,7 @@ public class PartitionCollapsingExecutionPlannerTests extends TestBase
     }
     
     // previous output too old to be useful
-    createOutput(2012,10,3,new DateRange(getDate(2012,10,1),getDate(2012,10,8)));
+    createOutput(2012,10,8,new DateRange(getDate(2012,10,1),getDate(2012,10,8)));
     
     createPlan();
     

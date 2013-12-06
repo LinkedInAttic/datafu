@@ -130,7 +130,7 @@ public class DateRangePlanner
     {
       endDate = endAvailable;
             
-      _log.info(String.format("Using latest available date for end date: %s",
+      _log.info(String.format("No end date specified, using date for latest available input: %s",
                               PathUtils.datedPathFormat.format(endDate)));
       
       if (daysAgo != null)

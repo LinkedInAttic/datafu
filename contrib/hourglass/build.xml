@@ -5,7 +5,7 @@
   <property name="name" value="datafu-hourglass" />
   <property name="display.name" value="DataFu Hourglass" />
   <property name="author" value="Matthew Hayes" />
-  <property name="datafu.hourglass.version" value="0.1.3" />
+  <property name="datafu.hourglass.version" value="0.1.4" />
   <property name="version" value="${datafu.hourglass.version}-SNAPSHOT" />
 
   <!-- ivy -->

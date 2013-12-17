@@ -1,8 +1,6 @@
 DataFu
 Copyright 2010 LinkedIn, Inc
 
-This product includes/uses software developed by The Apache Software Foundation (http://www.apache.org/).
-
 This product includes/uses fastutil, a Java collections framework (http://fastutil.dsi.unimi.it/), licensed under Apache 2.
 
 This product includes/uses joda-time (http://joda.sourceforge.net/), licensed under Apache 2.

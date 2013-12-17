@@ -52,6 +52,8 @@ public class GenerateIds extends Configured implements NamedTool
   private static final Schema EVENT_SCHEMA;
   
   private Random random = new Random();
+  private int startId;
+  private int endId;
   
   static
   {    
@@ -62,16 +64,25 @@ public class GenerateIds extends Configured implements NamedTool
   @Override
   public int run(String[] args) throws Exception
   {    
-    if (args.length != 2)
+    if (args.length < 2 || args.length > 3)
     {
       System.err.printf("%s   %s\n",getName(),getDescription());
-      System.err.println("Usage: <output-path> <date-range>");
+      System.err.println("Usage: <output-path> <date-range> [<id-range>]");
       return 1;
+    }
+    
+    String outputPath = args[0];
+    String dateRange = args[1];
+    
+    String idRange = "1-100";
+    if (args.length == 3)
+    {
+      idRange = args[2];
     }
     
     try
     {
-      return run(super.getConf(), args[0], args[1]);
+      return run(super.getConf(), outputPath, dateRange, idRange);
     }
     catch (IOException e)
     {
@@ -88,12 +99,13 @@ public class GenerateIds extends Configured implements NamedTool
     return 1;
   }
   
-  public int run(Configuration conf, String outputPathString, String dateRange) throws IOException, InterruptedException, ClassNotFoundException
+  public int run(Configuration conf, String outputPathString, String dateRange, String idRange) throws IOException, InterruptedException, ClassNotFoundException
   {
     FileSystem fs = FileSystem.get(conf);
     Path outputPath = new Path(outputPathString);
     
     String[] dateRangeParts = dateRange.split("-");
+    String[] idRangeParts = idRange.split("-");
     
     Date startDate;
     Date endDate = null;
@@ -144,6 +156,53 @@ public class GenerateIds extends Configured implements NamedTool
       return 1;
     }
     
+    if (idRangeParts.length == 1)
+    {
+      try
+      {
+        startId = Integer.parseInt(idRangeParts[0]);
+        endId = startId;
+      }
+      catch (NumberFormatException e)
+      {
+        System.err.println("Invalid id range: " + idRangeParts[0]);
+        return 1;
+      }
+    }
+    else if (idRangeParts.length ==2)
+    {
+      try
+      {
+        startId = Integer.parseInt(idRangeParts[0]);
+      }
+      catch (NumberFormatException e)
+      {
+        System.err.println("Invalid id range: " + idRangeParts[0]);
+        return 1;
+      }
+      
+      try
+      {
+        endId = Integer.parseInt(idRangeParts[1]);
+      }
+      catch (NumberFormatException e)
+      {
+        System.err.println("Invalid id range: " + idRangeParts[1]);
+        return 1;
+      }
+      
+      if (endId < startId)
+      {
+        System.err.println("Start id must be before end id");
+        return 1;
+      }
+    }
+    else
+    {
+      System.err.println("Invalid id range: " + idRange);
+      return 1;
+    }
+    
     Calendar cal = Calendar.getInstance();
     
     if (endDate == null)
@@ -174,7 +233,7 @@ public class GenerateIds extends Configured implements NamedTool
     
     Path datePath = new Path(outputPath,dateFormat.format(date));
     
-    System.out.println("Writing to " + datePath.toString());
+    System.out.println("Writing to " + datePath.toString() + " with range " + startId + " to " + endId);
     
     DataFileWriter<GenericRecord> dataWriter;
     OutputStream outputStream;
@@ -198,7 +257,16 @@ public class GenerateIds extends Configured implements NamedTool
     // create 1000 random IDs
     for (int i=0; i<1000; i++)
     {
-      record.put("id", (long)(1 + random.nextInt(100)));
+      long val;
+      if (startId == endId)
+      {
+        val = startId;
+      }
+      else
+      {
+        val = (long)(startId + random.nextInt(endId-startId+1));
+      }
+      record.put("id", val);
       dataWriter.append(record);
     }
     

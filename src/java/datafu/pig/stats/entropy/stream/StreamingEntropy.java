@@ -136,7 +136,8 @@ public class StreamingEntropy extends AccumulatorEvalFunc<Double>
           //check if the comparison result is different from previous compare result
           if ((cmp < 0 && this.lastCmp > 0)
               || (cmp > 0 && this.lastCmp < 0)) {
-              throw new ExecException("Out of order!");
+              throw new ExecException("Out of order! previous tuple: " + this.x + ", present tuple: " + t
+                                      + ", comparsion: " + cmp + ", previous comparsion: " + this.lastCmp);
           }
 
           if (cmp != 0) {

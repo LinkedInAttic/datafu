@@ -36,7 +36,6 @@ import datafu.pig.stats.entropy.stream.EntropyEstimator;
  * It uses Euler's number as the logarithm base so to get entropy in different logarithm base such as 2 or 10, the external application
  * could divide the result entropy by LOG(2) or LOG(10) 
  * </p>
- * </p> 
  * 
  * <p>
  * Note: 
@@ -58,7 +57,7 @@ import datafu.pig.stats.entropy.stream.EntropyEstimator;
  * {@code
  * 
  * 
- * define Entropy datafu.pig.stats.entropy.count.Entropy();
+ * define Entropy datafu.pig.stats.entropy.Entropy();
  *
  * input = LOAD 'input' AS (val: double);
  *

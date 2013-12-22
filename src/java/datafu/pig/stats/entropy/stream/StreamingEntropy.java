@@ -42,11 +42,11 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * the base of logarithm whose common value includes: 2, Euler's number e, and 10. We use
  * Euler's number as the default logarithm base and we also permit customers to input 
  * any positive number as its logarithm base. If the input logarithm base is empty or null or
- * invalid character string, we shall use the default logarithm base.
+ * character string not in numeric format, we shall use the default logarithm base.
  * </p>
  * 
  * <p>
- * The 1st argument, type of entropy estimator algorithm we currently support, includes:
+ * The 1st argument, the type of entropy estimator algorithm we currently support, includes:
  * <ul>
  *     <li>empirical (empirical entropy estimator)
  *     <li>chaosh (Chao-Shen entropy estimator) 
@@ -70,15 +70,16 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * <pre>
  * {@code
  * 
- * 
+ * --calculate empirical entropy with Euler's number as the logarithm base
  * define Entropy datafu.pig.stats.entropy.stream.StreamingEntropy();
  *
- * input = LOAD 'input' AS (group: chararray, val: double);
+ * input = LOAD 'input' AS (grp: chararray, val: double);
  *
  * -- calculate the input samples' entropy in each group
- * input_group_g = GROUP input BY group;
+ * input_group_g = GROUP input BY grp;
  * entropy_group = FOREACH input_group_g {
- *   input_ordered = ORDER input BY val;
+ *   input_val = input.val;
+ *   input_ordered = ORDER input_val BY $0;
  *   GENERATE FLATTEN(group) AS group, Entropy(input_ordered) AS entropy; 
  * }
  *

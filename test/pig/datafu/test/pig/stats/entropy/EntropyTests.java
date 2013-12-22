@@ -329,13 +329,13 @@ public class EntropyTests extends PigTests
     
     writeLinesToFile("input",
                      "0",
-                     "38",
+                     "38.0",
                      "0",
-                     "62",
+                     "62.0",
                      "38",
-                     "32",
+                     "32.0",
                      "96",
-                     "38",
+                     "38.0",
                      "96",
                      "0");
         
@@ -345,7 +345,7 @@ public class EntropyTests extends PigTests
      * 
      * e.g.
      * 
-     * > count=c(0, 38, 0, 62, 38, 32, 96, 38, 96, 0)
+     * > count=c(0, 38.0, 0, 62.0, 38, 32.0, 96, 38.0, 96, 0)
      * > library(entropy)
      * > entropy(count) 
      * [1] 1.846901 
@@ -417,6 +417,77 @@ public class EntropyTests extends PigTests
       assertTrue(expectationIterator.hasNext());
       Double entropy = (Double)t.get(0);
       assertEquals(String.format("%.4f",entropy),String.format("%.4f", expectationIterator.next()));
+    }
+  }
+
+  /**
+  register $JAR_PATH
+
+  define Entropy datafu.pig.stats.entropy.Entropy();
+  
+  data_cnt = load 'input' as (f1:chararray, f2:chararray);
+  --describe data_cnt;
+  data_cnt_grouped = GROUP data_cnt ALL;
+  data_out = FOREACH data_cnt_grouped GENERATE Entropy(data_cnt);
+  store data_out into 'output';
+   */
+  @Multiline private String invalidInputSchemaEntropy;
+ 
+  @Test
+  public void invalidInputSchemaEntropoyTest() throws Exception
+  {
+    System.out.println(invalidInputSchemaEntropy);
+    PigTest test = createPigTestFromString(invalidInputSchemaEntropy); // logarithm base is 2 
+    
+    writeLinesToFile("input",
+                     "hadoop	98.94791",
+                     "bigdata	38.61010",
+                     "hadoop	97.10575",
+                     "datafu	32.05370",
+                     "bigdata	38.61010",
+                     "datafu	32.05370",
+                     "datafu	32.05370");
+        
+    try {
+         test.runScript();
+         List<Tuple> output = this.getLinesForAlias(test, "data_out");
+    } catch(Exception ex) {
+         System.out.println(ex);
+         return;
+    }
+ 
+    fail( "Testcase should fail");    
+  }
+
+  /**
+  register $JAR_PATH
+
+  define Entropy datafu.pig.stats.entropy.Entropy();
+  
+  data_cnt = load 'input' as f1:chararray;
+  --describe data_cnt;
+  data_cnt_grouped = GROUP data_cnt ALL;
+  data_out = FOREACH data_cnt_grouped GENERATE Entropy(data_cnt);
+  store data_out into 'output';
+   */
+  @Multiline private String invalidInputNumberFormatEntropy;
+ 
+  @Test
+  public void invalidInputNumberFormatEntropoyTest() throws Exception
+  {
+    System.out.println(invalidInputNumberFormatEntropy);
+    PigTest test = createPigTestFromString(invalidInputNumberFormatEntropy); // logarithm base is 2 
+    
+    writeLinesToFile("input",
+                     "hadoop",
+                     "bigdata");
+        
+    test.runScript();
+    
+    List<Tuple> output = this.getLinesForAlias(test, "data_out");
+    for (Tuple t : output)
+    {
+      assertTrue(t.isNull(0));
     }
   }
 

@@ -9,6 +9,7 @@ import org.apache.pig.AccumulatorEvalFunc;
 import org.apache.pig.Algebraic;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.PigException;
+import org.apache.pig.PigWarning;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataByteArray;
@@ -109,7 +110,7 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
         @Override
         public Tuple exec(Tuple input) throws IOException {
             Tuple t = mTupleFactory.newTuple(2);
-            
+
             try{
                 //input is a bag with one tuple containing
                 //the sample's occurrence frequency
@@ -124,6 +125,7 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
                     //invalid input frequency
                     t.set(0, null);
                     t.set(1, null);
+                    warn("Non-positive input frequency number: " + cxl, PigWarning.UDF_WARNING_1);
                 } else {
                     long cx = cxl.longValue();
                     double logcx = (cx > 0 ? Math.log(cx) : 0);
@@ -139,6 +141,7 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
             } catch (NumberFormatException nfe) {
                 //invalid input format
                 //treat this input as null
+                warn("Caught invalid format input number, exception: " + nfe, PigWarning.UDF_WARNING_2);
                 try {
                     t.set(0, null);
                     t.set(1, null);
@@ -154,27 +157,6 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
                 throw new ExecException(msg, errCode, PigException.BUG, e);
             }
             
-        }
-        
-        private Long getFreq(Tuple tp) throws ExecException {
-            Long cx = null;
-            
-            Object obj = tp.get(0);
-            
-            if(obj != null) {
-                switch (tp.getType(0)) 
-                {
-                case DataType.LONG : cx = (Long)obj; break;
-                case DataType.INTEGER: cx = ((Integer)obj).longValue(); break;
-                case DataType.FLOAT: cx = ((Float)obj).longValue(); break;
-                case DataType.DOUBLE: cx = ((Double)obj).longValue(); break;
-                case DataType.BYTEARRAY: cx = Long.valueOf(((DataByteArray)obj).toString()); break;
-                case DataType.CHARARRAY: cx = Long.valueOf(obj.toString()); break;
-                default: 
-                }
-            }
-                        
-            return cx;
         }
         
     }
@@ -261,6 +243,27 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
         return output;
     }
     
+    static Long getFreq(Tuple tp) throws ExecException {
+        Long cx = null;
+        
+        Object obj = tp.get(0);
+        
+        if(obj != null) {
+            switch (tp.getType(0))
+            {
+            case DataType.LONG : cx = (Long)obj; break;
+            case DataType.INTEGER: cx = ((Integer)obj).longValue(); break;
+            case DataType.FLOAT: cx = ((Float)obj).longValue(); break;
+            case DataType.DOUBLE: cx = ((Double)obj).longValue(); break;
+            case DataType.BYTEARRAY: cx = Double.valueOf(((DataByteArray)obj).toString()).longValue(); break;
+            case DataType.CHARARRAY: cx = Double.valueOf(obj.toString()).longValue(); break;
+            default: 
+            }
+        }
+                    
+        return cx;
+    }
+    
     /*
      * Accumulator implementation part
      */
@@ -269,7 +272,7 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
     public void accumulate(Tuple input) throws IOException
     {
         for (Tuple t : (DataBag) input.get(0)) {
-            long cx = (Long)t.get(0);
+            long cx = getFreq(t);
             this.streamEstimator.accumulate(cx);
         }
     }

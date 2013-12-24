@@ -86,7 +86,7 @@ public abstract class IncrementalJob extends TimeBasedJob
     
     if (getProperties().get("fail.on.missing") != null)
     {
-      setFailOnMissing(Boolean.parseBoolean((String)getProperties().get("max.days.to.process")));
+      setFailOnMissing(Boolean.parseBoolean((String)getProperties().get("fail.on.missing")));
     }
   }
   

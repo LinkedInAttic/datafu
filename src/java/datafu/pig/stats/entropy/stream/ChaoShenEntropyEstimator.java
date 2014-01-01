@@ -32,8 +32,20 @@ import datafu.pig.stats.entropy.EntropyUtil;
 
 
 /*
- * This class implements the Chao-Shen entropy estimator
- * based on the estimator's implementation in R's entropy library
+ * This class implements the Chao-Shen entropy estimator based on this  
+ * {@link <a href="http://www.researchgate.net/publication/226041346_Nonparametric_estimation_of_Shannons_index_of_diversity_when_there_are_unseen_species_in_sample/file/d912f510a79b8aae74.pdf" target="_blank">paper</a>} 
+ * <p>
+ * It combines the {@link <a href="http://en.wikipedia.org/wiki/Horvitz%E2%80%93Thompson_estimator" target="_blank">Horvitz-Thompson estimator</a>}
+ * to adjust for missing species and the concept of sample coverage to estimate the relative abundances of species in the sample. 
+ * The entropy calculation formula is as follows:
+ * <pre>
+ * {@code
+ *   H(X) = - SUM( ( C * c(x) / N * log(C * c(x) / N) ) / ( 1 - (1 - C * c(x) / N) ^ N ) )
+ *   c(x) is the occurrence frequency of sample x, N is the sum of c(x)
+ *   C = 1 - N1 / N, N1 is the number of samples whose c(x) equals 1.
+ * }
+ * </pre>
+ * </p>
  */
 class ChaoShenEntropyEstimator extends EntropyEstimator {
     //sample frequency 
@@ -72,6 +84,7 @@ class ChaoShenEntropyEstimator extends EntropyEstimator {
                N1 = N - 1;
             }
 
+            //sample coverage estimation
             double c = 1 - (double)N1 / N;
             
             try {
@@ -104,11 +117,11 @@ class ChaoShenEntropyEstimator extends EntropyEstimator {
                                     long N,
                                     double c,
                                     long cnt) {
-        //occurrence probability
+        //sample proportion
         double p = (double)cx / N;
-        //coverage adjusted occurrence probability
+        //sample coverage adjusted probability
         double pa = c * p;
-        //probability to see a bin in the sample
+        //probability to see an individual in the sample
         double la = 1 - Math.pow((1 - pa), N);
         return -(cnt * pa * Math.log(pa) / la);
     }

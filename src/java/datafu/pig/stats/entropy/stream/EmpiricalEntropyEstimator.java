@@ -20,12 +20,21 @@ import datafu.pig.stats.entropy.EntropyUtil;
 
 
 /*
- * This entropy estimator calculates the empirical entropy of input samples
- * using per sample's frequency as an estimation of its probability. 
+ * This entropy estimator calculates the empirical entropy of given species
+ * using the occurrence frequency of individual in the sample as an estimation of its probability. 
+ * The empirical estimator is also called the maximum likelihood estimator (MLE). 
  * <p>
  * It applies the following formula to compute entropy:
+ * <pre>
+ * {@code
  * H(X) = log(N) - 1 / N * SUM(c(x) * log(c(x)) )
  * c(x) is the occurrence frequency of sample x, N is the sum of c(x)
+ * }
+ * </pre>
+ * </p>
+ * <p>
+ * This entropy estimator is widely used when the number of species is known and small.
+ * But it is biased since it does not cover the rare species with zero frequency in the sample.
  * </p>
  */
 class EmpiricalEntropyEstimator extends EntropyEstimator {

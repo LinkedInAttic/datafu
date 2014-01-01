@@ -31,56 +31,57 @@ import datafu.pig.stats.entropy.EntropyUtil;
 
 
 /**
- * Calculate entropy of a given bag of raw data samples according to entropy's definition in 
- * {@link <a href="http://en.wikipedia.org/wiki/Entropy_%28information_theory%29" target="_blank">wiki</a>} 
+ * Calculate entropy of a given stream of raw data samples according to entropy's 
+ * {@link <a href="http://en.wikipedia.org/wiki/Entropy_%28information_theory%29" target="_blank">wiki definition</a>}
+ *
  * <p>
- * This UDF extends * {@link org.apache.pig.AccumulatorEvalFunc} and calculates
- * entropy in a streaming way. 
+ * Its constructor takes 2 arguments. 
  * </p>
- * 
- * <p>
- * Its constructor has 2 arguments, the first argument specifies
- * the type of entropy estimator algorithm to apply and the second argument specifies
- * the base of logarithm 
- * </p>
- * 
  * <p>
  * The 1st argument, the type of entropy estimator algorithm we currently support, includes:
  * <ul>
  *     <li>empirical (empirical entropy estimator)
  *     <li>chaosh (Chao-Shen entropy estimator) 
  * </ul>
- * The default estimation algorithm we support is empirical.
- * </p> 
- * 
+ * </p>
+ * <p>
+ * The default estimation algorithm is empirical.
+ * </p>
  * <p>
  * The 2nd argument, the logarithm base we currently support, includes:
+ * </p>
+ * <p>
  * <ul>
  *     <li>log (use Euler's number as the logarithm base)
  *     <li>log2 (use 2 as the logarithm base)
  *     <li>log10 (use 10 as the logarithm base) 
  * </ul>
- * The default logarithm base we support is log
+ * </p>
+ * <p>
+ * The default logarithm base is log.
  * </p> 
- * 
  * <p>
  * Note:
  * <ul>
- *     <li>input bag to the UDF must be sorted. 
- *     <li>Entropy value is returned as double type.
+ *     <li>The input bag to the UDF must be sorted. 
+ *     <li>The entropy value is returned as double type.
  * </ul>
  * </p>
  *
  * <p>
- * How to use: This UDF is suitable to calculate entropy in a nested FOREACH after a GROUP BY,
- * where we sort the bag per group key and use the sorted bag as the input to this UDF, a scenario
- * we would like to calculate entropy per group.
- * 
+ * How to use: 
+ * </p>
+ * <p>
+ * This UDF is suitable to calculate entropy in a nested FOREACH after a GROUP BY,
+ * where we sort the inner bag and use the sorted bag as the input to this UDF.
+ * </p>
+ * <p>
+ * This is a scenario in which we would like to get a variable's entropy in different constraint groups.
+ * </p>
+ * <p>
  * Example:
  * <pre>
- * 
  * {@code
- * 
  * --calculate empirical entropy with Euler's number as the logarithm base
  * define Entropy datafu.pig.stats.entropy.stream.StreamingEntropy();
  *
@@ -93,12 +94,11 @@ import datafu.pig.stats.entropy.EntropyUtil;
  *   input_ordered = ORDER input_val BY $0;
  *   GENERATE FLATTEN(group) AS group, Entropy(input_ordered) AS entropy; 
  * }
- * 
  * }
- *
  * </pre>
- * 
  * </p>
+ * 
+ * @see StreamingCondEntropy
  */
 @Nondeterministic
 public class StreamingEntropy extends AccumulatorEvalFunc<Double>

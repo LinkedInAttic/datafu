@@ -40,36 +40,44 @@ import datafu.pig.stats.entropy.EntropyUtil;
 
 
 /**
- * Calculate the empirical entropy given a bag of sample counts following entropy's definition in 
- * {@link <a href="http://en.wikipedia.org/wiki/Entropy_%28information_theory%29" target="_blank">wiki</a>} 
+ * Calculate the empirical entropy given a bag of data sample counts following entropy's
+ * {@link <a href="http://en.wikipedia.org/wiki/Entropy_%28information_theory%29" target="_blank">wiki definition</a>} 
  * 
  * <p>
- * It extends * {@link org.apache.pig.AccumulatorEvalFunc} so it supports entropy calculation in a streaming way.
- * And it also implements {@link org.apache.pig.Algebraic} so it supports entropy calculation
- * in a distributed way using combiner.
+ * It supports entropy calculation both in a streaming way and in a distributed way using combiner.
  * </p>
  * 
  * <p>
- * This UDF's constructor accepts logarithm base as its input. 
+ * This UDF's constructor accepts the logarithm base as its single argument. 
  * The definition of supported logarithm base is the same as {@link datafu.pig.stats.entropy.stream.StreamingEntropy}
  * </p>
  * 
  * <p>
  * Note: 
  * <ul>
- *     <li>the input to the UDF is a bag of each sample's occurrence frequency, 
- *     which is different from * {@link datafu.pig.stats.entropy.stream.StreamingEntropy}, 
+ *     <li>the input to the UDF is a bag of data sample's occurrence frequency, 
+ *     which is different from * {StreamingEntropy}, 
  *     whose input is a sorted bag of raw data samples.
  *     <li>each tuple in the UDF's input bag could be int, long, float, double, chararray, bytearray.
  *     The UDF will try to convert the input tuple's value to long type number.
+ *     <li>if the UDF fails to convert the input tuple's value to long type number, the record will be
+ *     skipped and a warning message will be written to the job's log.
  *     <li>the returned entropy value is of double type.
  * </ul>
  * </p>
- *
+ * 
  * <p>
- * How to use: This UDF is suitable to calculate entropy in the whole data set when we 
- * could easily get the frequency of each sample's value using an outer GROUP BY. Then use another outer GROUP BY
- * on the frequencies to get entropy. Example:
+ * How to use: 
+ * </p>
+ * <p>
+ * This UDF is suitable to calculate entropy on the whole data set when we 
+ * could easily get the each sample's frequency using an outer GROUP BY. 
+ * </p>
+ * <p>
+ * Then we could use another outer GROUP BY on the sample frequencies to get the entropy. 
+ * </p>
+ * <p>
+ * Example:
  * <pre>
  * 
  * {@code
@@ -80,22 +88,17 @@ import datafu.pig.stats.entropy.EntropyUtil;
  *
  * -- calculate the occurrence of each sample
  * counts_g = GROUP input BY val;
- * counts = FOREACh counts_g GENERATE COUNT(input) as cnt;
+ * counts = FOREACh counts_g GENERATE COUNT(input) AS cnt;
  * 
  * -- calculate entropy 
  * input_counts_g = GROUP counts ALL;
  * entropy = FOREACH input_counts_g GENERATE Entropy(counts) AS entropy;
- * 
  * }
- * 
  * </pre>
  * </p>
- * 
  * <p>
- * Use case to calculate mutual information:
- * 
+ * Use case to calculate mutual information using Entropy:
  * <pre>
- * 
  * {@code
  * 
  * define Entropy datafu.pig.stats.entropy.Entropy();
@@ -119,27 +122,30 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * input_x_y_entropy_g = GROUP input_x_y_cnt ALL;
  * input_x_y_entropy = FOREACH input_x_y_entropy_g {
  *                         input_x_y_entropy_cnt = input_x_y_cnt.cnt;
- *                         GENERATE Entropy(input_x_y_entropy_cnt) as x_y_entropy;
+ *                         GENERATE Entropy(input_x_y_entropy_cnt) AS x_y_entropy;
  *                     }
  *                         
  * input_x_entropy_g = GROUP input_x_cnt ALL;
  * input_x_entropy = FOREACH input_x_entropy_g {
  *                         input_x_entropy_cnt = input_x_cnt.cnt;
- *                         GENERATE Entropy(input_x_entropy_cnt) as x_entropy;
+ *                         GENERATE Entropy(input_x_entropy_cnt) AS x_entropy;
  *                   }
  *                       
  * input_y_entropy_g = GROUP input_y_cnt ALL;
  * input_y_entropy = FOREACH input_y_entropy_g {
  *                         input_y_entropy_cnt = input_y_cnt.cnt;
- *                         GENERATE Entropy(input_y_entropy_cnt) as y_entropy;
+ *                         GENERATE Entropy(input_y_entropy_cnt) AS y_entropy;
  *                   }
  *
  * input_mi_cross = CROSS input_x_y_entropy, input_x_entropy, input_y_entropy;
- * input_mi = FOREACH input_mi_cross GENERATE (input_x_entropy::x_entropy + input_y_entropy::y_entropy - input_x_y_entropy::x_y_entropy) as mi;
+ * input_mi = FOREACH input_mi_cross GENERATE (input_x_entropy::x_entropy +
+ *                                             input_y_entropy::y_entropy - 
+ *                                             input_x_y_entropy::x_y_entropy) AS mi;
  * }
- * 
  * </pre>
  * </p>
+ * 
+ * @see datafu.pig.stats.entropy.stream.StreamingEntropy
  */
 
 public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {

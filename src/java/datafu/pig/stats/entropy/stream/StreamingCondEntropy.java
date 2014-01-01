@@ -34,20 +34,24 @@ import datafu.pig.stats.entropy.EntropyUtil;
 
 
 /**
- * Calculate the conditional entropy H(Y|X) of random variables X and Y according to its definition in 
- * {@link <a href="http://en.wikipedia.org/wiki/Conditional_entropy" target="_blank">wiki</a>}, 
- * X is the conditional variable and Y is the variable conditioned on X.
+ * Calculate the conditional entropy H(Y|X) of random variables X and Y according to its 
+ * {@link <a href="http://en.wikipedia.org/wiki/Conditional_entropy" target="_blank">wiki definition</a>}, 
+ * X is the conditional variable and Y is the variable that conditions on X.
  * <p>
- * This UDF extends * {@link org.apache.pig.AccumulatorEvalFunc} and calculates
- * conditional entropy in a streaming way. The input to the UDF is a bag, each element is a tuple containing 2 fields,
- * the 1st field of the tuple is an object instance of random variable X, 
- * the 2nd field of the tuple is an object instance of random variable Y.
+ * The input to this UDF is a bag of 2 field tuple.
+ * <ul>
+ *     <li>the 1st field of the tuple is an instance of variable X.
+ *     <li>the 2nd field of the tuple is an instance of variable Y.
+ * </ul>
+ * </p>
+ * <p>
+ * An exception will be thrown if the input tuple does not have 2 fields.
  * </p> 
  * 
  * <p>
- * This UDF's constructor definition and arguments are the same as that of * {@link datafu.pig.stats.entropy.stream.StreamingEntropy}
+ * This UDF's constructor definition and parameters are the same as that of * {@link datafu.pig.stats.entropy.stream.StreamingEntropy}
  * </p>
- * 
+ *
  * <p>
  * Note:
  * <ul>
@@ -57,9 +61,16 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * </p>
  *
  * <p>
- * How to use: This UDF is suitable to calculate conditional entropy in a nested FOREACH after a GROUP BY.
- * where we sort per group key and use the sorted bag as the input to this UDF, a scenario
- * we would like to calculate conditional entropy per group.
+ * How to use: 
+ * </p>
+ * <p>
+ * This UDF is suitable to calculate conditional entropy in a nested FOREACH after a GROUP BY,
+ * where we sort the inner bag and use the sorted bag as the input to this UDF.
+ * </p>
+ * <p>
+ * This is a scenario in which we would like to get a variable's conditional entropy in different constraint groups.
+ * </p>
+ * <p>
  * Example:
  * <pre>
  * 
@@ -77,18 +88,13 @@ import datafu.pig.stats.entropy.EntropyUtil;
  *   input_ordered = ORDER input_val BY $0, $1;
  *   GENERATE FLATTEN(group) AS group, CondEntropy(input_ordered) AS cond_entropy; 
  * }
- * 
  * }
- * 
  * </pre>
  * </p>
- * 
  * <p>
  * Use case to calculate mutual information:
  * <pre>
- * 
  * {@code
- * 
  * ------------
  * -- calculate mutual information I(X, Y) using streaming conditional entropy and streaming entropy
  * -- I(X, Y) = H(Y) - H(Y|X)
@@ -110,11 +116,11 @@ import datafu.pig.stats.entropy.EntropyUtil;
  *      h_y = Entropy(input_val_y_ordered);
  *      GENERATE FLATTEN(group), h_y - cond_h_x_y;
  * }
- * 
  * }
- * 
  * </pre>
  * </p>
+ * 
+ * @see StreamingEntropy
  */
 @Nondeterministic
 public class StreamingCondEntropy extends AccumulatorEvalFunc<Double> {

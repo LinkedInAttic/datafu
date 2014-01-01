@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 LinkedIn Corp. and contributors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package datafu.test.pig.stats.entropy;
 
 import static org.testng.Assert.*;
@@ -17,7 +33,7 @@ import datafu.test.pig.PigTests;
  * R's entropy library: http://cran.r-project.org/web/packages/entropy/entropy.pdf
  * used as our test benchmark
  */
-public class StreamingChaoShenEntropyTests extends PigTests
+public class StreamingChaoShenEntropyTests extends AbstractEntropyTests
 {
   /**
   register $JAR_PATH
@@ -38,8 +54,7 @@ public class StreamingChaoShenEntropyTests extends PigTests
   @Test  
   public void uniqValStreamingChaoShenEntropoyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=e"); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=log");
     
     writeLinesToFile("input",
                      "98.94791",
@@ -74,20 +89,13 @@ public class StreamingChaoShenEntropyTests extends PigTests
     expectedOutput.add(4.816221);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5);
   }
 
   @Test  
   public void singleValStreamingChaoShenEntropoyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=e"); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=log");
     
     writeLinesToFile("input",
                      "98.94791",
@@ -121,20 +129,13 @@ public class StreamingChaoShenEntropyTests extends PigTests
     expectedOutput.add(0.0);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5);
   }
 
   @Test  
   public void dupValStreamingChaoShenEntropoyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy,"type=chaosh", "base=e"); // logarithm base is 2 
+    PigTest test = createPigTestFromString(entropy,"type=chaosh", "base=log");
     
     writeLinesToFile("input",
                      "98.94791",
@@ -169,21 +170,14 @@ public class StreamingChaoShenEntropyTests extends PigTests
     expectedOutput.add(2.57429);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5);
   }
 
 
   @Test  
   public void emptyInputBagStreamingChaoShenEntropoyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=e"); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=log");
     
     writeLinesToFile("input"
                      );
@@ -204,23 +198,15 @@ public class StreamingChaoShenEntropyTests extends PigTests
      * 
      */
     List<Double> expectedOutput = new ArrayList<Double>();
-    expectedOutput.add(0.0);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5);
   }
 
   @Test  
   public void singleElemInputBagStreamingChaoShenEntropoyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=e"); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=log");
     
     writeLinesToFile("input",
                      "98.94791");
@@ -241,13 +227,7 @@ public class StreamingChaoShenEntropyTests extends PigTests
     expectedOutput.add(0.0);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5);
   }
 
   /**
@@ -269,8 +249,7 @@ public class StreamingChaoShenEntropyTests extends PigTests
   @Test  
   public void dupPairValStreamingChaoShenEntropoyTest() throws Exception
   {
-    System.out.println(pairEntropy);
-    PigTest test = createPigTestFromString(pairEntropy, "type=chaosh", "base=e"); // logarithm base is e 
+    PigTest test = createPigTestFromString(pairEntropy, "type=chaosh", "base=log");
     
     writeLinesToFile("input",
                      "hadoop	98.94791",
@@ -301,20 +280,13 @@ public class StreamingChaoShenEntropyTests extends PigTests
     expectedOutput.add(2.57429);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5);
   }
 
   @Test  
   public void dupValStreamingChaoShenEntropoyLog2Test() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy,"type=chaosh", "base=2"); // logarithm base is 2 
+    PigTest test = createPigTestFromString(entropy,"type=chaosh", "base=log2");
     
     writeLinesToFile("input",
                      "98.94791",
@@ -350,20 +322,13 @@ public class StreamingChaoShenEntropyTests extends PigTests
     expectedOutput.add(3.713915);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5);
   }
 
   @Test  
   public void dupValStreamingChaoShenEntropoyLog10Test() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=10"); // logarithm base is 10 
+    PigTest test = createPigTestFromString(entropy, "type=chaosh", "base=log10");
     
     writeLinesToFile("input",
                      "98.94791",
@@ -398,13 +363,7 @@ public class StreamingChaoShenEntropyTests extends PigTests
     expectedOutput.add(1.118);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5);
   }
 
 

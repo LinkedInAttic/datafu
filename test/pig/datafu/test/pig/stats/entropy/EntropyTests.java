@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 LinkedIn Corp. and contributors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package datafu.test.pig.stats.entropy;
 
 import static org.testng.Assert.*;
@@ -17,7 +33,7 @@ import datafu.test.pig.PigTests;
  * R's entropy library: http://cran.r-project.org/web/packages/entropy/entropy.pdf
  * used as our test benchmark 
  */
-public class EntropyTests extends PigTests
+public class EntropyTests extends AbstractEntropyTests
 {
   /**
   register $JAR_PATH
@@ -35,10 +51,9 @@ public class EntropyTests extends PigTests
   @Multiline private String entropy;
   
   @Test
-  public void uniqValEntropoyTest() throws Exception
+  public void uniqValEntropyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy);
     
     writeLinesToFile("input",
                      "98.94791",
@@ -71,22 +86,14 @@ public class EntropyTests extends PigTests
      */
     List<Double> expectedOutput = new ArrayList<Double>();
     expectedOutput.add(2.302585);
-    
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
   }
 
   @Test
-  public void singleValEntropoyTest() throws Exception
+  public void singleValEntropyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy);
     
     writeLinesToFile("input",
                      "98.94791",
@@ -121,20 +128,13 @@ public class EntropyTests extends PigTests
     expectedOutput.add(0.0);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
   }
 
   @Test
-  public void dupValEntropoyTest() throws Exception
+  public void dupValEntropyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy);
     
     writeLinesToFile("input",
                      "98.94791",
@@ -169,20 +169,13 @@ public class EntropyTests extends PigTests
     expectedOutput.add(1.834372);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
   }
 
   @Test
-  public void emptyInputBagEntropoyTest() throws Exception
+  public void emptyInputBagEntropyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy);
     
     writeLinesToFile("input"
                      );
@@ -203,23 +196,15 @@ public class EntropyTests extends PigTests
      * 
      */
     List<Double> expectedOutput = new ArrayList<Double>();
-    expectedOutput.add(0.0);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
   }
 
   @Test
-  public void singleElemInputBagEntropoyTest() throws Exception
+  public void singleElemInputBagEntropyTest() throws Exception
   {
-    System.out.println(entropy);
-    PigTest test = createPigTestFromString(entropy); // logarithm base is e 
+    PigTest test = createPigTestFromString(entropy);
     
     writeLinesToFile("input",
                      "98.94791");
@@ -240,19 +225,13 @@ public class EntropyTests extends PigTests
     expectedOutput.add(0.0);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
   }
 
   /**
   register $JAR_PATH
 
-  define Entropy datafu.pig.stats.entropy.Entropy();
+  define Entropy datafu.pig.stats.entropy.Entropy('$base');
 
   data = load 'input' as (x:chararray, y:double);
   --describe data;
@@ -262,13 +241,12 @@ public class EntropyTests extends PigTests
   data_out = FOREACH data_cnt_grouped GENERATE Entropy(data_cnt);
   store data_out into 'output';
    */
-  @Multiline private String pairEntropy;
+  @Multiline private String pairLogEntropy;
  
   @Test
-  public void dupPairValEntropoyTest() throws Exception
+  public void dupPairValEntropyTest() throws Exception
   {
-    System.out.println(pairEntropy);
-    PigTest test = createPigTestFromString(pairEntropy); // logarithm base is e 
+    PigTest test = createPigTestFromString(pairLogEntropy, "base=log");
     
     writeLinesToFile("input",
                      "hadoop	98.94791",
@@ -299,14 +277,106 @@ public class EntropyTests extends PigTests
     expectedOutput.add(1.834372);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
   }
+
+  /**
+  register $JAR_PATH
+
+  define Entropy datafu.pig.stats.entropy.Entropy('$base');
+  
+  data = load 'input' as (val:double);
+  --describe data;
+  data_grouped = GROUP data BY val;
+  data_cnt = FOREACH data_grouped GENERATE COUNT(data) AS cnt;
+  data_cnt_grouped = GROUP data_cnt ALL;
+  data_out = FOREACH data_cnt_grouped GENERATE Entropy(data_cnt);
+  store data_out into 'output';
+   */
+  @Multiline private String logEntropy;
+ 
+  @Test
+  public void dupValEntropyLog2Test() throws Exception
+  {
+    PigTest test = createPigTestFromString(logEntropy, "base=log2");
+    
+    writeLinesToFile("input",
+                     "98.94791",
+                     "38.61010",
+                     "97.10575",
+                     "62.28313",
+                     "38.61010",
+                     "32.05370",
+                     "96.10962",
+                     "38.61010",
+                     "96.10962",
+                     "20.41135");
+        
+    test.runScript();
+    
+    /* Add expected values, computed using R:
+     * 
+     * e.g.
+     * 
+     * > v=c(98.94791,38.61010,97.10575,62.28313,38.61010,32.05370,96.10962,38.61010,96.10962,20.41135) 
+     * > table(v)
+     * v
+     * 20.41135  32.0537  38.6101 62.28313 96.10962 97.10575 98.94791 
+     * 1        1        3        1        2        1        1 
+     * > count=c(1,1,3,1,2,1,1)
+     * > library(entropy)
+     * > entropy(count, count/sum(count), c("ML"),c("log2"))
+     * [1] 2.646439
+     * 
+     */
+    List<Double> expectedOutput = new ArrayList<Double>();
+    expectedOutput.add(2.646439);
+    
+    List<Tuple> output = this.getLinesForAlias(test, "data_out");
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
+  }
+
+  @Test
+  public void dupValEntropyLog10Test() throws Exception
+  {
+    PigTest test = createPigTestFromString(logEntropy, "base=log10");
+    
+    writeLinesToFile("input",
+                     "98.94791",
+                     "38.61010",
+                     "97.10575",
+                     "62.28313",
+                     "38.61010",
+                     "32.05370",
+                     "96.10962",
+                     "38.61010",
+                     "96.10962",
+                     "20.41135");
+        
+    test.runScript();
+    
+    /* Add expected values, computed using R:
+     * 
+     * e.g.
+     * 
+     * > v=c(98.94791,38.61010,97.10575,62.28313,38.61010,32.05370,96.10962,38.61010,96.10962,20.41135) 
+     * > table(v)
+     * v
+     * 20.41135  32.0537  38.6101 62.28313 96.10962 97.10575 98.94791 
+     * 1        1        3        1        2        1        1 
+     * > count=c(1,1,3,1,2,1,1)
+     * > library(entropy)
+     * > entropy(count, count/sum(count), c("ML"),c("log10"))
+     * [1] 0.7966576
+     * 
+     */
+    List<Double> expectedOutput = new ArrayList<Double>();
+    expectedOutput.add(0.7966576);
+    
+    List<Tuple> output = this.getLinesForAlias(test, "data_out");
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
+  }
+
 
   /**
   register $JAR_PATH
@@ -322,10 +392,9 @@ public class EntropyTests extends PigTests
   @Multiline private String rawByteInputEntropy;
  
   @Test
-  public void rawByteInputEntropoyTest() throws Exception
+  public void rawByteInputEntropyTest() throws Exception
   {
-    System.out.println(rawByteInputEntropy);
-    PigTest test = createPigTestFromString(rawByteInputEntropy); // logarithm base is 2 
+    PigTest test = createPigTestFromString(rawByteInputEntropy); 
     
     writeLinesToFile("input",
                      "0",
@@ -355,13 +424,7 @@ public class EntropyTests extends PigTests
     expectedOutput.add(1.846901);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
   }
 
   /**
@@ -378,10 +441,9 @@ public class EntropyTests extends PigTests
   @Multiline private String rawDoubleInputEntropy;
  
   @Test
-  public void rawDoubleInputEntropoyTest() throws Exception
+  public void rawDoubleInputEntropyTest() throws Exception
   {
-    System.out.println(rawDoubleInputEntropy);
-    PigTest test = createPigTestFromString(rawDoubleInputEntropy); // logarithm base is 2 
+    PigTest test = createPigTestFromString(rawDoubleInputEntropy); 
     
     writeLinesToFile("input",
                      "0.0",
@@ -412,12 +474,7 @@ public class EntropyTests extends PigTests
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
     Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.4f",entropy),String.format("%.4f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 4);
   }
 
   /**
@@ -434,10 +491,9 @@ public class EntropyTests extends PigTests
   @Multiline private String invalidInputSchemaEntropy;
  
   @Test
-  public void invalidInputSchemaEntropoyTest() throws Exception
+  public void invalidInputSchemaEntropyTest() throws Exception
   {
-    System.out.println(invalidInputSchemaEntropy);
-    PigTest test = createPigTestFromString(invalidInputSchemaEntropy); // logarithm base is 2 
+    PigTest test = createPigTestFromString(invalidInputSchemaEntropy); 
     
     writeLinesToFile("input",
                      "hadoop	98.94791",
@@ -451,12 +507,10 @@ public class EntropyTests extends PigTests
     try {
          test.runScript();
          List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    } catch(Exception ex) {
-         System.out.println(ex);
-         return;
+         fail( "Testcase should fail");    
+    } catch (Exception ex) {
+         assertTrue(ex.getMessage().indexOf("The field schema of the input tuple is null or its size is not 1") >= 0);
     }
- 
-    fail( "Testcase should fail");    
   }
 
   /**
@@ -473,10 +527,9 @@ public class EntropyTests extends PigTests
   @Multiline private String invalidInputNumberFormatEntropy;
  
   @Test
-  public void invalidInputNumberFormatEntropoyTest() throws Exception
+  public void invalidInputNumberFormatEntropyTest() throws Exception
   {
-    System.out.println(invalidInputNumberFormatEntropy);
-    PigTest test = createPigTestFromString(invalidInputNumberFormatEntropy); // logarithm base is 2 
+    PigTest test = createPigTestFromString(invalidInputNumberFormatEntropy); 
     
     writeLinesToFile("input",
                      "hadoop",
@@ -511,10 +564,9 @@ public class EntropyTests extends PigTests
   @Multiline private String accumulatedEntropy;
 
   @Test
-  public void accumulatedEntropoyTest() throws Exception
+  public void accumulatedEntropyTest() throws Exception
   {
-    System.out.println(accumulatedEntropy);
-    PigTest test = createPigTestFromString(accumulatedEntropy); // logarithm base is e 
+    PigTest test = createPigTestFromString(accumulatedEntropy); 
     
     writeLinesToFile("input",
                      "98.94791",
@@ -531,18 +583,10 @@ public class EntropyTests extends PigTests
     test.runScript();
     
     List<Double> expectedOutput = new ArrayList<Double>();
-    //the same output as @test dupValEntropoyTest
+    //the same output as @test dupValEntropyTest
     expectedOutput.add(1.834372);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    for (Tuple t : output)
-    {
-      assertTrue(expectationIterator.hasNext());
-      Double entropy = (Double)t.get(0);
-      assertEquals(String.format("%.5f",entropy),String.format("%.5f", expectationIterator.next()));
-    }
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
   }
-
-
 }

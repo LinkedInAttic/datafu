@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 LinkedIn Corp. and contributors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package datafu.pig.stats.entropy;
 
 import java.io.IOException;
@@ -20,22 +36,22 @@ import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 import datafu.pig.stats.entropy.stream.EntropyEstimator;
+import datafu.pig.stats.entropy.EntropyUtil;
 
 
 /**
- * Calculate entropy given a bag of sample counts following entropy's definition in 
+ * Calculate the empirical entropy given a bag of sample counts following entropy's definition in 
  * {@link <a href="http://en.wikipedia.org/wiki/Entropy_%28information_theory%29" target="_blank">wiki</a>} 
  * 
  * <p>
- * This UDF extends * {@link org.apache.pig.AccumulatorEvalFunc} and implements 
- * * {@link org.apache.pig.Algebraic} so it could calculate entropy either in a streaming way 
- * or in a distributed fashion levering combiner
+ * It extends * {@link org.apache.pig.AccumulatorEvalFunc} so it supports entropy calculation in a streaming way.
+ * And it also implements {@link org.apache.pig.Algebraic} so it supports entropy calculation
+ * in a distributed way using combiner.
  * </p>
  * 
  * <p>
- * It uses empirical estimation that is the same as * {@link datafu.pig.stats.entropy.stream.EmpiricalEntropyEstimator} 
- * It uses Euler's number as the logarithm base so to get entropy in different logarithm base such as 2 or 10, the external application
- * could divide the result entropy by LOG(2) or LOG(10) 
+ * This UDF's constructor accepts logarithm base as its input. 
+ * The definition of supported logarithm base is the same as {@link datafu.pig.stats.entropy.stream.StreamingEntropy}
  * </p>
  * 
  * <p>
@@ -44,7 +60,7 @@ import datafu.pig.stats.entropy.stream.EntropyEstimator;
  *     <li>the input to the UDF is a bag of each sample's occurrence frequency, 
  *     which is different from * {@link datafu.pig.stats.entropy.stream.StreamingEntropy}, 
  *     whose input is a sorted bag of raw data samples.
- *     <li>each tuple in the UDF's input bag could be int, long, float, double, chararray, bytearray
+ *     <li>each tuple in the UDF's input bag could be int, long, float, double, chararray, bytearray.
  *     The UDF will try to convert the input tuple's value to long type number.
  *     <li>the returned entropy value is of double type.
  * </ul>
@@ -52,11 +68,11 @@ import datafu.pig.stats.entropy.stream.EntropyEstimator;
  *
  * <p>
  * How to use: This UDF is suitable to calculate entropy in the whole data set when we 
- * could easily get the frequency of each sample's value using an outer GROUP BY. Then use another GROUP BY
- * on the frequency set to get entropy. Example:
+ * could easily get the frequency of each sample's value using an outer GROUP BY. Then use another outer GROUP BY
+ * on the frequencies to get entropy. Example:
  * <pre>
- * {@code
  * 
+ * {@code
  * 
  * define Entropy datafu.pig.stats.entropy.Entropy();
  *
@@ -68,8 +84,60 @@ import datafu.pig.stats.entropy.stream.EntropyEstimator;
  * 
  * -- calculate entropy 
  * input_counts_g = GROUP counts ALL;
- * entropy = FOREACH input_counts_g GENERATE Entropy(counts) AS entropy; 
+ * entropy = FOREACH input_counts_g GENERATE Entropy(counts) AS entropy;
+ * 
+ * }
+ * 
+ * </pre>
+ * </p>
+ * 
+ * <p>
+ * Use case to calculate mutual information:
+ * 
+ * <pre>
+ * 
+ * {@code
+ * 
+ * define Entropy datafu.pig.stats.entropy.Entropy();
+ * 
+ * input = LOAD 'input' AS (valX: double, valY: double);
+ * 
+ * ------------
+ * -- calculate mutual information I(X, Y) using entropy
+ * -- I(X, Y) = H(X) + H(Y) -  H(X, Y)
+ * ------------
+ * 
+ * input_x_y_g = GROUP input BY (valX, valY);
+ * input_x_y_cnt = FOREACH input_x_y_g GENERATE flatten(group) as (valX, valY), COUNT(input) AS cnt;
+ * 
+ * input_x_g = GROUP input_x_y_cnt BY valX;
+ * input_x_cnt = FOREACH input_x_g GENERATE flatten(group) as valX, SUM(input_x_y_cnt.cnt) AS cnt;
+ * 
+ * input_y_g = GROUP input_x_y_cnt BY valY;
+ * input_y_cnt = FOREACH input_y_g GENERATE flatten(group) as valY, SUM(input_x_y_cnt.cnt) AS cnt;
+ * 
+ * input_x_y_entropy_g = GROUP input_x_y_cnt ALL;
+ * input_x_y_entropy = FOREACH input_x_y_entropy_g {
+ *                         input_x_y_entropy_cnt = input_x_y_cnt.cnt;
+ *                         GENERATE Entropy(input_x_y_entropy_cnt) as x_y_entropy;
+ *                     }
+ *                         
+ * input_x_entropy_g = GROUP input_x_cnt ALL;
+ * input_x_entropy = FOREACH input_x_entropy_g {
+ *                         input_x_entropy_cnt = input_x_cnt.cnt;
+ *                         GENERATE Entropy(input_x_entropy_cnt) as x_entropy;
+ *                   }
+ *                       
+ * input_y_entropy_g = GROUP input_y_cnt ALL;
+ * input_y_entropy = FOREACH input_y_entropy_g {
+ *                         input_y_entropy_cnt = input_y_cnt.cnt;
+ *                         GENERATE Entropy(input_y_entropy_cnt) as y_entropy;
+ *                   }
  *
+ * input_mi_cross = CROSS input_x_y_entropy, input_x_entropy, input_y_entropy;
+ * input_mi = FOREACH input_mi_cross GENERATE (input_x_entropy::x_entropy + input_y_entropy::y_entropy - input_x_y_entropy::x_y_entropy) as mi;
+ * }
+ * 
  * </pre>
  * </p>
  */
@@ -82,31 +150,62 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
     //re-use the same entropy estimator for StreamingEntropy
     private EntropyEstimator streamEstimator;
     
-    public Entropy() {
+    //logarithm base
+    private String base;
+    
+    public Entropy() throws ExecException {
         //empirical estimator using Euler's number as logarithm base
-        streamEstimator = EntropyEstimator.createEstimator(EntropyEstimator.EMPIRICAL_ESTIMATOR, "");
+        this(EntropyUtil.LOG);
+    }
+    
+    public Entropy(String base) throws ExecException {
+        try {
+            this.streamEstimator = EntropyEstimator.createEstimator(EntropyEstimator.EMPIRICAL_ESTIMATOR, base);
+        } catch (IllegalArgumentException ex) {
+            throw new ExecException(
+                    String.format("Fail to initialize Entropy with logarithm base: (%s), exception: (%s)", base, ex));
+        }
+        this.base = base;
     }
     
     /*
      * Algebraic implementation part
      */
     
+    private String param = null;
+    private String getParam()
+    {
+      if (param == null) {
+        if (this.base != null) {
+          param = String.format("('%s')", this.base);
+        } else {
+          param = "";
+        }
+      }
+      return param;
+    }
+    
     @Override
     public String getFinal() {
-        return Final.class.getName();
+        return Final.class.getName() + getParam();
     }
 
     @Override
     public String getInitial() {
-       return Initial.class.getName();
+       return Initial.class.getName() + getParam();
     }
 
     @Override
     public String getIntermed() {
-        return Intermediate.class.getName();
+        return Intermediate.class.getName() + getParam();
     }
     
     static public class Initial extends EvalFunc<Tuple> {
+                
+        public Initial(){}
+        
+        public Initial(String base){}
+        
         @Override
         public Tuple exec(Tuple input) throws IOException {
             Tuple t = mTupleFactory.newTuple(2);
@@ -120,7 +219,7 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
                    Tuple tp = bg.iterator().next();
                    cxl = getFreq(tp);
                 }
-                
+
                 if(cxl == null || cxl.longValue() < 0) {
                     //invalid input frequency
                     t.set(0, null);
@@ -162,6 +261,11 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
     }
     
     static public class Intermediate extends EvalFunc<Tuple> {
+        
+        public Intermediate(){}
+        
+        public Intermediate(String base){}
+        
         @Override
         public Tuple exec(Tuple input) throws IOException {
             try {
@@ -178,6 +282,18 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
     }
     
     static public class Final extends EvalFunc<Double> {
+        private String base;
+        
+        public Final()
+        {
+            this(EntropyUtil.LOG);
+        }
+        
+        public Final(String base)
+        {
+            this.base = base;
+        }
+        
         @Override
         public Double exec(Tuple input) throws IOException {
             try {
@@ -198,7 +314,7 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
                                 
                 if (scx > 0) {
                     //H(X) = log(N) - 1 / N * SUM(c(x) * log(c(x)) )
-                    entropy = Math.log(scx) - scxlogcx / scx;
+                    entropy = EntropyUtil.logTransform(Math.log(scx) - scxlogcx / scx, this.base);
                 }
 
                 return entropy;

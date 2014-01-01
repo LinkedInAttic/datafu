@@ -1,6 +1,24 @@
+/*
+ * Copyright 2013 LinkedIn Corp. and contributors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package datafu.pig.stats.entropy.stream;
 
 import org.apache.pig.backend.executionengine.ExecException;
+
+import datafu.pig.stats.entropy.EntropyUtil;
 
 
 /*
@@ -13,15 +31,17 @@ public abstract class EntropyEstimator {
     
     public static final String CHAOSHEN_ESTIMATOR = "chaosh";
     
-    static final String EULER = "e";
-    
     /*
      * logarithm base
      * by default, we use Euler's number as the default logarithm base
      */ 
     protected String base;
     
-    protected EntropyEstimator(String base) {
+    protected EntropyEstimator(String base) throws IllegalArgumentException {
+        if(!EntropyUtil.isValidLogBase(base)) {
+            throw new IllegalArgumentException("Invalid input logarithm base. " + 
+                    "Please refer to StreamingEntropy's javadoc for supported logarithm base");
+        }
         this.base = base;
     }
     
@@ -32,7 +52,9 @@ public abstract class EntropyEstimator {
      * if the method is not supported, a null estimator instance is returned
      * and the external application needs to handle this case   
      */
-    public static EntropyEstimator createEstimator(String type, String base) {
+    public static EntropyEstimator createEstimator(String type, 
+                                                   String base) throws IllegalArgumentException 
+    {
         //empirical estimator
         if(EmpiricalEntropyEstimator.EMPIRICAL_ESTIMATOR.equalsIgnoreCase(type)) {
             return new EmpiricalEntropyEstimator(base);
@@ -42,7 +64,8 @@ public abstract class EntropyEstimator {
            return new ChaoShenEntropyEstimator(base);
         }
         //unsupported estimator type
-        return null;
+        throw new IllegalArgumentException("invalid input entropy estimator type. " +
+                    "Please refer to StreamingEntropy's javadoc for the supported estimator types");        
     }
     
     /*
@@ -61,29 +84,4 @@ public abstract class EntropyEstimator {
      * cleanup and reset internal states
      */
     public abstract void reset();
-
-    /*
-     * Transform the input entropy to that in the input logarithm base
-     * The input entropy is assumed to be calculated in the Euler's number logarithm base
-     * */
-    protected double logTransform(double h) {
-        if(this.base != null && 
-           !this.base.isEmpty() &&
-           !EULER.equalsIgnoreCase(this.base)) {
-            try {
-                
-                double base = Double.parseDouble(this.base);
-                
-                if(base > 0) {
-                    //if the input base is a positive number
-                    h = h / Math.log(base);
-                }
-                
-            } catch (NumberFormatException ex) {
-                //invalid input logarithm base, use euler number as the default logarithm base
-            }
-        }
-        
-        return h;
-    }
 }

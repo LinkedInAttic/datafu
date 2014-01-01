@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 LinkedIn Corp. and contributors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package datafu.pig.stats.entropy.stream;
 
 import java.util.HashMap;
@@ -11,6 +27,8 @@ import org.apache.pig.data.TupleFactory;
 import org.apache.pig.backend.executionengine.ExecException;
 
 import java.util.Collections;
+
+import datafu.pig.stats.entropy.EntropyUtil;
 
 
 /*
@@ -79,7 +97,7 @@ class ChaoShenEntropyEstimator extends EntropyEstimator {
             }
         }
 
-        return super.logTransform(h);
+        return EntropyUtil.logTransform(h, super.base);
     }
     
     private double accumlateEntropy(long cx, 

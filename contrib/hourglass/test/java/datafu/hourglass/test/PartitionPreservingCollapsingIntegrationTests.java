@@ -52,9 +52,9 @@ import datafu.hourglass.test.jobs.SimplePartitionPreservingCountJob;
 import datafu.hourglass.test.util.DailyTrackingWriter;
 
 @Test(groups="pcl")
-public class FirstAndSecondPassJobTests extends TestBase
+public class PartitionPreservingCollapsingIntegrationTests extends TestBase
 {
-  private Logger _log = Logger.getLogger(FirstAndSecondPassJobTests.class);
+  private Logger _log = Logger.getLogger(PartitionPreservingCollapsingIntegrationTests.class);
   
   private Path _inputPath = new Path("/data/tracking/SimpleEvent");
   private Path _intermediatePath = new Path("/intermediate");
@@ -76,11 +76,11 @@ public class FirstAndSecondPassJobTests extends TestBase
   
   static
   {
-    EVENT_SCHEMA = Schemas.createRecordSchema(FirstAndSecondPassJobTests.class, "Event",
+    EVENT_SCHEMA = Schemas.createRecordSchema(PartitionPreservingCollapsingIntegrationTests.class, "Event",
                                               new Field("id", Schema.create(Type.LONG), "ID", null));
   }
   
-  public FirstAndSecondPassJobTests() throws IOException
+  public PartitionPreservingCollapsingIntegrationTests() throws IOException
   {
     super();
   }

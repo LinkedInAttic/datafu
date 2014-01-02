@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +33,6 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
-
 
 import datafu.hourglass.avro.AvroDateRangeMetadata;
 import datafu.hourglass.fs.DatePath;
@@ -75,20 +75,110 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
 {
   private final Logger _log = Logger.getLogger(PartitionCollapsingExecutionPlanner.class);
 
-  private int _numReducers;
   private SortedMap<Date,DatePath> _outputPathsByDate;
   private boolean _reusePreviousOutput;
   
-  private List<DatePath> _inputsToProcess = new ArrayList<DatePath>();
-  private List<DatePath> _newInputsToProcess = new ArrayList<DatePath>();
-  private List<DatePath> _oldInputsToProcess = new ArrayList<DatePath>();
-  private Map<String,String> _latestInputByPath = new HashMap<String,String>();
-  private DatePath _previousOutputToProcess;
-  private List<Schema> _inputSchemas = new ArrayList<Schema>();
-  private Map<String,Schema> _inputSchemasByPath = new HashMap<String,Schema>();
-  private boolean _needAnotherPass;
-  private DateRange _currentDateRange;
-  private boolean _planExists;
+  // the chosen execution plan
+  private Plan _plan;
+  
+  /**
+   * An execution plan.  Encapsulates what inputs will be processed.
+   * 
+   * @author mhayes
+   *
+   */
+  private class Plan
+  {
+    private List<DatePath> _inputsToProcess = new ArrayList<DatePath>();
+    private List<DatePath> _newInputsToProcess = new ArrayList<DatePath>();
+    private List<DatePath> _oldInputsToProcess = new ArrayList<DatePath>();
+    private Map<String,String> _latestInputByPath = new HashMap<String,String>();
+    private DatePath _previousOutputToProcess;
+    private List<Schema> _inputSchemas = new ArrayList<Schema>();
+    private Map<String,Schema> _inputSchemasByPath = new HashMap<String,Schema>();
+    private boolean _needAnotherPass;
+    private DateRange _currentDateRange;
+    private int _numReducers;
+    private Long _totalBytes;
+    
+    public void finalizePlan() throws IOException
+    {
+      determineInputSchemas();
+      determineNumReducers();
+      determineTotalBytes();
+    }
+    
+    /**
+     * Determines the number of bytes that will be consumed by this execution plan.
+     * This is used to compare alternative plans so the one with the least bytes
+     * consumed can be used.
+     * 
+     * @throws IOException
+     */
+    private void determineTotalBytes() throws IOException
+    {
+      _totalBytes = 0L;
+      for (DatePath dp : _inputsToProcess)
+      {
+        _totalBytes += PathUtils.countBytes(getFileSystem(), dp.getPath());
+      }
+      if (_previousOutputToProcess != null)
+      {
+        _totalBytes += PathUtils.countBytes(getFileSystem(), _previousOutputToProcess.getPath());
+      }
+      _log.info("Total bytes consumed: " + _totalBytes);
+    }
+    
+    /**
+     * Determines the input schemas.  There may be multiple input schemas because multiple inputs are allowed.
+     * The latest available inputs are used to determine the schema, the assumption being that schemas are
+     * backwards-compatible.
+     * 
+     * @throws IOException
+     */
+    private void determineInputSchemas() throws IOException
+    {
+      if (_latestInputByPath.size() > 0)
+      {
+        _log.info("Determining input schemas");
+        for (Entry<String,String> entry : _latestInputByPath.entrySet())
+        {
+          String root = entry.getKey();
+          String input = entry.getValue();
+          _log.info("Loading schema for " + input);
+          Schema schema = PathUtils.getSchemaFromPath(getFileSystem(),new Path(input));
+          _inputSchemas.add(schema);
+          _inputSchemasByPath.put(root, schema);
+        }
+      }
+    }
+    
+    /**
+     * Determines the number of reducers to use based on the input data size and the previous output,
+     * if it exists and is being reused.
+     * The number of reducers to use is based on the input data size and the 
+     * <em>num.reducers.bytes.per.reducer</em> property.  This setting can be controlled more granularly
+     * through <em>num.reducers.input.bytes.per.reducer</em> and <em>num.reducers.previous.bytes.per.reducer</em>.
+     * See {@link ReduceEstimator} for details on reducer estimation.
+     * 
+     * @throws IOException
+     */
+    private void determineNumReducers() throws IOException
+    {
+      ReduceEstimator estimator = new ReduceEstimator(getFileSystem(),getProps());
+      List<String> inputPaths = new ArrayList<String>();
+      for (DatePath input : _inputsToProcess)
+      {
+        inputPaths.add(input.getPath().toString());
+        estimator.addInputPath("input",input.getPath());
+      }
+      if (_previousOutputToProcess != null)
+      {
+        estimator.addInputPath("previous",_previousOutputToProcess.getPath());
+      }
+      _numReducers = estimator.getNumReducers();
+    }
+  }
   
   /**
    * Initializes the execution planner.
@@ -108,15 +198,76 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   public void createPlan() throws IOException
   {
-    if (_planExists) throw new RuntimeException("Plan already exists");
-    _planExists = true;
+    if (_plan != null) throw new RuntimeException("Plan already exists");
+    
+    _log.info("Creating execution plan");
+    
     loadInputData();
-    loadOutputData();
+    loadOutputData();    
     determineAvailableInputDates();
     determineDateRange();
-    determineInputsToProcess();
-    determineInputSchemas();
-    determineNumReducers();
+    
+    List<Plan> plans = new ArrayList<Plan>();
+    Plan plan;
+    
+    if (_reusePreviousOutput)
+    {
+      _log.info("Output may be reused, will create alternative plan that does not reuse output");
+      plan = new Plan();
+      try
+      {
+        determineInputsToProcess(false,plan);
+        plan.finalizePlan();
+        plans.add(plan);
+      }
+      catch (MaxInputDataExceededException e)
+      {
+        _log.info(e.getMessage());
+      }
+    }
+    
+    _log.info(String.format("Creating plan that %s previous output",(_reusePreviousOutput ? "reuses" : "does not reuse")));
+    plan = new Plan();
+    try
+    {
+      determineInputsToProcess(_reusePreviousOutput,plan);
+    }
+    catch (MaxInputDataExceededException e)
+    {
+      throw new RuntimeException(e);
+    }
+    plan.finalizePlan();
+    plans.add(plan);
+    
+    if (plans.size() > 1)
+    { 
+      _log.info(String.format("There are %d alternative execution plans:",plans.size()));
+      
+      for (Plan option : plans)
+      {
+        _log.info(String.format("* Consume %d new inputs, %d old inputs, %s previous output (%d bytes)",
+                                option._newInputsToProcess.size(),
+                                option._oldInputsToProcess.size(),
+                                option._previousOutputToProcess != null ? "reuse" : "no",
+                                option._totalBytes));
+      }
+      
+      // choose plan with least bytes consumed
+      Collections.sort(plans, new Comparator<Plan>() {
+        @Override
+        public int compare(Plan o1, Plan o2)
+        {
+          return o1._totalBytes.compareTo(o2._totalBytes);
+        }      
+      });
+      _plan = plans.get(0);
+      
+      _log.info(String.format("Choosing plan consuming %d bytes",_plan._totalBytes));
+    }
+    else
+    {
+      _plan = plans.get(0);
+    }
   } 
 
   /**
@@ -148,13 +299,13 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
   public int getNumReducers()
   {
     checkPlanExists();
-    return _numReducers;
+    return getPlan()._numReducers;
   }
   
   public DateRange getCurrentDateRange()
   {
     checkPlanExists();
-    return _currentDateRange;
+    return getPlan()._currentDateRange;
   }
   
   /**
@@ -165,8 +316,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   public DatePath getPreviousOutputToProcess()
   {
-    checkPlanExists();
-    return _previousOutputToProcess;
+    return getPlan()._previousOutputToProcess;
   }
   
   /**
@@ -177,8 +327,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   public List<DatePath> getInputsToProcess()
   {
-    checkPlanExists();
-    return _inputsToProcess;
+    return getPlan()._inputsToProcess;
   }
   
   /**
@@ -190,8 +339,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   public List<DatePath> getNewInputsToProcess()
   {
-    checkPlanExists();
-    return _newInputsToProcess;
+    return getPlan()._newInputsToProcess;
   }
   
   /**
@@ -203,8 +351,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   public List<DatePath> getOldInputsToProcess()
   {
-    checkPlanExists();
-    return _oldInputsToProcess;
+    return getPlan()._oldInputsToProcess;
   }
   
   /**
@@ -216,8 +363,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   public boolean getNeedsAnotherPass()
   {
-    checkPlanExists();
-    return _needAnotherPass;
+    return getPlan()._needAnotherPass;
   }
   
   /**
@@ -233,8 +379,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   public List<Schema> getInputSchemas()
   {
-    checkPlanExists();
-    return _inputSchemas;
+    return getPlan()._inputSchemas;
   }
   
   /**
@@ -245,58 +390,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   public Map<String,Schema> getInputSchemasByPath()
   {
-    checkPlanExists();
-    return _inputSchemasByPath;
-  }
-  
-  /**
-   * Determines the number of reducers to use based on the input data size and the previous output,
-   * if it exists and is being reused.
-   * The number of reducers to use is based on the input data size and the 
-   * <em>num.reducers.bytes.per.reducer</em> property.  This setting can be controlled more granularly
-   * through <em>num.reducers.input.bytes.per.reducer</em> and <em>num.reducers.previous.bytes.per.reducer</em>.
-   * See {@link ReduceEstimator} for details on reducer estimation.
-   * 
-   * @throws IOException
-   */
-  private void determineNumReducers() throws IOException
-  {
-    ReduceEstimator estimator = new ReduceEstimator(getFileSystem(),getProps());
-    List<String> inputPaths = new ArrayList<String>();
-    for (DatePath input : getInputsToProcess())
-    {
-      inputPaths.add(input.getPath().toString());
-      estimator.addInputPath("input",input.getPath());
-    }
-    if (_previousOutputToProcess != null)
-    {
-      estimator.addInputPath("previous",_previousOutputToProcess.getPath());
-    }
-    _numReducers = estimator.getNumReducers();
-  }
-
-  /**
-   * Determines the input schemas.  There may be multiple input schemas because multiple inputs are allowed.
-   * The latest available inputs are used to determine the schema, the assumption being that schemas are
-   * backwards-compatible.
-   * 
-   * @throws IOException
-   */
-  private void determineInputSchemas() throws IOException
-  {
-    if (_latestInputByPath.size() > 0)
-    {
-      _log.info("Determining input schemas");
-      for (Entry<String,String> entry : _latestInputByPath.entrySet())
-      {
-        String root = entry.getKey();
-        String input = entry.getValue();
-        _log.info("Loading schema for " + input);
-        Schema schema = PathUtils.getSchemaFromPath(getFileSystem(),new Path(input));
-        _inputSchemas.add(schema);
-        _inputSchemasByPath.put(root, schema);
-      }
-    }
+    return getPlan()._inputSchemasByPath;
   }
   
   /**
@@ -306,8 +400,13 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   private void loadOutputData() throws IOException
   {
-    _log.info(String.format("Checking output data in " + getOutputPath()));
+    if (getOutputPath() == null)
+    {
+      throw new RuntimeException("No output path specified");
+    }
+    _log.info(String.format("Searching for existing output data in " + getOutputPath()));
     _outputPathsByDate = getDatedData(getOutputPath());
+    _log.info(String.format("Found %d output paths",_outputPathsByDate.size()));
   }
   
   /**
@@ -327,56 +426,61 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    * </p>
    * 
    * @throws IOException
+   * @throws MaxInputDataExceededException 
    */
-  private void determineInputsToProcess() throws IOException
+  private void determineInputsToProcess(boolean reusePreviousOutput, Plan plan) throws IOException, MaxInputDataExceededException
   {
     Calendar cal = Calendar.getInstance(PathUtils.timeZone);    
-    
-    _inputsToProcess.clear();
-    _latestInputByPath.clear();
-    _previousOutputToProcess = null;
-    
+        
     DateRange outputDateRange = null;
     
-    if (_reusePreviousOutput && _outputPathsByDate.size() > 0)
+    if (reusePreviousOutput)
     {
-      DatePath latestPriorOutput = _outputPathsByDate.get(Collections.max(_outputPathsByDate.keySet()));
-      _log.info("Have previous output, determining what previous incremental data to difference out");
-      outputDateRange = AvroDateRangeMetadata.getOutputFileDateRange(getFileSystem(),latestPriorOutput.getPath());
-      _log.info(String.format("Previous output has date range %s to %s",
-                PathUtils.datedPathFormat.format(outputDateRange.getBeginDate()),
-                PathUtils.datedPathFormat.format(outputDateRange.getEndDate())));
-      
-      for (Date currentDate=outputDateRange.getBeginDate(); currentDate.compareTo(getDateRange().getBeginDate()) < 0;)
+      if (_outputPathsByDate.size() > 0)
       {
-        if (!getAvailableInputsByDate().containsKey(currentDate))
-        {  
-          throw new RuntimeException(String.format("Missing incremental data for %s, so can't remove it from previous output",PathUtils.datedPathFormat.format(currentDate)));
-        }
+        DatePath latestPriorOutput = _outputPathsByDate.get(Collections.max(_outputPathsByDate.keySet()));
+        _log.info("Have previous output, determining what previous incremental data to difference out");
+        outputDateRange = AvroDateRangeMetadata.getOutputFileDateRange(getFileSystem(),latestPriorOutput.getPath());
+        _log.info(String.format("Previous output has date range %s to %s",
+                  PathUtils.datedPathFormat.format(outputDateRange.getBeginDate()),
+                  PathUtils.datedPathFormat.format(outputDateRange.getEndDate())));
         
-        List<DatePath> inputs = getAvailableInputsByDate().get(currentDate);
-        
-        for (DatePath input : inputs)
+        for (Date currentDate=outputDateRange.getBeginDate(); 
+             currentDate.compareTo(getDateRange().getBeginDate()) < 0
+             && currentDate.compareTo(outputDateRange.getEndDate()) <= 0;)
         {
-          _log.info(String.format("Input: %s",input.getPath()));
-          _inputsToProcess.add(input);
-          _oldInputsToProcess.add(input);
+          if (!getAvailableInputsByDate().containsKey(currentDate))
+          {  
+            throw new RuntimeException(String.format("Missing incremental data for %s, so can't remove it from previous output",PathUtils.datedPathFormat.format(currentDate)));
+          }
           
-          Path root = PathUtils.getNestedPathRoot(input.getPath());
-          _latestInputByPath.put(root.toString(), input.getPath().toString());
+          List<DatePath> inputs = getAvailableInputsByDate().get(currentDate);
+          
+          for (DatePath input : inputs)
+          {
+            _log.info(String.format("Old Input: %s",input.getPath()));
+            plan._inputsToProcess.add(input);
+            plan._oldInputsToProcess.add(input);
+            
+            Path root = PathUtils.getNestedPathRoot(input.getPath());
+            plan._latestInputByPath.put(root.toString(), input.getPath().toString());
+          }
+                                  
+          cal.setTime(currentDate);
+          cal.add(Calendar.DAY_OF_MONTH, 1);
+          currentDate = cal.getTime();
         }
-                                
-        cal.setTime(currentDate);
-        cal.add(Calendar.DAY_OF_MONTH, 1);
-        currentDate = cal.getTime();
+          
+        plan._previousOutputToProcess = latestPriorOutput;
+        _log.info("Previous Output: " + plan._previousOutputToProcess.getPath());
       }
-        
-      _previousOutputToProcess = latestPriorOutput;
-      _log.info("Including previous output: " + _previousOutputToProcess.getPath());
+      else
+      {
+        _log.info("No previous output to reuse");
+      }
     }
     
     // consume the incremental data and produce the final output
-    _log.info("Determining what new incremental data to include");
     
     int newDataCount = 0;
     Date startDate = getDateRange().getBeginDate();
@@ -385,13 +489,13 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
     { 
       if (getMaxToProcess() != null && newDataCount >= getMaxToProcess())
       {
-        if (!_reusePreviousOutput)
+        if (!reusePreviousOutput)
         {
-          throw new RuntimeException(String.format("Amount of input data has exceeded max of %d however output is not being reused so cannot do in multiple passes", getMaxToProcess()));
+          throw new MaxInputDataExceededException(String.format("Amount of input data has exceeded max of %d however output is not being reused so cannot do in multiple passes", getMaxToProcess()));
         }
         
         // too much data to process in a single run, will require another pass
-        _needAnotherPass = true;
+        plan._needAnotherPass = true;
         break;
       }
       
@@ -414,12 +518,12 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
           
           for (DatePath input : inputs)
           {
-            _log.info(String.format("Input: %s",input.getPath()));
-            _inputsToProcess.add(input);
-            _newInputsToProcess.add(input);
+            _log.info(String.format("New Input: %s",input.getPath()));
+            plan._inputsToProcess.add(input);
+            plan._newInputsToProcess.add(input);
             
             Path root = PathUtils.getNestedPathRoot(input.getPath());
-            _latestInputByPath.put(root.toString(), input.getPath().toString());
+            plan._latestInputByPath.put(root.toString(), input.getPath().toString());
           }
                     
           newDataCount++;
@@ -432,7 +536,7 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
       currentDate = cal.getTime();
     }
     
-    _currentDateRange = new DateRange(startDate,endDate);
+    plan._currentDateRange = new DateRange(startDate,endDate);
   } 
   
   /**
@@ -440,6 +544,12 @@ public class PartitionCollapsingExecutionPlanner extends ExecutionPlanner
    */
   private void checkPlanExists()
   {
-    if (!_planExists) throw new RuntimeException("Must call createPlan first");
+    if (_plan == null) throw new RuntimeException("Must call createPlan first");
+  }
+  
+  private Plan getPlan()
+  {
+    checkPlanExists();
+    return _plan;
   }
 }

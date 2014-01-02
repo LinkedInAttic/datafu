@@ -45,14 +45,14 @@ import org.testng.annotations.Test;
 
 import datafu.hourglass.fs.PathUtils;
 import datafu.hourglass.test.Schemas;
-import datafu.hourglass.test.SecondPassCountJobTests;
+import datafu.hourglass.test.PartitionCollapsingTests;
 import datafu.hourglass.test.TestBase;
 import datafu.hourglass.test.util.DailyTrackingWriter;
 
 @Test(groups="pcl")
 public class Examples extends TestBase
 {
-  private Logger _log = Logger.getLogger(SecondPassCountJobTests.class);
+  private Logger _log = Logger.getLogger(PartitionCollapsingTests.class);
     
   private static final Schema EVENT_SCHEMA;
   

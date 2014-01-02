@@ -31,7 +31,7 @@ end
 
 files_without_license = []
 
-source_dirs = ["src/java/datafu/linkanalysis","src/java/datafu/pig"]
+source_dirs = ["src","test"]
 
 source_dirs.each do |dir|
   files_without_license.concat find_unlicensed_files(dir)

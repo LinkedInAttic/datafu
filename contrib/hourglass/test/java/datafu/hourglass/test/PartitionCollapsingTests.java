@@ -51,9 +51,9 @@ import datafu.hourglass.test.jobs.counting.PartitionCollapsingIncrementalCountJo
 import datafu.hourglass.test.util.DailyTrackingWriter;
 
 @Test(groups="pcl")
-public class SecondPassCountJobTests extends TestBase
+public class PartitionCollapsingTests extends TestBase
 {
-  private Logger _log = Logger.getLogger(SecondPassCountJobTests.class);
+  private Logger _log = Logger.getLogger(PartitionCollapsingTests.class);
   
   private Path _inputPath = new Path("/input");
   private Path _outputPath = new Path("/output");
@@ -74,11 +74,11 @@ public class SecondPassCountJobTests extends TestBase
     
   static
   {    
-    EVENT_SCHEMA = Schemas.createRecordSchema(SecondPassCountJobTests.class, "Event",
+    EVENT_SCHEMA = Schemas.createRecordSchema(PartitionCollapsingTests.class, "Event",
                                               new Field("id", Schema.create(Type.LONG), "ID", null));
   }
   
-  public SecondPassCountJobTests() throws IOException
+  public PartitionCollapsingTests() throws IOException
   {
     super();
   }

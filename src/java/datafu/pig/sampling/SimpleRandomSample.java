@@ -1,9 +1,25 @@
+/*
+ * Copyright 2013 LinkedIn Corp. and contributors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package datafu.pig.sampling;
 
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.Random;
 
+import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.pig.AlgebraicEvalFunc;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.BagFactory;
@@ -45,8 +61,8 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  */
 public class SimpleRandomSample extends AlgebraicEvalFunc<DataBag>
 {
-  public static final TupleFactory tupleFactory = TupleFactory.getInstance();
-  public static final BagFactory bagFactory = BagFactory.getInstance();
+  private static final TupleFactory tupleFactory = TupleFactory.getInstance();
+  private static final BagFactory bagFactory = BagFactory.getInstance();
 
   public SimpleRandomSample()
   {
@@ -108,7 +124,7 @@ public class SimpleRandomSample extends AlgebraicEvalFunc<DataBag>
   static public class Initial extends EvalFunc<Tuple>
   {
     private double _samplingProbability;
-    private Random _random = new Random(System.nanoTime() % 996209L);
+    private RandomDataImpl _rdg = new RandomDataImpl();
 
     public Initial()
     {
@@ -137,7 +153,7 @@ public class SimpleRandomSample extends AlgebraicEvalFunc<DataBag>
 
         for (Tuple item : items)
         {
-          double key = _random.nextDouble();
+          double key = _rdg.nextUniform(0.0d, 1.0d);
 
           if (key < q1)
           {

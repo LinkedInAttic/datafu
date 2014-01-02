@@ -1,35 +1,16 @@
 DataFu
 Copyright 2010 LinkedIn, Inc
 
-This product includes/uses software developed by The Apache Software
-Foundation (http://www.apache.org/).
+This product includes/uses fastutil, a Java collections framework (http://fastutil.dsi.unimi.it/), licensed under Apache 2.
 
-This product includes/uses pig (http://pig.apache.org/)
+This product includes/uses joda-time (http://joda.sourceforge.net/), licensed under Apache 2.
 
-This product includes/uses fastutil, a Java collections framework (http://fastutil.dsi.unimi.it/)
+This product includes/uses commons-math (http://commons.apache.org/math/), licensed under Apache 2.
 
-This product includes/uses joda-time (http://joda.sourceforge.net/)
+This product includes/uses guava (http://code.google.com/p/guava-libraries/), licensed under Apache 2.
 
-This product includes/uses commons-math (http://commons.apache.org/math/)
+This product includes/uses stream (https://github.com/addthis/stream-lib), licensed under Apache 2.
 
-This product includes/uses commons-io (http://commons.apache.org/io/)
+This product includes/uses jsr-305 (http://code.google.com/p/jsr-305/), licensed under BSD.
 
-This product includes/uses hadoop (http://hadoop.apache.org/)
-
-This product includes/uses testng (http://testng.org/doc/index.html)
-
-This product includes/uses guava (http://code.google.com/p/guava-libraries/)
-
-This product includes/uses log4j http://logging.apache.org/log4j/)
-
-This product includes/uses jline (http://jline.sourceforge.net/)
-
-This product includes/uses antlr (http://www.antlr.org/)
-
-This product includes/uses autojar (http://autojar.sourceforge.net/en_d/index.html)
-
-This product includes/uses jarjar (http://code.google.com/p/jarjar/)
-
-This product includes/uses cobertura (http://cobertura.sourceforge.net/index.html)
-
-This product includes/uses stream (https://github.com/addthis/stream-lib)
+This product includes/uses StreamingQuantile, copyright Cloudera (http://cloudera.com), licensed under Apache 2.

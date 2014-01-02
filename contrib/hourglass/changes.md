@@ -1,3 +1,10 @@
+# 0.1.3
+
+Fixes:
+
+* Fix bug reusing output in execution planner.  It now subtracts off the correct old inputs.
+* When reusing output, execution planner now considers whether it is better than not reusing.
+
 # 0.1.2
 
 Fixes:

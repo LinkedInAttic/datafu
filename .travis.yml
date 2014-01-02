@@ -1,4 +1,16 @@
 language: java
-script: ant test
+script: ant test -Dtestclasses.pattern=**/datafu/test/pig/$TESTFOLDER/**/*.class
+env:
+  - TESTFOLDER=bags
+  - TESTFOLDER=geo
+  - TESTFOLDER=hash
+  - TESTFOLDER=linkanalysis
+  - TESTFOLDER=random
+  - TESTFOLDER=sampling
+  - TESTFOLDER=sessions
+  - TESTFOLDER=sets
+  - TESTFOLDER=stats
+  - TESTFOLDER=urls
+  - TESTFOLDER=util
 jdk:
   - openjdk6

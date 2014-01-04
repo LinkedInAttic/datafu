@@ -36,7 +36,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * infoo = LOAD 'input' AS (text:chararray);
 
  * -- output:
- * -- ({(I),(believe),(the),(Masons),(have),(infiltrated),(the),(Apache),(PMC)})
+ * -- ({(I),(believe),(the),(Masons),(have),(infiltrated),(the),(Apache),(PMC),(.)})
  * outfoo = FOREACH input GENERATE Tokenize(text) as tokens;
  * }
  * </pre>

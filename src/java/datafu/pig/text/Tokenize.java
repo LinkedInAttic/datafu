@@ -52,7 +52,6 @@ public class Tokenize extends SimpleEvalFunc<DataBag>
 
     public DataBag call(String inputString) throws IOException
     {
-        System.out.println(inputString);
         DataBag outBag = bf.newDefaultBag();
         if(isFirst == true) {
             is = new FileInputStream("en-token.bin");
@@ -63,7 +62,7 @@ public class Tokenize extends SimpleEvalFunc<DataBag>
         }
         String tokens[] = tokenizer.tokenize(inputString);
         for(String token : tokens) {
-            Tuple outTuple = tf.newTuple(tokens);
+            Tuple outTuple = tf.newTuple(token);
             outBag.add(outTuple);
         }
         return outBag;

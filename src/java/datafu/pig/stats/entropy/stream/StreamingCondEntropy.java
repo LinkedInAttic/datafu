@@ -47,19 +47,16 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * <p>
  * An exception will be thrown if the input tuple does not have 2 fields.
  * </p> 
- * 
  * <p>
  * This UDF's constructor definition and parameters are the same as that of * {@link datafu.pig.stats.entropy.stream.StreamingEntropy}
  * </p>
- *
  * <p>
  * Note:
  * <ul>
- *     <li>input bag to the UDF must be sorted on X and Y
+ *     <li>input bag to the UDF must be sorted on X and Y, with X in the first order.
  *     <li>Entropy value is returned as double type.
  * </ul>
  * </p>
- *
  * <p>
  * How to use: 
  * </p>
@@ -68,14 +65,12 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * where we sort the inner bag and use the sorted bag as the input to this UDF.
  * </p>
  * <p>
- * This is a scenario in which we would like to get a variable's conditional entropy in different constraint groups.
+ * This is a scenario in which we would like to get 2 variables' conditional entropy in different constraint groups.
  * </p>
  * <p>
  * Example:
  * <pre>
- * 
  * {@code
- * 
  * --define empirical conditional entropy with Euler's number as the logarithm base
  * define CondEntropy datafu.pig.stats.entropy.stream.StreamingCondEntropy();
  *
@@ -91,8 +86,8 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * }
  * </pre>
  * </p>
- * <p>
  * Use case to calculate mutual information:
+ * <p>
  * <pre>
  * {@code
  * ------------
@@ -119,10 +114,8 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * }
  * </pre>
  * </p>
- * 
  * @see StreamingEntropy
  */
-@Nondeterministic
 public class StreamingCondEntropy extends AccumulatorEvalFunc<Double> {
     //last visited tuple of <x,y>
     private Tuple xy;
@@ -189,21 +182,7 @@ public class StreamingCondEntropy extends AccumulatorEvalFunc<Double> {
                this.combEstimator.accumulate(this.cxy);
                this.cxy = 0;
                this.lastCmp = cmp;
-               Object prevObj = this.xy.get(0);
-               byte prevObjType = DataType.findType(prevObj);
-               Object presentObj = t.get(0);
-               byte presentObjType = DataType.findType(presentObj);
-               if(prevObjType == DataType.ERROR || 
-                  presentObjType == DataType.ERROR ||
-                  prevObjType != presentObjType) {
-                   throw new ExecException("Inconsistent data type of the 1st field!" +
-                       " previous object type: " + DataType.findTypeName(prevObjType) + 
-                       ", present object type: " + DataType.findTypeName(presentObjType));
-               }
-               if(DataType.compare(prevObj,
-                                   presentObj,
-                                   prevObjType,
-                                   presentObjType) != 0) {
+               if(DataType.compare(this.xy.get(0), t.get(0)) != 0) {
                   //different x
                    this.condXEstimator.accumulate(this.cx);
                    this.cx = 0;

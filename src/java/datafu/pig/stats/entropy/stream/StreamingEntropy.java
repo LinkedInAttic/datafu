@@ -33,7 +33,6 @@ import datafu.pig.stats.entropy.EntropyUtil;
 /**
  * Calculate entropy of a given stream of raw data samples according to entropy's 
  * {@link <a href="http://en.wikipedia.org/wiki/Entropy_%28information_theory%29" target="_blank">wiki definition</a>}
- *
  * <p>
  * Its constructor takes 2 arguments. 
  * </p>
@@ -67,7 +66,6 @@ import datafu.pig.stats.entropy.EntropyUtil;
  *     <li>The entropy value is returned as double type.
  * </ul>
  * </p>
- *
  * <p>
  * How to use: 
  * </p>
@@ -78,8 +76,8 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * <p>
  * This is a scenario in which we would like to get a variable's entropy in different constraint groups.
  * </p>
- * <p>
  * Example:
+ * <p>
  * <pre>
  * {@code
  * --calculate empirical entropy with Euler's number as the logarithm base
@@ -97,10 +95,8 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * }
  * </pre>
  * </p>
- * 
  * @see StreamingCondEntropy
  */
-@Nondeterministic
 public class StreamingEntropy extends AccumulatorEvalFunc<Double>
 { 
   //last visited tuple

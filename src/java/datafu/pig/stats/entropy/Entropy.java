@@ -42,36 +42,30 @@ import datafu.pig.stats.entropy.EntropyUtil;
 /**
  * Calculate the empirical entropy given a bag of data sample counts following entropy's
  * {@link <a href="http://en.wikipedia.org/wiki/Entropy_%28information_theory%29" target="_blank">wiki definition</a>} 
- * 
  * <p>
  * It supports entropy calculation both in a streaming way and in a distributed way using combiner.
  * </p>
- * 
  * <p>
  * This UDF's constructor accepts the logarithm base as its single argument. 
  * The definition of supported logarithm base is the same as {@link datafu.pig.stats.entropy.stream.StreamingEntropy}
  * </p>
- * 
  * <p>
  * Note: 
  * <ul>
  *     <li>the input to the UDF is a bag of data sample's occurrence frequency, 
- *     which is different from * {StreamingEntropy}, 
- *     whose input is a sorted bag of raw data samples.
- *     <li>each tuple in the UDF's input bag could be int, long, float, double, chararray, bytearray.
- *     The UDF will try to convert the input tuple's value to long type number.
- *     <li>if the UDF fails to convert the input tuple's value to long type number, the record will be
- *     skipped and a warning message will be written to the job's log.
+ *     which is different from * {StreamingEntropy}, whose input is a sorted bag of raw data samples.
+ *     <li>the UDF accepts int or long number. Other data types will be rejected and an exception will be thrown
+ *     <li>the input int or long number should be non-negative,
+ *     negative input will be silently discarded and a warning message will be logged.
  *     <li>the returned entropy value is of double type.
  * </ul>
  * </p>
- * 
  * <p>
  * How to use: 
  * </p>
  * <p>
  * This UDF is suitable to calculate entropy on the whole data set when we 
- * could easily get the each sample's frequency using an outer GROUP BY. 
+ * could easily get each sample's frequency using an outer GROUP BY. 
  * </p>
  * <p>
  * Then we could use another outer GROUP BY on the sample frequencies to get the entropy. 
@@ -79,7 +73,6 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * <p>
  * Example:
  * <pre>
- * 
  * {@code
  * 
  * define Entropy datafu.pig.stats.entropy.Entropy();
@@ -96,8 +89,8 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * }
  * </pre>
  * </p>
- * <p>
  * Use case to calculate mutual information using Entropy:
+ * <p>
  * <pre>
  * {@code
  * 
@@ -144,7 +137,6 @@ import datafu.pig.stats.entropy.EntropyUtil;
  * }
  * </pre>
  * </p>
- * 
  * @see datafu.pig.stats.entropy.stream.StreamingEntropy
  */
 
@@ -223,11 +215,11 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
                 Long cxl = null;
                 if(bg.iterator().hasNext()) {
                    Tuple tp = bg.iterator().next();
-                   cxl = getFreq(tp);
+                   cxl = ((Number)(tp.get(0))).longValue();
                 }
-
+                
                 if(cxl == null || cxl.longValue() < 0) {
-                    //invalid input frequency
+                    //emit null in case of invalid input frequency
                     t.set(0, null);
                     t.set(1, null);
                     warn("Non-positive input frequency number: " + cxl, PigWarning.UDF_WARNING_1);
@@ -242,17 +234,7 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
                     //2nd element of the returned tuple is freq
                     t.set(1, cxl);
                 }
-                return t;
-            } catch (NumberFormatException nfe) {
-                //invalid input format
-                //treat this input as null
-                warn("Caught invalid format input number, exception: " + nfe, PigWarning.UDF_WARNING_2);
-                try {
-                    t.set(0, null);
-                    t.set(1, null);
-                } catch(ExecException e) {
-                    throw e;
-                }
+                
                 return t;
             } catch (ExecException ee) {
                 throw ee;
@@ -310,6 +292,9 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
                 Long sumOfCx = (Long)combined.get(1);
                 
                 if(sumOfCxLogCx == null || sumOfCx == null) {
+                    //emit null if there is at least 1 invalid input
+                    warn("Invalid null field output from combine(), " +
+                    		"1st field: " + sumOfCxLogCx + ", 2nd field: " + sumOfCx, PigWarning.UDF_WARNING_1);
                     return null;
                 }
                 
@@ -347,43 +332,23 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
             Double scxlogcx = (Double)t.get(0);
             Long scx = (Long)t.get(1);
             
-            sumOfCxLogCx += (scxlogcx == null ? 0 : scxlogcx.doubleValue());
-            sumOfCx += (scx == null ? 0 : scx.longValue());
-            
             if(scxlogcx != null && scx != null) {
+                sumOfCxLogCx += scxlogcx.doubleValue();
+                sumOfCx += scx.longValue();
                 sawNonNull = true;
             }
         }
         
-        if(sawNonNull) {
+        if (sawNonNull) {
             output.set(0, sumOfCxLogCx);
             output.set(1, sumOfCx);
         } else {
+            //emit null if there is no invalid input
             output.set(0, null);
             output.set(1, null);
         }
+        
         return output;
-    }
-    
-    static Long getFreq(Tuple tp) throws ExecException {
-        Long cx = null;
-        
-        Object obj = tp.get(0);
-        
-        if(obj != null) {
-            switch (tp.getType(0))
-            {
-            case DataType.LONG : cx = (Long)obj; break;
-            case DataType.INTEGER: cx = ((Integer)obj).longValue(); break;
-            case DataType.FLOAT: cx = ((Float)obj).longValue(); break;
-            case DataType.DOUBLE: cx = ((Double)obj).longValue(); break;
-            case DataType.BYTEARRAY: cx = Double.valueOf(((DataByteArray)obj).toString()).longValue(); break;
-            case DataType.CHARARRAY: cx = Double.valueOf(obj.toString()).longValue(); break;
-            default: 
-            }
-        }
-                    
-        return cx;
     }
     
     /*
@@ -394,7 +359,7 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
     public void accumulate(Tuple input) throws IOException
     {
         for (Tuple t : (DataBag) input.get(0)) {
-            long cx = getFreq(t);
+            long cx = ((Number)(t.get(0))).longValue();
             this.streamEstimator.accumulate(cx);
         }
     }
@@ -402,15 +367,13 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
     @Override
     public Double getValue()
     {
-      return streamEstimator.getEntropy();
+      return this.streamEstimator.getEntropy();
     }
 
     @Override
     public void cleanup()
     {
-      if(this.streamEstimator != null) {
-         this.streamEstimator.reset();
-      }
+        this.streamEstimator.reset();
     }
     
     @Override
@@ -444,18 +407,11 @@ public class Entropy extends AccumulatorEvalFunc<Double> implements Algebraic {
                 throw new RuntimeException("The field schema of the input tuple is null or its size is not 1");
             }
             
-            if(fieldSchemaList.get(0).type != DataType.BYTEARRAY &&
-               fieldSchemaList.get(0).type != DataType.CHARARRAY &&
-               fieldSchemaList.get(0).type != DataType.INTEGER &&
-               fieldSchemaList.get(0).type != DataType.LONG &&
-               fieldSchemaList.get(0).type != DataType.FLOAT &&
-               fieldSchemaList.get(0).type != DataType.DOUBLE) {
-                String[] expectedTypes = new String[] {DataType.findTypeName(DataType.BYTEARRAY),
-                                                           DataType.findTypeName(DataType.CHARARRAY),
-                                                           DataType.findTypeName(DataType.INTEGER),
-                                                           DataType.findTypeName(DataType.LONG),
-                                                           DataType.findTypeName(DataType.FLOAT),
-                                                           DataType.findTypeName(DataType.DOUBLE)};
+            if(fieldSchemaList.get(0).type != DataType.INTEGER &&
+               fieldSchemaList.get(0).type != DataType.LONG )
+            {
+                String[] expectedTypes = new String[] {DataType.findTypeName(DataType.INTEGER),
+                                                       DataType.findTypeName(DataType.LONG)};
                 throw new RuntimeException("Expect the type of the input tuple to be of (" +
                         java.util.Arrays.toString(expectedTypes) + "), but instead found " + 
                         DataType.findTypeName(fieldSchemaList.get(0).type));

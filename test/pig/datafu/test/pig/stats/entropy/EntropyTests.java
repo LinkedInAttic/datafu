@@ -383,28 +383,28 @@ public class EntropyTests extends AbstractEntropyTests
 
   define Entropy datafu.pig.stats.entropy.Entropy();
   
-  data_cnt = load 'input' as val;
+  data_cnt = load 'input' as (val:int);
   --describe data_cnt;
   data_cnt_grouped = GROUP data_cnt ALL;
   data_out = FOREACH data_cnt_grouped GENERATE Entropy(data_cnt);
   store data_out into 'output';
    */
-  @Multiline private String rawByteInputEntropy;
+  @Multiline private String rawValidInputEntropy;
  
   @Test
-  public void rawByteInputEntropyTest() throws Exception
+  public void rawValidInputEntropyTest() throws Exception
   {
-    PigTest test = createPigTestFromString(rawByteInputEntropy); 
+    PigTest test = createPigTestFromString(rawValidInputEntropy); 
     
     writeLinesToFile("input",
                      "0",
-                     "38.0",
-                     "0",
-                     "62.0",
                      "38",
-                     "32.0",
+                     "0",
+                     "62",
+                     "38",
+                     "32",
                      "96",
-                     "38.0",
+                     "38",
                      "96",
                      "0");
         
@@ -414,7 +414,7 @@ public class EntropyTests extends AbstractEntropyTests
      * 
      * e.g.
      * 
-     * > count=c(0, 38.0, 0, 62.0, 38, 32.0, 96, 38.0, 96, 0)
+     * > count=c(0, 38, 0, 62, 38, 32, 96, 38, 96, 0)
      * > library(entropy)
      * > entropy(count) 
      * [1] 1.846901 
@@ -432,18 +432,18 @@ public class EntropyTests extends AbstractEntropyTests
 
   define Entropy datafu.pig.stats.entropy.Entropy();
   
-  data_cnt = load 'input' as val:double;
+  data_cnt = load 'input' as (val:double);
   --describe data_cnt;
   data_cnt_grouped = GROUP data_cnt ALL;
   data_out = FOREACH data_cnt_grouped GENERATE Entropy(data_cnt);
   store data_out into 'output';
    */
-  @Multiline private String rawDoubleInputEntropy;
+  @Multiline private String rawInvalidTypeInputEntropy;
  
   @Test
-  public void rawDoubleInputEntropyTest() throws Exception
+  public void rawInvalidTypeInputEntropyTest() throws Exception
   {
-    PigTest test = createPigTestFromString(rawDoubleInputEntropy); 
+    PigTest test = createPigTestFromString(rawInvalidTypeInputEntropy); 
     
     writeLinesToFile("input",
                      "0.0",
@@ -456,25 +456,47 @@ public class EntropyTests extends AbstractEntropyTests
                      "38.01",
                      "96.00001",
                      "0.0");
-        
-    test.runScript();
+     try {
+         test.runScript();
+         List<Tuple> output = this.getLinesForAlias(test, "data_out");
+         fail( "Testcase should fail");    
+     } catch (Exception ex) {
+         assertTrue(ex.getMessage().indexOf("Expect the type of the input tuple to be of ([int, long]), but instead found double") >= 0);
+     }
+  }
+
+  @Test
+  public void rawInValidInputValueEntropyTest() throws Exception
+  {
+    PigTest test = createPigTestFromString(rawValidInputEntropy); 
     
+    writeLinesToFile("input",
+                     "0",
+                     "-38",
+                     "0",
+                     "62",
+                     "38",
+                     "32",
+                     "96",
+                     "38",
+                     "96",
+                     "0");
     /* Add expected values, computed using R:
      * 
      * e.g.
      * 
-     * > count=c(0.0, 38.0, 0.0, 62.0, 38.0, 32.001, 96.002, 38.01, 96.00001, 0.0)
+     * > count=c(0, -38, 0, 62, 38, 32, 96, 38, 96, 0)
      * > library(entropy)
-     * > entropy(count) 
-     * [1] 1.846913 
+     * > entropy(ifelse(count>0,count,0))
+     * [1] 1.693862 
      * 
      */
     List<Double> expectedOutput = new ArrayList<Double>();
-    expectedOutput.add(1.846913);
+    expectedOutput.add(1.693862);
     
     List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    Iterator<Double> expectationIterator = expectedOutput.iterator();
-    verifyEqualEntropyOutput(expectedOutput, output, 4);
+    verifyEqualEntropyOutput(expectedOutput, output, 5); 
+
   }
 
   /**
@@ -512,38 +534,6 @@ public class EntropyTests extends AbstractEntropyTests
          assertTrue(ex.getMessage().indexOf("The field schema of the input tuple is null or its size is not 1") >= 0);
     }
   }
-
-  /**
-  register $JAR_PATH
-
-  define Entropy datafu.pig.stats.entropy.Entropy();
-  
-  data_cnt = load 'input' as f1:chararray;
-  --describe data_cnt;
-  data_cnt_grouped = GROUP data_cnt ALL;
-  data_out = FOREACH data_cnt_grouped GENERATE Entropy(data_cnt);
-  store data_out into 'output';
-   */
-  @Multiline private String invalidInputNumberFormatEntropy;
- 
-  @Test
-  public void invalidInputNumberFormatEntropyTest() throws Exception
-  {
-    PigTest test = createPigTestFromString(invalidInputNumberFormatEntropy); 
-    
-    writeLinesToFile("input",
-                     "hadoop",
-                     "bigdata");
-        
-    test.runScript();
-    
-    List<Tuple> output = this.getLinesForAlias(test, "data_out");
-    for (Tuple t : output)
-    {
-      assertTrue(t.isNull(0));
-    }
-  }
-
 
   /**
   register $JAR_PATH

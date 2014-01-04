@@ -54,7 +54,7 @@ public class Tokenize extends SimpleEvalFunc<DataBag>
     {
         DataBag outBag = bf.newDefaultBag();
         if(isFirst == true) {
-            is = new FileInputStream("en-token.bin");
+            is = new FileInputStream("data/en-token.bin");
             model = new TokenizerModel(is);
             tokenizer = new TokenizerME(model);
 

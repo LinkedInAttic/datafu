@@ -19,10 +19,13 @@
             <!-- don't include fastutil, as we will include it below and don't want it in the common directory -->
             <exclude org="it.unimi.dsi" name="fastutil" />
         </dependency>
-        <dependency org="com.google.guava" name="guava" rev="${guava.version}" conf="packaged->default"/>       
+        <dependency org="com.google.guava" name="guava" rev="${guava.version}" conf="packaged->default"/>
+        <dependency org="org.apache.opennlp" name="opennlp-tools" rev="${opennlp.version}" conf="packaged->default"/>
+        <dependency org="org.apache.opennlp" name="opennlp-uima" rev="${opennlp.version}" conf="packaged->default"/>
+        <dependency org="org.apache.opennlp" name="opennlp-maxent" rev="${opennlp-maxent.version}" conf="packaged->default"/>
 
         <!-- hadoop and pig dependencies required for building but which are not included in the pom because
-             we don't want to require a specific version -->
+we don't want to require a specific version -->
         <dependency org="org.apache.pig" name="pig" rev="${pig.version}" conf="hadoop->default"/>
         <dependency org="org.apache.hadoop" name="hadoop-core" rev="${hadoop.version}" conf="hadoop->default"/>
 

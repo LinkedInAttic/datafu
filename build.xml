@@ -49,6 +49,7 @@
   <property name="commons-math.jar" value="commons-math-jar-${commons-math.version}.jar" />
   <property name="guava.jar" value="guava-jar-${guava.version}.jar" />
   <property name="stream.jar" value="stream-jar-${stream.version}.jar" />
+  <property name="opennlp.jar" value="opennlp-tools-bundle-${opennlp.version}.jar" />
 
   <!-- Java configuration -->
   <property name="targetJavaVersion" value="1.5" />

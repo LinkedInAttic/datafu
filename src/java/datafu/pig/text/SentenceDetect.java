@@ -24,12 +24,12 @@ import org.apache.pig.data.*;
 import datafu.pig.util.SimpleEvalFunc;
 
 /**
- * The OpenNLP Tokenizers segment an input character sequence into tokens.
+ * The OpenNLP SentenceDectectors segment an input paragraph into sentences.
  * <p>
  * Example:
  * <pre>
  * {@code
- * define Tokenize datafu.pig.bags.Tokenize();
+ * define SentenceDetect datafu.pig.text.SentenceDetect();
  *
  * -- input:
  * -- ("I believe the Masons have infiltrated the Apache PMC. I believe laser beams control cat brains.")
@@ -37,7 +37,7 @@ import datafu.pig.util.SimpleEvalFunc;
 
  * -- output:
  * -- ({(I believe the Masons have infiltrated the Apache PMC.)(I believe laser beams control cat brains.)})
- * outfoo = FOREACH input GENERATE SentenceDetect(text) as tokens;
+ * outfoo = FOREACH input GENERATE SentenceDetect(text) as sentences;
  * }
  * </pre>
  */

@@ -29,7 +29,7 @@ import datafu.pig.util.SimpleEvalFunc;
  * Example:
  * <pre>
  * {@code
- * define Tokenize datafu.pig.bags.Tokenize();
+ * define Tokenize datafu.pig.text.Tokenize();
  *
  * -- input:
  * -- ("I believe the Masons have infiltrated the Apache PMC.")

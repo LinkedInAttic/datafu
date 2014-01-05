@@ -13,18 +13,13 @@
  */
 package datafu.pig.text;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
 
-import opennlp.tools.cmdline.postag.POSModelLoader;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
-import opennlp.tools.sentdetect.SentenceDetectorME;
-import opennlp.tools.sentdetect.SentenceModel;
 import org.apache.pig.data.*;
 
 import datafu.pig.util.SimpleEvalFunc;
@@ -35,15 +30,20 @@ import datafu.pig.util.SimpleEvalFunc;
  * Example:
  * <pre>
  * {@code
- * define Tokenize datafu.pig.bags.Tokenize();
+ * define Tokenize datafu.pig.text.Tokenize();
+ * define POSTag datafu.pig.text.POSTag();
  *
  * -- input:
- * -- ("I believe the Masons have infiltrated the Apache PMC. I believe laser beams control cat brains.")
+ * -- ({(Appetizers),(during),(happy),(hour),(range),(from),($),(3-$),(8+),(.)})
  * infoo = LOAD 'input' AS (text:chararray);
 
  * -- output:
- * -- ({(I believe the Masons have infiltrated the Apache PMC.)(I believe laser beams control cat brains.)})
- * outfoo = FOREACH input GENERATE SentenceDetect(text) as tokens;
+ * -- Tuple schema is: (word, tag, confidence)
+ * outfoo = FOREACH input GENERATE FLATTEN(Tokenize(text)) AS tokens;
+ * -- ({(Appetizers,NNP,0.3619277937390988),(during,IN,0.7945543860326094),(happy,JJ,0.9888504792754391),
+ * -- (hour,NN,0.9427455123502427),(range,NN,0.7335527963654751),(from,IN,0.9911576465589752),($,$,0.9652034031895174),
+ * -- (3-$,CD,0.7005347487371849),(8+,CD,0.8227771746247106),(.,.,0.9900983495480891)})
+ * outfoo2 = FOREACH outfoo GENERATE POSTag(tokens) AS tagged;
  * }
  * </pre>
  */

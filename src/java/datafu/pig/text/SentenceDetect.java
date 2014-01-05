@@ -52,9 +52,16 @@ public class SentenceDetect extends SimpleEvalFunc<DataBag>
 
     public DataBag call(String inputString) throws IOException
     {
+         DataBag outBag = this.call(inputString, "data/en-sent.bin");
+         return outBag;
+    }
+
+    // Enable multiple languages by specifying the model path. See http://opennlp.sourceforge.net/models-1.5/
+    public DataBag call(String inputString, String modelPath) throws IOException
+    {
         DataBag outBag = bf.newDefaultBag();
         if(isFirst == true) {
-            is = new FileInputStream("data/en-sent.bin");
+            is = new FileInputStream(modelPath);
             model = new SentenceModel(is);
             sdetector = new SentenceDetectorME(model);
 

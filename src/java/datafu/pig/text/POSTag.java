@@ -58,9 +58,16 @@ public class POSTag extends SimpleEvalFunc<DataBag>
 
     public DataBag call(DataBag inputBag) throws IOException
     {
+        DataBag outBag = this.call(inputBag, "data/en-pos-maxent.bin");
+        return outBag;
+    }
+
+    // Enable multiple languages by specifying the model path. See http://opennlp.sourceforge.net/models-1.5/
+    public DataBag call(DataBag inputBag, String modelPath) throws IOException
+    {
         DataBag outBag = bf.newDefaultBag();
         if(isFirst == true) {
-            modelIn = new FileInputStream("data/en-pos-maxent.bin");
+            modelIn = new FileInputStream(modelPath);
             model = new POSModel(modelIn);
             tagger = new POSTaggerME(model);
 

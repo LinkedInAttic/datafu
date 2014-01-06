@@ -28,7 +28,7 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
-     define SentenceDetect datafu.pig.text.SentenceDetect();
+     define SentenceDetect datafu.pig.text.opennlp.SentenceDetect();
 
      data = LOAD 'input' AS (text: chararray);
 
@@ -62,7 +62,7 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
-     define TokenizeME datafu.pig.text.TokenizeME();
+     define TokenizeME datafu.pig.text.opennlp.TokenizeME();
 
      data = LOAD 'input' AS (text: chararray);
 
@@ -96,7 +96,7 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
-     define TokenizeSimple datafu.pig.text.TokenizeSimple();
+     define TokenizeSimple datafu.pig.text.opennlp.TokenizeSimple();
 
      data = LOAD 'input' AS (text: chararray);
 
@@ -130,7 +130,7 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
-     define TokenizeWhitespace datafu.pig.text.TokenizeWhitespace();
+     define TokenizeWhitespace datafu.pig.text.opennlp.TokenizeWhitespace();
 
      data = LOAD 'input' AS (text: chararray);
 
@@ -164,8 +164,8 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
-     define TokenizeME datafu.pig.text.TokenizeME();
-     define POSTag datafu.pig.text.POSTag();
+     define TokenizeME datafu.pig.text.opennlp.TokenizeME();
+     define POSTag datafu.pig.text.opennlp.POSTag();
 
      data = LOAD 'input' AS (text: chararray);
 

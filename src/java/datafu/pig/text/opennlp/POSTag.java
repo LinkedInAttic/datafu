@@ -22,6 +22,8 @@ import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
+import org.apache.pig.impl.logicalLayer.FrontendException;
+import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
  * The OpenNLP Tokenizers segment an input character sequence into tokens.
@@ -108,5 +110,59 @@ public class POSTag extends EvalFunc<DataBag>
         }
 
         return outBag;
+    }
+
+    @Override
+    public Schema outputSchema(Schema input)
+    {
+        try
+        {
+            Schema.FieldSchema inputFieldSchema = input.getField(0);
+
+            if (inputFieldSchema.type != DataType.BAG)
+            {
+                throw new RuntimeException("Expected a BAG as input");
+            }
+
+            Schema inputBagSchema = inputFieldSchema.schema;
+
+            if(inputBagSchema == null) {
+                return null;
+            }
+
+            if (inputBagSchema.getField(0).type != DataType.TUPLE)
+            {
+                throw new RuntimeException(String.format("Expected input bag to contain a TUPLE, but instead found %s",
+                        DataType.findTypeName(inputBagSchema.getField(0).type)));
+            }
+
+            Schema inputTupleSchema = inputBagSchema.getField(0).schema;
+
+            if (inputTupleSchema.size() != 1)
+            {
+                throw new RuntimeException("Expected one field for the token data");
+            }
+
+            if (inputTupleSchema.getField(0).type != DataType.CHARARRAY)
+            {
+                throw new RuntimeException(String.format("Expected source to be a CHARARRAY, but instead found %s",
+                        DataType.findTypeName(inputTupleSchema.getField(0).type)));
+            }
+
+            Schema tupleSchema = new Schema();
+            tupleSchema.add(new Schema.FieldSchema("token",DataType.CHARARRAY));
+            tupleSchema.add(new Schema.FieldSchema("tag",DataType.CHARARRAY));
+            tupleSchema.add(new Schema.FieldSchema("probability",DataType.DOUBLE));
+
+            return new Schema(new Schema.FieldSchema(getSchemaName(this.getClass()
+                    .getName()
+                    .toLowerCase(), input),
+                    tupleSchema,
+                    DataType.BAG));
+        }
+        catch (FrontendException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 }

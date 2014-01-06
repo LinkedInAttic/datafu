@@ -130,6 +130,40 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
+     define TokenizeWhitespace datafu.pig.text.TokenizeWhitespace();
+
+     data = LOAD 'input' AS (text: chararray);
+
+     dump data;
+
+     data2 = FOREACH data GENERATE TokenizeWhitespace(text) AS tokens;
+
+     dump data2;
+
+     STORE data2 INTO 'output';
+     */
+    @Multiline
+    private String tokenizeWhitespaceTest;
+
+    @Test
+    public void tokenizeWhitespaceTest() throws Exception
+    {
+        PigTest test = createPigTestFromString(tokenizeWhitespaceTest);
+
+        writeLinesToFile("input",
+                "This is a sentence. This is another sentence.",
+                "Yet another sentence. One more just for luck.");
+
+        test.runScript();
+
+        assertOutput(test, "data2",
+                "({(This),(is),(a),(sentence.),(This),(is),(another),(sentence.)})",
+                "({(Yet),(another),(sentence.),(One),(more),(just),(for),(luck.)})");
+    }
+
+    /**
+     register $JAR_PATH
+
      define TokenizeME datafu.pig.text.TokenizeME();
      define POSTag datafu.pig.text.POSTag();
 

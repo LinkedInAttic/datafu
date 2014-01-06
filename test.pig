@@ -10,6 +10,9 @@ DUMP out
 outa = FOREACH foo GENERATE datafu.pig.text.TokenizeSimple(text) AS tokens;
 DUMP outa
 
+outb = FOREACH foo GENERATE datafu.pig.text.TokenizeWhitespace(text) AS tokens;
+DUMP outb
+
 out2 = FOREACH foo GENERATE datafu.pig.text.SentenceDetect(text) AS sentences;
 out25 = FOREACH out2 GENERATE FLATTEN(sentences) AS sentences;
 

@@ -361,6 +361,7 @@
         <rule pattern="org.apache.commons.math.**" result="datafu.org.apache.commons.math.@1"/>
         <rule pattern="com.clearspring.analytics.**" result="datafu.com.clearspring.analytics.@1"/>
         <rule pattern="com.google.common.**" result="datafu.com.google.common.@1"/>
+        <rule pattern="opennlp.**" result="datafu.opennlp.@1"/>
     </jarjar>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
   </target>

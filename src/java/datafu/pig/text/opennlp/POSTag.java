@@ -11,7 +11,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package datafu.pig.text;
+package datafu.pig.text.opennlp;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -55,7 +55,7 @@ public class POSTag extends EvalFunc<DataBag>
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
 
-    // Enable multiple languages by specifying the model path. See http://opennlp.sourceforge.net/models-1.5/
+    // Enable multiple languages by specifying the model path. See http://text.sourceforge.net/models-1.5/
     public DataBag exec(Tuple input) throws IOException
     {
         DataBag inputBag = null;

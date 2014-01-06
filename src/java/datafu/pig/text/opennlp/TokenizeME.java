@@ -11,13 +11,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package datafu.pig.text;
+package datafu.pig.text.opennlp;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import opennlp.tools.tokenize.WhitespaceTokenizer;
+import opennlp.tools.tokenize.TokenizerME;
+import opennlp.tools.tokenize.TokenizerModel;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
 
@@ -27,7 +28,7 @@ import org.apache.pig.data.*;
  * Example:
  * <pre>
  * {@code
- * define TokenizeWhitespace datafu.pig.text.TokenizeWhitespace();
+ * define TokenizeME datafu.pig.text.TokenizeME();
  *
  * -- input:
  * -- ("I believe the Masons have infiltrated the Apache PMC.")
@@ -35,26 +36,33 @@ import org.apache.pig.data.*;
 
  * -- output:
  * -- ({(I),(believe),(the),(Masons),(have),(infiltrated),(the),(Apache),(PMC),(.)})
- * outfoo = FOREACH input GENERATE TokenizeWhitespace(text) as tokens;
+ * outfoo = FOREACH input GENERATE TokenizeME(text) as tokens;
  * }
  * </pre>
  */
-public class TokenizeWhitespace extends EvalFunc<DataBag>
+public class TokenizeME extends EvalFunc<DataBag>
 {
     private boolean isFirst = true;
     InputStream is = null;
-    WhitespaceTokenizer tokenizer = WhitespaceTokenizer.INSTANCE;
+    TokenizerModel model = null;
+    TokenizerME tokenizer = null;
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
 
+    // Enable multiple languages by specifying the model path. See http://text.sourceforge.net/models-1.5/
     public DataBag exec(Tuple input) throws IOException
     {
         String inputString = null;
+        String modelPath = "data/en-token.bin";
 
         if(input.size() == 0) {
             return null;
         }
         if(input.size() == 1) {
+            inputString = input.get(0).toString();
+        }
+        if(input.size() == 2) {
+            modelPath = input.get(1).toString();
             inputString = input.get(0).toString();
         }
 
@@ -63,6 +71,13 @@ public class TokenizeWhitespace extends EvalFunc<DataBag>
         }
 
         DataBag outBag = bf.newDefaultBag();
+        if(isFirst == true) {
+            is = new FileInputStream(modelPath);
+            model = new TokenizerModel(is);
+            tokenizer = new TokenizerME(model);
+
+            isFirst = false;
+        }
         String tokens[] = tokenizer.tokenize(inputString);
         for(String token : tokens) {
             Tuple outTuple = tf.newTuple(token);

@@ -11,13 +11,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package datafu.pig.text;
+package datafu.pig.text.opennlp;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import opennlp.tools.tokenize.SimpleTokenizer;
+import opennlp.tools.tokenize.WhitespaceTokenizer;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
 
@@ -27,7 +27,7 @@ import org.apache.pig.data.*;
  * Example:
  * <pre>
  * {@code
- * define TokenizeSimple datafu.pig.text.TokenizeSimple();
+ * define TokenizeWhitespace datafu.pig.text.TokenizeWhitespace();
  *
  * -- input:
  * -- ("I believe the Masons have infiltrated the Apache PMC.")
@@ -35,15 +35,15 @@ import org.apache.pig.data.*;
 
  * -- output:
  * -- ({(I),(believe),(the),(Masons),(have),(infiltrated),(the),(Apache),(PMC),(.)})
- * outfoo = FOREACH input GENERATE TokenizeSimple(text) as tokens;
+ * outfoo = FOREACH input GENERATE TokenizeWhitespace(text) as tokens;
  * }
  * </pre>
  */
-public class TokenizeSimple extends EvalFunc<DataBag>
+public class TokenizeWhitespace extends EvalFunc<DataBag>
 {
     private boolean isFirst = true;
     InputStream is = null;
-    SimpleTokenizer tokenizer = SimpleTokenizer.INSTANCE;
+    WhitespaceTokenizer tokenizer = WhitespaceTokenizer.INSTANCE;
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
 

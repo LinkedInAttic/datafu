@@ -11,14 +11,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package datafu.pig.text;
+package datafu.pig.text.opennlp;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import opennlp.tools.tokenize.TokenizerME;
-import opennlp.tools.tokenize.TokenizerModel;
+import opennlp.tools.tokenize.SimpleTokenizer;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
 
@@ -28,7 +27,7 @@ import org.apache.pig.data.*;
  * Example:
  * <pre>
  * {@code
- * define TokenizeME datafu.pig.text.TokenizeME();
+ * define TokenizeSimple datafu.pig.text.TokenizeSimple();
  *
  * -- input:
  * -- ("I believe the Masons have infiltrated the Apache PMC.")
@@ -36,33 +35,26 @@ import org.apache.pig.data.*;
 
  * -- output:
  * -- ({(I),(believe),(the),(Masons),(have),(infiltrated),(the),(Apache),(PMC),(.)})
- * outfoo = FOREACH input GENERATE TokenizeME(text) as tokens;
+ * outfoo = FOREACH input GENERATE TokenizeSimple(text) as tokens;
  * }
  * </pre>
  */
-public class TokenizeME extends EvalFunc<DataBag>
+public class TokenizeSimple extends EvalFunc<DataBag>
 {
     private boolean isFirst = true;
     InputStream is = null;
-    TokenizerModel model = null;
-    TokenizerME tokenizer = null;
+    SimpleTokenizer tokenizer = SimpleTokenizer.INSTANCE;
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
 
-    // Enable multiple languages by specifying the model path. See http://opennlp.sourceforge.net/models-1.5/
     public DataBag exec(Tuple input) throws IOException
     {
         String inputString = null;
-        String modelPath = "data/en-token.bin";
 
         if(input.size() == 0) {
             return null;
         }
         if(input.size() == 1) {
-            inputString = input.get(0).toString();
-        }
-        if(input.size() == 2) {
-            modelPath = input.get(1).toString();
             inputString = input.get(0).toString();
         }
 
@@ -71,13 +63,6 @@ public class TokenizeME extends EvalFunc<DataBag>
         }
 
         DataBag outBag = bf.newDefaultBag();
-        if(isFirst == true) {
-            is = new FileInputStream(modelPath);
-            model = new TokenizerModel(is);
-            tokenizer = new TokenizerME(model);
-
-            isFirst = false;
-        }
         String tokens[] = tokenizer.tokenize(inputString);
         for(String token : tokens) {
             Tuple outTuple = tf.newTuple(token);

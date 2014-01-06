@@ -62,25 +62,25 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
-     define Tokenize datafu.pig.text.Tokenize();
+     define TokenizeME datafu.pig.text.TokenizeME();
 
      data = LOAD 'input' AS (text: chararray);
 
      dump data;
 
-     data2 = FOREACH data GENERATE Tokenize(text) AS tokens;
+     data2 = FOREACH data GENERATE TokenizeME(text) AS tokens;
 
      dump data2;
 
      STORE data2 INTO 'output';
      */
     @Multiline
-    private String tokenizeTest;
+    private String tokenizeMETest;
 
     @Test
-    public void tokenizeTest() throws Exception
+    public void tokenizeMETest() throws Exception
     {
-        PigTest test = createPigTestFromString(tokenizeTest);
+        PigTest test = createPigTestFromString(tokenizeMETest);
 
         writeLinesToFile("input",
                 "This is a sentence. This is another sentence.",
@@ -96,14 +96,14 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
-     define Tokenize datafu.pig.text.Tokenize();
+     define TokenizeME datafu.pig.text.TokenizeME();
      define POSTag datafu.pig.text.POSTag();
 
      data = LOAD 'input' AS (text: chararray);
 
      dump data;
 
-     data2 = FOREACH data GENERATE Tokenize(text) AS tokens;
+     data2 = FOREACH data GENERATE TokenizeME(text) AS tokens;
 
      dump data2;
 

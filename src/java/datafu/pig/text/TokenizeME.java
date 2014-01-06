@@ -28,7 +28,7 @@ import org.apache.pig.data.*;
  * Example:
  * <pre>
  * {@code
- * define Tokenize datafu.pig.text.Tokenize();
+ * define TokenizeME datafu.pig.text.TokenizeME();
  *
  * -- input:
  * -- ("I believe the Masons have infiltrated the Apache PMC.")
@@ -36,11 +36,11 @@ import org.apache.pig.data.*;
 
  * -- output:
  * -- ({(I),(believe),(the),(Masons),(have),(infiltrated),(the),(Apache),(PMC),(.)})
- * outfoo = FOREACH input GENERATE Tokenize(text) as tokens;
+ * outfoo = FOREACH input GENERATE TokenizeME(text) as tokens;
  * }
  * </pre>
  */
-public class Tokenize extends EvalFunc<DataBag>
+public class TokenizeME extends EvalFunc<DataBag>
 {
     private boolean isFirst = true;
     InputStream is = null;

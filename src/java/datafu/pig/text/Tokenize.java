@@ -69,7 +69,6 @@ public class Tokenize extends EvalFunc<DataBag>
         if(inputString == null || inputString == "") {
             return null;
         }
-        System.out.println(inputString);
 
         DataBag outBag = bf.newDefaultBag();
         if(isFirst == true) {

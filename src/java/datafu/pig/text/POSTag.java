@@ -29,7 +29,7 @@ import org.apache.pig.data.*;
  * Example:
  * <pre>
  * {@code
- * define Tokenize datafu.pig.text.Tokenize();
+ * define TokenizeME datafu.pig.text.TokenizeME();
  * define POSTag datafu.pig.text.POSTag();
  *
  * -- input:
@@ -38,7 +38,7 @@ import org.apache.pig.data.*;
 
  * -- output:
  * -- Tuple schema is: (word, tag, confidence)
- * outfoo = FOREACH input GENERATE FLATTEN(Tokenize(text)) AS tokens;
+ * outfoo = FOREACH input GENERATE FLATTEN(TokenizeME(text)) AS tokens;
  * -- ({(Appetizers,NNP,0.3619277937390988),(during,IN,0.7945543860326094),(happy,JJ,0.9888504792754391),
  * -- (hour,NN,0.9427455123502427),(range,NN,0.7335527963654751),(from,IN,0.9911576465589752),($,$,0.9652034031895174),
  * -- (3-$,CD,0.7005347487371849),(8+,CD,0.8227771746247106),(.,.,0.9900983495480891)})

@@ -347,7 +347,7 @@
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     <move file="${dist.dir}/${final.name}.jar" tofile="${dist.dir}/${final.name}-orig.jar" />
     <java jar="${tools.dir}/autojar.jar" fork="true">
-      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${packaged.lib.dir}/${fastutil.jar}:${packaged.lib.dir}/${commons-math.jar}:${packaged.lib.dir}/${stream.jar}:${packaged.lib.dir}/${guava.jar} ${dist.dir}/${final.name}-orig.jar" />
+      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${packaged.lib.dir}/*.jar ${fastutil.jar}:${packaged.lib.dir}/${commons-math.jar}:${packaged.lib.dir}/${stream.jar}:${packaged.lib.dir}/${guava.jar} ${dist.dir}/${final.name}-orig.jar" />
     </java>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     

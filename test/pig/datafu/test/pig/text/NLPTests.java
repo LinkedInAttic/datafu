@@ -16,25 +16,10 @@
 
 package datafu.test.pig.text;
 
-import static org.testng.Assert.assertEquals;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import junit.framework.Assert;
-
 import org.adrianwalker.multilinestring.Multiline;
-import org.apache.pig.data.BagFactory;
-import org.apache.pig.data.DataBag;
-import org.apache.pig.data.Tuple;
-import org.apache.pig.data.TupleFactory;
 import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
-import datafu.pig.bags.CountEach;
-import datafu.pig.bags.DistinctBy;
-import datafu.pig.bags.Enumerate;
 import datafu.test.pig.PigTests;
 
 
@@ -49,7 +34,7 @@ public class NLPTests extends PigTests
 
      dump data;
 
-     data2 = FOREACH data GENERATE datafu.pig.text.SentenceDetect(text) AS sentences;
+     data2 = FOREACH data GENERATE SentenceDetect(text) AS sentences;
 
      dump data2;
 
@@ -64,13 +49,86 @@ public class NLPTests extends PigTests
         PigTest test = createPigTestFromString(sentenceDetectTest);
 
         writeLinesToFile("input",
-                "(This is a sentence. This is another sentence.)",
-                "(Yet another sentence. One more just for luck.)");
+                "This is a sentence. This is another sentence.",
+                "Yet another sentence. One more just for luck.");
 
         test.runScript();
 
         assertOutput(test, "data2",
                 "({(This is a sentence.),(This is another sentence.)})",
                 "({(Yet another sentence.),(One more just for luck.)})");
+    }
+
+    /**
+     register $JAR_PATH
+
+     define Tokenize datafu.pig.text.Tokenize();
+
+     data = LOAD 'input' AS (text: chararray);
+
+     dump data;
+
+     data2 = FOREACH data GENERATE Tokenize(text) AS tokens;
+
+     dump data2;
+
+     STORE data2 INTO 'output';
+     */
+    @Multiline
+    private String tokenizeTest;
+
+    @Test
+    public void tokenizeTest() throws Exception
+    {
+        PigTest test = createPigTestFromString(tokenizeTest);
+
+        writeLinesToFile("input",
+                "This is a sentence. This is another sentence.",
+                "Yet another sentence. One more just for luck.");
+
+        test.runScript();
+
+        assertOutput(test, "data2",
+                "({(This),(is),(a),(sentence),(.),(This),(is),(another),(sentence),(.)})",
+                "({(Yet),(another),(sentence),(.),(One),(more),(just),(for),(luck),(.)})");
+    }
+
+    /**
+     register $JAR_PATH
+
+     define Tokenize datafu.pig.text.Tokenize();
+     define POSTag datafu.pig.text.POSTag();
+
+     data = LOAD 'input' AS (text: chararray);
+
+     dump data;
+
+     data2 = FOREACH data GENERATE Tokenize(text) AS tokens;
+
+     dump data2;
+
+     data3 = FOREACH data2 GENERATE POSTag(tokens) as tagged;
+
+     dump data3
+
+     STORE data3 INTO 'output';
+     */
+    @Multiline
+    private String POSTagTest;
+
+    @Test
+    public void POSTagTest() throws Exception
+    {
+        PigTest test = createPigTestFromString(POSTagTest);
+
+        writeLinesToFile("input",
+                "This is a sentence. This is another sentence.",
+                "Yet another sentence. One more just for luck.");
+
+        test.runScript();
+
+        assertOutput(test, "data3",
+                "({(This,DT,0.9649410482478001),(is,VBZ,0.9982592902509803),(a,DT,0.9967282012835504),(sentence,NN,0.9772619256460584),(.,.,0.4391067883074289),(This,DT,0.8346710130761914),(is,VBZ,0.9928885242823617),(another,DT,0.9761159923140399),(sentence,NN,0.9964463493238542),(.,.,0.9856037689871404)})",
+                "({(Yet,RB,0.7638997090011364),(another,DT,0.9657669183153523),(sentence,NN,0.989193114719676),(.,.,0.20091718589945456),(One,CD,0.9229251494813668),(more,JJR,0.9360382000551335),(just,RB,0.8646324491545225),(for,IN,0.9851765355889605),(luck,NN,0.9883408827371651),(.,.,0.9746378518791978)})");
     }
 }

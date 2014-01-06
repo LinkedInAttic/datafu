@@ -19,9 +19,8 @@ import java.io.InputStream;
 
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
+import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
-
-import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * The OpenNLP SentenceDectectors segment an input paragraph into sentences.
@@ -41,24 +40,36 @@ import datafu.pig.util.SimpleEvalFunc;
  * }
  * </pre>
  */
-public class SentenceDetect extends SimpleEvalFunc<DataBag>
+public class SentenceDetect extends EvalFunc<DataBag>
 {
-    private static boolean isFirst = true;
+    private boolean isFirst = true;
     InputStream is = null;
     SentenceModel model = null;
     SentenceDetectorME sdetector = null;
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
 
-    public DataBag call(String inputString) throws IOException
-    {
-         DataBag outBag = this.call(inputString, "data/en-sent.bin");
-         return outBag;
-    }
-
     // Enable multiple languages by specifying the model path. See http://opennlp.sourceforge.net/models-1.5/
-    public DataBag call(String inputString, String modelPath) throws IOException
+    public DataBag exec(Tuple input) throws IOException
     {
+        String inputString = null;
+        String modelPath = "data/en-sent.bin";
+
+        if(input.size() == 0) {
+            return null;
+        }
+        if(input.size() == 1) {
+            inputString = input.get(0).toString();
+        }
+        if(input.size() == 2) {
+            modelPath = input.get(1).toString();
+            inputString = input.get(0).toString();
+        }
+
+        if(inputString == null || inputString == "") {
+            return null;
+        }
+
         DataBag outBag = bf.newDefaultBag();
         if(isFirst == true) {
             is = new FileInputStream(modelPath);

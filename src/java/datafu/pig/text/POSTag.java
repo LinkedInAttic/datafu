@@ -20,9 +20,8 @@ import java.util.Iterator;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
+import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
-
-import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * The OpenNLP Tokenizers segment an input character sequence into tokens.
@@ -47,24 +46,32 @@ import datafu.pig.util.SimpleEvalFunc;
  * }
  * </pre>
  */
-public class POSTag extends SimpleEvalFunc<DataBag>
+public class POSTag extends EvalFunc<DataBag>
 {
-    private static boolean isFirst = true;
+    private boolean isFirst = true;
     InputStream modelIn = null;
     POSModel model = null;
     POSTaggerME tagger = null;
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
 
-    public DataBag call(DataBag inputBag) throws IOException
-    {
-        DataBag outBag = this.call(inputBag, "data/en-pos-maxent.bin");
-        return outBag;
-    }
-
     // Enable multiple languages by specifying the model path. See http://opennlp.sourceforge.net/models-1.5/
-    public DataBag call(DataBag inputBag, String modelPath) throws IOException
+    public DataBag exec(Tuple input) throws IOException
     {
+        DataBag inputBag = null;
+        String modelPath = "data/en-pos-maxent.bin";
+
+        if(input.size() == 0) {
+            return null;
+        }
+        if(input.size() == 1) {
+            inputBag = (DataBag)input.get(0);
+        }
+        if(input.size() == 2) {
+            modelPath = input.get(1).toString();
+            inputBag = (DataBag)input.get(0);
+        }
+
         DataBag outBag = bf.newDefaultBag();
         if(isFirst == true) {
             modelIn = new FileInputStream(modelPath);

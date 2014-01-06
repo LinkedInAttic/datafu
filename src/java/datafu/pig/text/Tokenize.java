@@ -19,9 +19,8 @@ import java.io.InputStream;
 
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
+import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
-
-import datafu.pig.util.SimpleEvalFunc;
 
 /**
  * The OpenNLP Tokenizers segment an input character sequence into tokens.
@@ -41,24 +40,37 @@ import datafu.pig.util.SimpleEvalFunc;
  * }
  * </pre>
  */
-public class Tokenize extends SimpleEvalFunc<DataBag>
+public class Tokenize extends EvalFunc<DataBag>
 {
-    private static boolean isFirst = true;
+    private boolean isFirst = true;
     InputStream is = null;
     TokenizerModel model = null;
     TokenizerME tokenizer = null;
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
 
-    public DataBag call(String inputString) throws IOException
-    {
-        DataBag outBag = this.call(inputString, "data/en-token.bin");
-        return outBag;
-    }
-
     // Enable multiple languages by specifying the model path. See http://opennlp.sourceforge.net/models-1.5/
-    public DataBag call(String inputString, String modelPath) throws IOException
+    public DataBag exec(Tuple input) throws IOException
     {
+        String inputString = null;
+        String modelPath = "data/en-token.bin";
+
+        if(input.size() == 0) {
+            return null;
+        }
+        if(input.size() == 1) {
+            inputString = input.get(0).toString();
+        }
+        if(input.size() == 2) {
+            modelPath = input.get(1).toString();
+            inputString = input.get(0).toString();
+        }
+
+        if(inputString == null || inputString == "") {
+            return null;
+        }
+        System.out.println(inputString);
+
         DataBag outBag = bf.newDefaultBag();
         if(isFirst == true) {
             is = new FileInputStream(modelPath);

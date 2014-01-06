@@ -49,7 +49,7 @@ public class NLPTests extends PigTests
 
      dump data;
 
-     data2 = FOREACH data GENERATE SentenceDetect(text) as sentences;
+     data2 = FOREACH data GENERATE datafu.pig.text.SentenceDetect(text) AS sentences;
 
      dump data2;
 

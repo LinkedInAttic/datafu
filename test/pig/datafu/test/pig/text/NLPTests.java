@@ -96,6 +96,40 @@ public class NLPTests extends PigTests
     /**
      register $JAR_PATH
 
+     define TokenizeSimple datafu.pig.text.TokenizeSimple();
+
+     data = LOAD 'input' AS (text: chararray);
+
+     dump data;
+
+     data2 = FOREACH data GENERATE TokenizeSimple(text) AS tokens;
+
+     dump data2;
+
+     STORE data2 INTO 'output';
+     */
+    @Multiline
+    private String tokenizeSimpleTest;
+
+    @Test
+    public void tokenizeSimpleTest() throws Exception
+    {
+        PigTest test = createPigTestFromString(tokenizeSimpleTest);
+
+        writeLinesToFile("input",
+                "This is a sentence. This is another sentence.",
+                "Yet another sentence. One more just for luck.");
+
+        test.runScript();
+
+        assertOutput(test, "data2",
+                "({(This),(is),(a),(sentence),(.),(This),(is),(another),(sentence),(.)})",
+                "({(Yet),(another),(sentence),(.),(One),(more),(just),(for),(luck),(.)})");
+    }
+
+    /**
+     register $JAR_PATH
+
      define TokenizeME datafu.pig.text.TokenizeME();
      define POSTag datafu.pig.text.POSTag();
 

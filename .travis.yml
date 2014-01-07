@@ -12,5 +12,6 @@ env:
   - TESTFOLDER=stats
   - TESTFOLDER=urls
   - TESTFOLDER=util
+  - TESTFOLDER=text
 jdk:
   - openjdk6

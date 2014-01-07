@@ -13,9 +13,9 @@
  */
 package datafu.pig.text.opennlp;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
@@ -40,20 +40,53 @@ import org.apache.pig.data.*;
  * }
  * </pre>
  */
+
+
+
 public class TokenizeME extends EvalFunc<DataBag>
 {
     private boolean isFirst = true;
     InputStream is = null;
     TokenizerModel model = null;
-    TokenizerME tokenizer = null;
+    private TokenizerME tokenizer = null;
+    public static final String MODEL_FILE = "tokens";
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
+    String modelPath;
+
+    public TokenizeME(String modelPath) {
+        this.modelPath = modelPath;
+    }
+
+    public TokenizeME() {
+        this.modelPath = "data/en-token.bin";
+    }
+
+    @Override
+    public List<String> getCacheFiles() {
+        List<String> list = new ArrayList<String>(1);
+        list.add(this.modelPath + "#" + MODEL_FILE);
+        return list;
+    }
+
+    private String getFilename() throws IOException {
+        // if the symlink exists, use it, if not, use the raw name if it exists
+        // note: this is to help with testing, as it seems distributed cache doesn't work with PigUnit
+        String loadFile = MODEL_FILE;
+        if (!new File(loadFile).exists()) {
+            if (new File(this.modelPath).exists()) {
+                loadFile = this.modelPath;
+            } else {
+                throw new IOException(String.format("Could not load model, neither symlink %s nor file %s exist", MODEL_FILE, this.modelPath));
+            }
+        }
+        return loadFile;
+    }
 
     // Enable multiple languages by specifying the model path. See http://text.sourceforge.net/models-1.5/
     public DataBag exec(Tuple input) throws IOException
     {
         String inputString = null;
-        String modelPath = "data/en-token.bin";
 
         if(input.size() == 0) {
             return null;
@@ -71,14 +104,16 @@ public class TokenizeME extends EvalFunc<DataBag>
         }
 
         DataBag outBag = bf.newDefaultBag();
-        if(isFirst == true) {
-            is = new FileInputStream(modelPath);
-            model = new TokenizerModel(is);
-            tokenizer = new TokenizerME(model);
+        if(isFirst == true || this.tokenizer == null) {
+            String loadFile = getFilename();
+            InputStream file = new FileInputStream(loadFile);
+            InputStream buffer = new BufferedInputStream(file);
+            TokenizerModel model = new TokenizerModel(buffer);
+            this.tokenizer = new TokenizerME(model);
 
             isFirst = false;
         }
-        String tokens[] = tokenizer.tokenize(inputString);
+        String tokens[] = this.tokenizer.tokenize(inputString);
         for(String token : tokens) {
             Tuple outTuple = tf.newTuple(token);
             outBag.add(outTuple);

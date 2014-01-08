@@ -50,6 +50,7 @@
   <property name="guava.jar" value="guava-jar-${guava.version}.jar" />
   <property name="stream.jar" value="stream-jar-${stream.version}.jar" />
   <property name="opennlp.jar" value="opennlp-tools-bundle-${opennlp.version}.jar" />
+  <property name="lucene-spellchecker.jar" value="lucene-spellchecker-${lucene-spellchecker.version}.jar" />
 
   <!-- Java configuration -->
   <property name="targetJavaVersion" value="1.5" />
@@ -362,6 +363,7 @@
         <rule pattern="com.clearspring.analytics.**" result="datafu.com.clearspring.analytics.@1"/>
         <rule pattern="com.google.common.**" result="datafu.com.google.common.@1"/>
         <rule pattern="opennlp.**" result="datafu.opennlp.@1"/>
+        <rule pattern="lucene-spellchecker.**" result="datafu.lucene-spellchecker.@1" />
     </jarjar>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
   </target>

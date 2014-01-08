@@ -23,6 +23,7 @@
         <dependency org="org.apache.opennlp" name="opennlp-tools" rev="${opennlp.version}" conf="packaged->default"/>
         <dependency org="org.apache.opennlp" name="opennlp-uima" rev="${opennlp.version}" conf="packaged->default"/>
         <dependency org="org.apache.opennlp" name="opennlp-maxent" rev="${opennlp-maxent.version}" conf="packaged->default"/>
+        <dependency org="org.apache.lucene" name="lucene-spellchecker" rev="${lucene-spellchecker.version}" conf="packaged->default"/>
 
         <!-- hadoop and pig dependencies required for building but which are not included in the pom because
 we don't want to require a specific version -->

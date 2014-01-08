@@ -93,11 +93,6 @@ public class TokenizeME extends EvalFunc<DataBag>
         }
         if(input.size() == 1) {
             inputString = input.get(0).toString();
-        }
-        if(input.size() == 2) {
-            modelPath = input.get(1).toString();
-            inputString = input.get(0).toString();
-        }
 
         if(inputString == null || inputString == "") {
             return null;

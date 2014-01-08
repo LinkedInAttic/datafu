@@ -66,10 +66,6 @@ public class POSTag extends EvalFunc<DataBag>
         this.modelPath = modelPath;
     }
 
-    public POSTag() {
-        this.modelPath = "data/en-token.bin";
-    }
-
     @Override
     public List<String> getCacheFiles() {
         List<String> list = new ArrayList<String>(1);

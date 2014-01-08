@@ -50,21 +50,21 @@ public class SentenceDetect extends EvalFunc<DataBag>
     SentenceDetectorME sdetector = null;
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
+    String modelPath = null;
+
+    public SentenceDetect(String modelPath) {
+        this.modelPath = modelPath;
+    }
 
     // Enable multiple languages by specifying the model path. See http://text.sourceforge.net/models-1.5/
     public DataBag exec(Tuple input) throws IOException
     {
         String inputString = null;
-        String modelPath = "data/en-sent.bin";
 
         if(input.size() == 0) {
             return null;
         }
         if(input.size() == 1) {
-            inputString = input.get(0).toString();
-        }
-        if(input.size() == 2) {
-            modelPath = input.get(1).toString();
             inputString = input.get(0).toString();
         }
 
@@ -101,7 +101,7 @@ public class SentenceDetect extends EvalFunc<DataBag>
             }
 
             Schema tupleSchema = new Schema();
-            tupleSchema.add(new Schema.FieldSchema("token",DataType.CHARARRAY));
+            tupleSchema.add(new Schema.FieldSchema("sentence",DataType.CHARARRAY));
 
             return new Schema(new Schema.FieldSchema(getSchemaName(this.getClass()
                     .getName()

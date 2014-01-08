@@ -13,10 +13,13 @@
  */
 package datafu.pig.text.opennlp;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -54,8 +57,39 @@ public class POSTag extends EvalFunc<DataBag>
     InputStream modelIn = null;
     POSModel model = null;
     POSTaggerME tagger = null;
+    public static final String MODEL_FILE = "pos";
     TupleFactory tf = TupleFactory.getInstance();
     BagFactory bf = BagFactory.getInstance();
+    String modelPath;
+
+    public POSTag(String modelPath) {
+        this.modelPath = modelPath;
+    }
+
+    public POSTag() {
+        this.modelPath = "data/en-token.bin";
+    }
+
+    @Override
+    public List<String> getCacheFiles() {
+        List<String> list = new ArrayList<String>(1);
+        list.add(this.modelPath + "#" + MODEL_FILE);
+        return list;
+    }
+
+    private String getFilename() throws IOException {
+        // if the symlink exists, use it, if not, use the raw name if it exists
+        // note: this is to help with testing, as it seems distributed cache doesn't work with PigUnit
+        String loadFile = MODEL_FILE;
+        if (!new File(loadFile).exists()) {
+            if (new File(this.modelPath).exists()) {
+                loadFile = this.modelPath;
+            } else {
+                throw new IOException(String.format("Could not load model, neither symlink %s nor file %s exist", MODEL_FILE, this.modelPath));
+            }
+        }
+        return loadFile;
+    }
 
     // Enable multiple languages by specifying the model path. See http://text.sourceforge.net/models-1.5/
     public DataBag exec(Tuple input) throws IOException
@@ -78,7 +112,7 @@ public class POSTag extends EvalFunc<DataBag>
         if(isFirst == true) {
             modelIn = new FileInputStream(modelPath);
             model = new POSModel(modelIn);
-            tagger = new POSTaggerME(model);
+            this.tagger = new POSTaggerME(model);
 
             isFirst = false;
         }
@@ -95,8 +129,8 @@ public class POSTag extends EvalFunc<DataBag>
         }
 
         // Compute tags and their probabilities
-        String tags[] = tagger.tag(words);
-        double probs[] = tagger.probs();
+        String tags[] = this.tagger.tag(words);
+        double probs[] = this.tagger.probs();
 
         // Build output bag of 3-tuples
         for(int j = 0; j < tags.length; j++) {

@@ -60,10 +60,6 @@ public class TokenizeME extends EvalFunc<DataBag>
         this.modelPath = modelPath;
     }
 
-    public TokenizeME() {
-        this.modelPath = "data/en-token.bin";
-    }
-
     @Override
     public List<String> getCacheFiles() {
         List<String> list = new ArrayList<String>(1);

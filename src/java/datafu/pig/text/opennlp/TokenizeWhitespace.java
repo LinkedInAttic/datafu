@@ -20,6 +20,8 @@ import java.io.InputStream;
 import opennlp.tools.tokenize.WhitespaceTokenizer;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
+import org.apache.pig.impl.logicalLayer.FrontendException;
+import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
  * The OpenNLP Tokenizers segment an input character sequence into tokens.
@@ -69,5 +71,32 @@ public class TokenizeWhitespace extends EvalFunc<DataBag>
             outBag.add(outTuple);
         }
         return outBag;
+    }
+
+    @Override
+    public Schema outputSchema(Schema input)
+    {
+        try
+        {
+            Schema.FieldSchema inputFieldSchema = input.getField(0);
+
+            if (inputFieldSchema.type != DataType.CHARARRAY)
+            {
+                throw new RuntimeException("Expected a CHARARRAY as input, but got a " + inputFieldSchema.toString());
+            }
+
+            Schema tupleSchema = new Schema();
+            tupleSchema.add(new Schema.FieldSchema("token",DataType.CHARARRAY));
+
+            return new Schema(new Schema.FieldSchema(getSchemaName(this.getClass()
+                    .getName()
+                    .toLowerCase(), input),
+                    tupleSchema,
+                    DataType.BAG));
+        }
+        catch (FrontendException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 }

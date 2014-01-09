@@ -363,7 +363,7 @@
         <rule pattern="com.clearspring.analytics.**" result="datafu.com.clearspring.analytics.@1"/>
         <rule pattern="com.google.common.**" result="datafu.com.google.common.@1"/>
         <rule pattern="opennlp.**" result="datafu.opennlp.@1"/>
-        <rule pattern="lucene-spellchecker.**" result="datafu.lucene-spellchecker.@1" />
+        <rule pattern="org.lucene.**" result="datafu.org.lucene.@1" />
     </jarjar>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
   </target>

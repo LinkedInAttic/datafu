@@ -40,19 +40,19 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  * }
  * </pre>
  */
-public class JaroWinklerDistance extends EvalFunc<Double>
+public class JaroWinklerDistance extends EvalFunc<Float>
 {
     Float threshold = null;
 
     // Use the default Winkler bonus threshold of 0.7
-    JaroWinklerDistance() { }
+    public JaroWinklerDistance() { }
 
     // Set Winkler bonus threshold
-    JaroWinklerDistance(Float threshold) {
-        this.threshold = threshold;
+    public JaroWinklerDistance(String threshold) {
+        this.threshold = Float.valueOf(threshold);
     }
 
-    public Double exec(Tuple input) throws IOException
+    public Float exec(Tuple input) throws IOException
     {
         String inputString = null;
 
@@ -61,10 +61,6 @@ public class JaroWinklerDistance extends EvalFunc<Double>
         }
         if(input.size() < 2) {
             throw new RuntimeException("Must supply two arguments, got < 2");
-        }
-
-        if(inputString == null || inputString == "") {
-            return null;
         }
 
         // Accept numerical types or bytes too. Why not?
@@ -78,35 +74,11 @@ public class JaroWinklerDistance extends EvalFunc<Double>
         }
 
         Float distance = distanceChecker.getDistance(word1, word2);
-        return distance.doubleValue();
+        return distance;
     }
 
     @Override
-    public Schema outputSchema(Schema input)
-    {
-        try
-        {
-            Schema.FieldSchema inputFieldSchema = input.getField(0);
-
-            if (inputFieldSchema.type != DataType.CHARARRAY || inputFieldSchema.type != DataType.BYTEARRAY ||
-                    inputFieldSchema.type != DataType.INTEGER || inputFieldSchema.type != DataType.FLOAT ||
-                    inputFieldSchema.type != DataType.LONG || inputFieldSchema.type != DataType.DOUBLE)
-            {
-                throw new RuntimeException("Expected a CHARARRAY|BYTEARRAY|INTEGER|LONG|FLOAT|DOUBLE as input, but got a " + inputFieldSchema.toString());
-            }
-
-            Schema tupleSchema = new Schema();
-            tupleSchema.add(new Schema.FieldSchema("distance",DataType.DOUBLE));
-
-            return new Schema(new Schema.FieldSchema(getSchemaName(this.getClass()
-                    .getName()
-                    .toLowerCase(), input),
-                    tupleSchema,
-                    DataType.DOUBLE));
-        }
-        catch (FrontendException e)
-        {
-            throw new RuntimeException(e);
-        }
+    public Schema outputSchema(Schema input) {
+        return new Schema(new Schema.FieldSchema(null, DataType.FLOAT));
     }
 }

@@ -49,13 +49,13 @@ public class LuceneTests extends PigTests
         PigTest test = createPigTestFromString(jaroWinklerDistanceTest);
 
         writeLinesToFile("input",
-                "(senor software engineer),(sr. software engineer)",
-                "(president),(presidente)");
+                "senor software engineer\tsr. software engineer",
+                "president\tpresidente");
 
         test.runScript();
 
         assertOutput(test, "data2",
-                "{0.5}",
-                "{0.5}");
+                "(0.81569296)",
+                "(0.99666667)");
     }
 }

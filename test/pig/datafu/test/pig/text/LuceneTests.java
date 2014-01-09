@@ -58,4 +58,38 @@ public class LuceneTests extends PigTests
                 "(0.81569296)",
                 "(0.99666667)");
     }
+
+    /**
+     register $JAR_PATH
+
+     define LevensteinDistance datafu.pig.text.lucene.LevensteinDistance();
+
+     data = LOAD 'input' AS (word1: chararray, word2:chararray);
+
+     dump data;
+
+     data2 = FOREACH data GENERATE LevensteinDistance(word1, word2) AS distance;
+
+     dump data2;
+
+    STORE data2 INTO 'output';
+    */
+    @Multiline
+    private String levensteinDistanceTest;
+
+    @Test
+    public void levensteinDistanceTest() throws Exception
+    {
+        PigTest test = createPigTestFromString(levensteinDistanceTest);
+
+        writeLinesToFile("input",
+                "senor software engineer\tsr. software engineer",
+                "president\tpresidente");
+
+        test.runScript();
+
+        assertOutput(test, "data2",
+                "(0.82608694)",
+                "(0.9)");
+    }
 }

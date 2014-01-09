@@ -42,11 +42,6 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
  */
 public class JaroWinklerDistance extends EvalFunc<Double>
 {
-    private boolean isFirst = true;
-    InputStream is = null;
-    SimpleTokenizer tokenizer = SimpleTokenizer.INSTANCE;
-    TupleFactory tf = TupleFactory.getInstance();
-    BagFactory bf = BagFactory.getInstance();
     Float threshold = null;
 
     // Use the default Winkler bonus threshold of 0.7

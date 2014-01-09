@@ -14,16 +14,13 @@
 package datafu.pig.text.lucene;
 
 import java.io.IOException;
-import java.io.InputStream;
 
-import opennlp.tools.tokenize.SimpleTokenizer;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.*;
-import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
- * The Lucene JaroWinklerDistance class returns a similarity DOUBLE between 0-1, given two strings.
+ * The Lucene JaroWinklerDistance class returns a similarity FLOAT between 0-1, given two strings.
  * <p>
  * Example:
  * <pre>

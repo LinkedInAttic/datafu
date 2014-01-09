@@ -53,8 +53,11 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 @Nondeterministic
 public class ReservoirSample extends AccumulatorEvalFunc<DataBag> implements Algebraic
 {
-  Integer numSamples;
+  protected Integer numSamples;
+  
   private Reservoir reservoir;
+  
+  protected ScoredTuple.ScoreGenerator scoreGen;
   
   private Reservoir getReservoir()
   {
@@ -68,13 +71,23 @@ public class ReservoirSample extends AccumulatorEvalFunc<DataBag> implements Alg
   {
     this.numSamples = Integer.parseInt(numSamples);    
   }
-
+  
+  protected ScoredTuple.ScoreGenerator getScoreGenerator()
+  {
+      if(this.scoreGen == null)
+      {
+          this.scoreGen = new ScoredTuple.PureRandomScoreGenerator();
+      }
+      return this.scoreGen;
+  }
+  
   @Override
   public void accumulate(Tuple input) throws IOException
   {
     DataBag samples = (DataBag) input.get(0);
+    ScoredTuple.ScoreGenerator scoreGen = getScoreGenerator();
     for (Tuple sample : samples) {
-      getReservoir().consider(new ScoredTuple(Math.random(), sample));
+      getReservoir().consider(new ScoredTuple(scoreGen.generateScore(sample), sample));
     }  
   }
 
@@ -82,6 +95,7 @@ public class ReservoirSample extends AccumulatorEvalFunc<DataBag> implements Alg
   public void cleanup()
   {
     this.reservoir = null;
+    this.scoreGen = null;
   }
 
   @Override
@@ -156,6 +170,7 @@ public class ReservoirSample extends AccumulatorEvalFunc<DataBag> implements Alg
   {
     int numSamples;
     private Reservoir reservoir;
+    protected ScoredTuple.ScoreGenerator scoreGen;
     TupleFactory tupleFactory = TupleFactory.getInstance();
     
     public Initial(){}
@@ -172,10 +187,21 @@ public class ReservoirSample extends AccumulatorEvalFunc<DataBag> implements Alg
       }
       return reservoir;
     }
+    
+    protected ScoredTuple.ScoreGenerator getScoreGenerator()
+    {
+        if(this.scoreGen == null)
+        {
+            this.scoreGen = new ScoredTuple.PureRandomScoreGenerator();
+        }
+        return this.scoreGen;
+    }
 
     @Override
     public Tuple exec(Tuple input) throws IOException {
       DataBag output = BagFactory.getInstance().newDefaultBag();
+      
+      ScoredTuple.ScoreGenerator scoreGen = getScoreGenerator();
       
       DataBag samples = (DataBag) input.get(0);
       if (samples == null)
@@ -186,11 +212,11 @@ public class ReservoirSample extends AccumulatorEvalFunc<DataBag> implements Alg
         // no need to construct a reservoir, so just emit intermediate tuples
         for (Tuple sample : samples) {
           // add the score on to the intermediate tuple
-          output.add(new ScoredTuple(Math.random(), sample).getIntermediateTuple(tupleFactory));
+          output.add(new ScoredTuple(scoreGen.generateScore(sample), sample).getIntermediateTuple(tupleFactory));
         }
       } else {     
         for (Tuple sample : samples) {
-          getReservoir().consider(new ScoredTuple(Math.random(), sample));
+          getReservoir().consider(new ScoredTuple(scoreGen.generateScore(sample), sample));
         }    
         
         for (ScoredTuple scoredTuple : getReservoir()) {

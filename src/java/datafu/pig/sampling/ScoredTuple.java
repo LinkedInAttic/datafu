@@ -85,5 +85,20 @@ class ScoredTuple implements Comparable<ScoredTuple>
       else return -1;
     }
     return score.compareTo(o.score);
-  }    
+  }
+  
+  static interface ScoreGenerator
+  {      
+      double generateScore(Tuple sample) throws ExecException;
+  }
+  
+  static class PureRandomScoreGenerator implements ScoreGenerator
+  {
+      public PureRandomScoreGenerator(){}
+      
+      public double generateScore(Tuple sample)
+      {
+          return Math.random();
+      }
+  }
 }

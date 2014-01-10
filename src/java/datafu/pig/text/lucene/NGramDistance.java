@@ -20,12 +20,12 @@ import org.apache.pig.data.*;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 
 /**
- * The Lucene LevensteinDistance class returns a similarity FLOAT between 0-1, given two strings.
+ * The Lucene NGramDistance class returns a similarity FLOAT between 0-1, given two strings.
  * <p>
  * Example:
  * <pre>
  * {@code
- * define LevensteinDistance datafu.pig.text.lucene.LevensteinDistance();
+ * define NGramDistance datafu.pig.text.lucene.NGramDistance();
  *
  * -- input:
  * -- ("foobar", "foogoo")
@@ -33,15 +33,19 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 
  * -- output:
  * -- (0.55152313)
- * outfoo = FOREACH input GENERATE LevensteinDistance(text) as distance;
+ * outfoo = FOREACH input GENERATE NGramDistance(text) as distance;
  * }
  * </pre>
  */
-public class LevensteinDistance extends EvalFunc<Float>
+public class NGramDistance extends EvalFunc<Float>
 {
-    Float threshold = null;
+    Integer size = null;
 
-    public LevensteinDistance() { }
+    public NGramDistance() { }
+
+    public NGramDistance(String size) {
+        this.size = Integer.valueOf(size);
+    }
 
     public Float exec(Tuple input) throws IOException
     {
@@ -58,7 +62,13 @@ public class LevensteinDistance extends EvalFunc<Float>
         String word1 = input.get(0).toString();
         String word2 = input.get(1).toString();
 
-        org.apache.lucene.search.spell.LevensteinDistance distanceChecker = new org.apache.lucene.search.spell.LevensteinDistance();
+        org.apache.lucene.search.spell.NGramDistance distanceChecker;
+        if(this.size == null) {
+            distanceChecker = new org.apache.lucene.search.spell.NGramDistance();
+        }
+        else {
+            distanceChecker = new org.apache.lucene.search.spell.NGramDistance(size);
+        }
 
         Float distance = distanceChecker.getDistance(word1, word2);
         return distance;

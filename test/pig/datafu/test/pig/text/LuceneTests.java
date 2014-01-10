@@ -92,4 +92,37 @@ public class LuceneTests extends PigTests
                 "(0.82608694)",
                 "(0.9)");
     }
+
+    /**
+     * register $JAR_PATH
+     *
+     * define NGramDistance datafu.pig.text.lucene.NGramDistance('3');
+     *
+     * data = LOAD 'input' AS (word1: chararray, word2:chararray);
+     *
+     * dump data;
+     *
+     * data2 = FOREACH data GENERATE NGramDistance(word1, word2) AS distance;
+     *
+     * dump data2;
+     *
+     * STORE data2 INTO 'output';
+     */
+    @Multiline
+    private String nGramDistanceTest;
+
+    @Test
+    public void nGramDistanceTest() throws Exception {
+        PigTest test = createPigTestFromString(nGramDistanceTest);
+
+        writeLinesToFile("input",
+                "senor software engineer\tsr. software engineer",
+                "president\tpresidente");
+
+        test.runScript();
+
+        assertOutput(test, "data2",
+                "(0.81884056)",
+                "(0.9)");
+    }
 }

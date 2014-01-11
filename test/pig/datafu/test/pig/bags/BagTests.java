@@ -1186,4 +1186,80 @@ public class BagTests extends PigTests
     getLinesForAlias(test, "data2", true);
     assertOutput(test, "data3", "({((1,A),{(1,A,1),(1,A,2)}),((1,B),{(1,B,1)}),((2,A),{(2,A,1)}),((2,B),{(2,B,1)}),((2,C),{(2,C,1)}),((3,A),{(3,A,1)})})");
   }
+
+  /**
+   register $JAR_PATH
+
+   define Lead datafu.pig.bags.Lead('2');
+
+   data = LOAD 'input' AS (data: bag {T: tuple(v:INT)});
+   --describe data;
+
+   data2 = FOREACH data GENERATE Lead(data);
+   --describe data2;
+
+   data3 = FOREACH data2 GENERATE FLATTEN($0);
+   --describe data3;
+
+   STORE data3 INTO 'output';
+
+   */
+  @Multiline
+  private String leadTest;
+
+  @Test
+  public void leadTest() throws Exception
+  {
+    PigTest test = createPigTestFromString(leadTest);
+    writeLinesToFile("input",
+        "({(1),(2),(3),(4)})");
+
+    test.runScript();
+
+    assertOutput(test, "data3",
+        "((1),(2),(3))",
+        "((2),(3),(4))",
+        "((3),(4),)",
+        "((4),,)");
+  }
+
+
+  /**
+   register $JAR_PATH
+
+   define Lead datafu.pig.bags.Lead();
+
+   data = LOAD 'input' AS (data: bag {T: tuple(v1:INT,B: bag{T: tuple(v2:INT)})});
+   --describe data;
+
+   data2 = FOREACH data GENERATE Lead(data);
+   --describe data2;
+   DUMP data2;
+
+   data3 = FOREACH data2 GENERATE FLATTEN($0);
+   --describe data3;
+
+   STORE data3 INTO 'output';
+
+   */
+  @Multiline
+  private String leadTest2;
+
+  @Test
+  public void leadTest2() throws Exception
+  {
+    PigTest test = createPigTestFromString(leadTest2);
+    writeLinesToFile("input",
+        "({(10,{(1),(2),(3)}),(20,{(4),(5),(6)}),(30,{(7),(8)}),(40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)})})");
+
+    test.runScript();
+
+    assertOutput(test, "data3",
+        "((10,{(1),(2),(3)}),(20,{(4),(5),(6)}))",
+        "((20,{(4),(5),(6)}),(30,{(7),(8)}))",
+        "((30,{(7),(8)}),(40,{(9),(10),(11)}))",
+        "((40,{(9),(10),(11)}),(50,{(12),(13),(14),(15)}))",
+        "((50,{(12),(13),(14),(15)}),)");
+  }
+
 }

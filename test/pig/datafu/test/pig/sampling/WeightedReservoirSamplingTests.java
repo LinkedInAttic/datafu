@@ -198,35 +198,13 @@ public class WeightedReservoirSamplingTests extends PigTests
     }
   }
 
- /** 
-  register $JAR_PATH 
- 
-  define WeightedSample datafu.pig.sampling.WeightedReservoirSample('1','-1'); 
-
-  data = LOAD 'input' AS (v1:chararray,v2:INT);
-  data_g = group data all;
-  sampled = FOREACH data_g GENERATE WeightedSample(data);
-  describe sampled; 
-   
-  STORE sampled INTO 'output'; 
- 
-  */ 
-  @Multiline 
-  private String invalidConstructorArgTest; 
- 
   @Test
   public void invalidConstructorArgTest() throws Exception
   {
-    PigTest test = createPigTestFromString(invalidConstructorArgTest);
-
-    writeLinesToFile("input",  
-                "a\t100","b\t1","c\t5","d\t2");
     try {
-         test.runScript();
-         List<Tuple> output = this.getLinesForAlias(test, "sampled");
-         Assert.fail( "Testcase should fail");
+         WeightedReservoirSample sampler = new WeightedReservoirSample("1", "-1");
     } catch (Exception ex) {
-         Assert.assertTrue(ex.getMessage().indexOf("could not instantiate 'datafu.pig.sampling.WeightedReservoirSample' with arguments '[1, -1]'") >= 0);
+         Assert.assertTrue(ex.getMessage().indexOf("Invalid negative index of weight field argument for WeightedReserviorSample constructor: -1") >= 0);
     }
   }
 

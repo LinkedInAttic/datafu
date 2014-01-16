@@ -49,6 +49,7 @@
   <property name="commons-math.jar" value="commons-math-jar-${commons-math.version}.jar" />
   <property name="guava.jar" value="guava-jar-${guava.version}.jar" />
   <property name="stream.jar" value="stream-jar-${stream.version}.jar" />
+  <property name="opennlp.jar" value="opennlp-tools-bundle-${opennlp.version}.jar" />
 
   <!-- Java configuration -->
   <property name="targetJavaVersion" value="1.5" />
@@ -346,7 +347,7 @@
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     <move file="${dist.dir}/${final.name}.jar" tofile="${dist.dir}/${final.name}-orig.jar" />
     <java jar="${tools.dir}/autojar.jar" fork="true">
-      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${packaged.lib.dir}/${fastutil.jar}:${packaged.lib.dir}/${commons-math.jar}:${packaged.lib.dir}/${stream.jar}:${packaged.lib.dir}/${guava.jar} ${dist.dir}/${final.name}-orig.jar" />
+      <arg line="-baeq -o ${dist.dir}/${final.name}.jar -c ${packaged.lib.dir}/*.jar ${fastutil.jar}:${packaged.lib.dir}/${commons-math.jar}:${packaged.lib.dir}/${stream.jar}:${packaged.lib.dir}/${guava.jar} ${dist.dir}/${final.name}-orig.jar" />
     </java>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
     
@@ -360,6 +361,7 @@
         <rule pattern="org.apache.commons.math.**" result="datafu.org.apache.commons.math.@1"/>
         <rule pattern="com.clearspring.analytics.**" result="datafu.com.clearspring.analytics.@1"/>
         <rule pattern="com.google.common.**" result="datafu.com.google.common.@1"/>
+        <rule pattern="opennlp.**" result="datafu.opennlp.@1"/>
     </jarjar>
     <delete file="${dist.dir}/${final.name}-orig.jar" />
   </target>

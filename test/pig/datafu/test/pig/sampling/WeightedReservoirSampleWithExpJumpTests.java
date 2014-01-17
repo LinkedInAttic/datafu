@@ -32,20 +32,21 @@ import org.apache.pig.pigunit.PigTest;
 import org.testng.annotations.Test;
 
 import datafu.pig.sampling.WeightedReservoirSample;
+import datafu.pig.sampling.WeightedReservoirSampleWithExpJump;
 import datafu.test.pig.PigTests;
 
 /**
- * Tests for {@link WeightedReservoirSample}.
+ * Tests for {@link WeightedReservoirSampleWithExpJumpTests}.
  *
  * @author wjian 
  *
  */
-public class WeightedReservoirSamplingTests extends PigTests
+public class WeightedReservoirSampleWithExpJumpTests extends PigTests
 {
  /** 
   register $JAR_PATH 
  
-  define WeightedSample datafu.pig.sampling.WeightedReservoirSample('1','1'); 
+  define WeightedSample datafu.pig.sampling.WeightedReservoirSampleWithExpJump('1','1'); 
 
   data = LOAD 'input' AS (v1:chararray,v2:INT);
   data_g = group data all;
@@ -56,7 +57,7 @@ public class WeightedReservoirSamplingTests extends PigTests
  
   */ 
   @Multiline 
-  private String weightedSampleAccumulateTest; 
+  private String weightedSampleAccTest; 
    
   @Test 
   public void weightedSampleAccumulateTest() throws Exception 
@@ -68,10 +69,10 @@ public class WeightedReservoirSamplingTests extends PigTests
      count.put("c", 0);
      count.put("d", 0);
 
-     PigTest test = createPigTestFromString(weightedSampleAccumulateTest); 
+     PigTest test = createPigTestFromString(weightedSampleAccTest); 
  
      writeLinesToFile("input",  
-                "a\t100","b\t5","c\t1","d\t2");
+                "b\t2","c\t1","d\t5","a\t100");
 
      for(int i = 0; i < 10; i++) {
         test.runScript();
@@ -181,11 +182,10 @@ public class WeightedReservoirSamplingTests extends PigTests
      Assert.assertEquals(maxKey, "a");
   }
 
-
   @Test
-  public void weightedSampleAccumulateIntegrityTest() throws IOException
+  public void weightedSampleAccumulateIntegerityTest() throws IOException
   {
-     WeightedReservoirSample sampler = new WeightedReservoirSample("10", "1");
+     WeightedReservoirSampleWithExpJump sampler = new WeightedReservoirSampleWithExpJump("10", "1");
 
      for (int i=0; i<100; i++)
      {
@@ -237,7 +237,7 @@ public class WeightedReservoirSamplingTests extends PigTests
   {
     List<Tuple> initialOutputTupleList = new ArrayList<Tuple>();
     for(Tuple initialInputTuple : initialInput) {
-        WeightedReservoirSample.Initial initialSampler = new WeightedReservoirSample.Initial(strNumSamples, strWeightIdx);
+        WeightedReservoirSampleWithExpJump.Initial initialSampler = new WeightedReservoirSampleWithExpJump.Initial(strNumSamples, strWeightIdx);
         Tuple initialOutputTuple = initialSampler.exec(initialInputTuple);
         initialOutputTupleList.add(initialOutputTuple);
     }
@@ -249,7 +249,7 @@ public class WeightedReservoirSamplingTests extends PigTests
         for(int j = 0; j < combiners && i < initialOutputTupleList.size(); j++, i++) {
            intermedTupleList.add(initialOutputTupleList.get(i));
         }
-        WeightedReservoirSample.Intermediate intermediateSampler = new WeightedReservoirSample.Intermediate(strNumSamples, strWeightIdx);
+        WeightedReservoirSampleWithExpJump.Intermediate intermediateSampler = new WeightedReservoirSampleWithExpJump.Intermediate(strNumSamples, strWeightIdx);
         DataBag finalBag = BagFactory.getInstance().newDefaultBag(intermedTupleList);
         Tuple finalTuple = intermediateSampler.exec(TupleFactory.getInstance().newTuple(finalBag));
         finalTupleList.add(finalTuple);
@@ -257,7 +257,7 @@ public class WeightedReservoirSamplingTests extends PigTests
     }
 
     DataBag finalBag = BagFactory.getInstance().newDefaultBag(finalTupleList);
-    WeightedReservoirSample.Final finalSampler = new WeightedReservoirSample.Final(strNumSamples, strWeightIdx);
+    WeightedReservoirSampleWithExpJump.Final finalSampler = new WeightedReservoirSampleWithExpJump.Final(strNumSamples, strWeightIdx);
     DataBag result = finalSampler.exec(TupleFactory.getInstance().newTuple(finalBag));
     return result;
   }
@@ -281,9 +281,9 @@ public class WeightedReservoirSamplingTests extends PigTests
   }
 
   @Test
-  public void weightedReservoirSampleLimitExecTest() throws IOException
+  public void weightedSampleLimitExecTest() throws IOException
   {
-    WeightedReservoirSample sampler = new WeightedReservoirSample("100", "1");
+    WeightedReservoirSampleWithExpJump sampler = new WeightedReservoirSampleWithExpJump("100", "1");
    
     DataBag bag = BagFactory.getInstance().newDefaultBag();
     for (int i=0; i<10; i++)
@@ -318,17 +318,17 @@ public class WeightedReservoirSamplingTests extends PigTests
   public void invalidConstructorArgTest() throws Exception
   {
     try {
-         WeightedReservoirSample sampler = new WeightedReservoirSample("1", "-1");
+         WeightedReservoirSampleWithExpJump sampler = new WeightedReservoirSampleWithExpJump("1", "-1");
          Assert.fail( "Testcase should fail");
     } catch (Exception ex) {
-         Assert.assertTrue(ex.getMessage().indexOf("Invalid negative weight field index argument in WeightedReservoirSample reservoir constructor: -1") >= 0);
+         Assert.assertTrue(ex.getMessage().indexOf("Invalid negative weight field index argument in WeightedReservoirSampleWithExpJump reservoir constructor: -1") >= 0);
     }
   }
 
   @Test
   public void invalidWeightTest() throws Exception
   {
-    PigTest test = createPigTestFromString(weightedSampleAccumulateTest);
+    PigTest test = createPigTestFromString(weightedSampleAccTest);
 
     writeLinesToFile("input",  
                 "a\t100","b\t1","c\t0","d\t2");
@@ -343,7 +343,7 @@ public class WeightedReservoirSamplingTests extends PigTests
  /** 
   register $JAR_PATH 
  
-  define WeightedSample datafu.pig.sampling.WeightedReservoirSample('1','1'); 
+  define WeightedSample datafu.pig.sampling.WeightedReservoirSampleWithExpJump('1','1'); 
 
   data = LOAD 'input' AS (v1:chararray);
   data_g = group data all;
@@ -375,7 +375,7 @@ public class WeightedReservoirSamplingTests extends PigTests
  /** 
   register $JAR_PATH 
  
-  define WeightedSample datafu.pig.sampling.WeightedReservoirSample('1','0'); 
+  define WeightedSample datafu.pig.sampling.WeightedReservoirSampleWithExpJump('1','0'); 
 
   data = LOAD 'input' AS (v1:chararray, v2:INT);
   data_g = group data all;

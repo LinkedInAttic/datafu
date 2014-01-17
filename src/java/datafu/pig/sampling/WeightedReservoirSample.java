@@ -1,17 +1,18 @@
 /*
- * Copyright 2013 LinkedIn Corp. and contributors
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *           http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package datafu.pig.sampling;
@@ -19,11 +20,11 @@ package datafu.pig.sampling;
 import java.util.List;
 
 import org.apache.pig.data.DataType;
-import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.builtin.Nondeterministic;
-import org.apache.pig.backend.executionengine.ExecException;
+
+import com.google.common.base.Preconditions;
 
 /**
  * <p>
@@ -32,7 +33,7 @@ import org.apache.pig.backend.executionengine.ExecException;
  * {@link <a href="http://utopia.duth.gr/~pefraimi/research/data/2007EncOfAlg.pdf" target="_blank">paper</a>}. 
  * </p>
  * <p>
- * Species with larger weight have higher probability to be selected in the final sample set.
+ * Items with larger weight have higher probability to be selected in the final sample set.
  * </p>
  * <p>
  * This UDF inherits from {@link ReservoirSample} and it is guaranteed to produce
@@ -62,28 +63,24 @@ import org.apache.pig.backend.executionengine.ExecException;
  */
 
 @Nondeterministic
-public class WeightedReservoirSample extends ReservoirSample {
+public class WeightedReservoirSample extends ReservoirSample 
+{   
+    protected Integer weightIdx;
     
-    private Integer weightIdx;
-    
-    public WeightedReservoirSample(String strNumSamples, String strWeightIdx)
+    protected WeightedReservoirSample(ScoredSampleReservoir reservoir) 
     {
-        super(strNumSamples);
-        this.weightIdx = Integer.parseInt(strWeightIdx);
-        if(this.weightIdx < 0) {
-            throw new IllegalArgumentException("Invalid negative index of weight field argument for WeightedReserviorSample constructor: " 
-                                     + strWeightIdx);
-        }
+        super(reservoir);
     }
     
-    @Override
-    protected ScoredTuple.ScoreGenerator getScoreGenerator()
+    private WeightedReservoirSample(int numSamples, int weightIdx)
     {
-        if(super.scoreGen == null)
-        {
-            super.scoreGen = new InverseWeightScoreGenerator(this.weightIdx);
-        }
-        return this.scoreGen;
+        this(new InverseWeightNoJumpSampleReservoir(numSamples, weightIdx));
+        this.weightIdx = weightIdx;
+    }
+        
+    public WeightedReservoirSample(String strNumSamples, String strWeightIdx)
+    {
+        this(Integer.parseInt(strNumSamples), Integer.parseInt(strWeightIdx));
     }
     
     @Override
@@ -142,12 +139,12 @@ public class WeightedReservoirSample extends ReservoirSample {
     
     String param = null;
     
-    private String getParam()
+    protected String getParam()
     {
       if (this.param == null) {
-          if(super.numSamples != null && this.weightIdx != null) {
+          if(super.reservoir != null && this.weightIdx != null) {
               this.param = String.format("('%d','%d')", 
-                                       super.numSamples,
+                                       super.reservoir.getNumSamples(),
                                        this.weightIdx);
           } else {
               this.param = "";
@@ -177,33 +174,17 @@ public class WeightedReservoirSample extends ReservoirSample {
     }
    
     static public class Initial extends ReservoirSample.Initial
-    {
-      private Integer weightIdx; 
-        
+    {        
       public Initial()
       {
           super();
-          this.weightIdx = null;
       }
       
       public Initial(String strNumSamples, String strWeightIdx)
       {
-          super(strNumSamples);
-          this.weightIdx = Integer.parseInt(strWeightIdx);
-          if(this.weightIdx < 0) {
-              throw new IllegalArgumentException("Invalid negative index of weight field for WeightedReserviorSample.Initial constructor: " 
-                                       + strWeightIdx);
-          }
-      }
-      
-      @Override
-      protected ScoredTuple.ScoreGenerator getScoreGenerator()
-      {
-          if(super.scoreGen == null)
-          {
-              super.scoreGen = new InverseWeightScoreGenerator(this.weightIdx);
-          }
-          return super.scoreGen;
+          int weightIdx = Integer.parseInt(strWeightIdx);
+          int numSamples = Integer.parseInt(strNumSamples);
+          super.reservoir = new InverseWeightNoJumpSampleReservoir(numSamples, weightIdx);
       }
     }
     
@@ -232,31 +213,26 @@ public class WeightedReservoirSample extends ReservoirSample {
             super(strNumSamples);
         }        
     }
-
-    static class InverseWeightScoreGenerator implements ScoredTuple.ScoreGenerator
-    {        
-        //index of the weight field of the input tuple
+    
+    static class InverseWeightNoJumpSampleReservoir extends NoJumpScoredSampleReservoir
+    {
         private int weightIdx;
         
-        InverseWeightScoreGenerator(Integer weightIdx) 
+        public InverseWeightNoJumpSampleReservoir(int numSamples, int weightIdx) 
         {
-            if(weightIdx == null || weightIdx < 0) {
-                throw new IllegalArgumentException("Invalid null or negative weight index input: " + weightIdx);
-            }
+            super(numSamples);
+            Preconditions.checkArgument(weightIdx >= 0, 
+                    "Invalid negative weight field index argument in WeightedReservoirSample reservoir constructor: " + weightIdx);
             this.weightIdx = weightIdx;
         }
         
         @Override
-        public double generateScore(Tuple sample) throws ExecException
+        public ScoreGenerator getScoreGenerator()
         {
-            double weight = ((Number)sample.get(this.weightIdx)).doubleValue();
-            if(Double.compare(weight, 0.0) <= 0)
-            {
-                //non-positive weight should be avoided
-                throw new ExecException(String.format("Invalid sample weight [%f]. It should be a positive real number", weight));
+            if(this.scoreGen == null) {
+                this.scoreGen = new InverseWeightScoreGenerator(this.weightIdx);
             }
-            //a differnt approach to try: u^(1/w) could be exp(log(u)/w) ?
-            return Math.pow(Math.random(), 1/weight);
+            return this.scoreGen;
         }
     }
 }

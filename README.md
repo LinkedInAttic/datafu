@@ -1,11 +1,14 @@
 # Apache DataFu
 
-[Apache DataFu](http://datafu.incubator.apache.org) is a collection of libraries for working with large-scale data in Hadoop. The project was inspired by the need for stable, well-tested libraries for data mining and statistics.
+[Apache DataFu](http://datafu.incubator.apache.org) is a collection of libraries for working with large-scale data in Hadoop.
+The project was inspired by the need for stable, well-tested libraries for data mining and statistics.
 
 It consists of two libraries:
 
 * **Apache DataFu Pig**: a collection of user-defined functions for [Apache Pig](http://pig.apache.org/)
 * **Apache DataFu Hourglass**: an incremental processing framework for [Apache Hadoop](http://hadoop.apache.org/) in MapReduce
+
+Apache DataFu is currently undergoing incubation with Apache.  A mirror of the official git repository can be found on GitHub at [https://github.com/apache/incubator-datafu](https://github.com/apache/incubator-datafu).
 
 For more information please visit the website:
 

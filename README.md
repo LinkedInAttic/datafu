@@ -14,6 +14,11 @@ For more information please visit the website:
 
 * [http://datafu.incubator.apache.org/](http://datafu.incubator.apache.org/)
 
+If you'd like to jump in and get started, check out the corresponding guides for each library:
+
+* [Apache DataFu Pig - Getting Started](http://datafu.incubator.apache.org/docs/datafu/getting-started.html)
+* [Apache DataFu Hourglass - Getting Started](http://datafu.incubator.apache.org/docs/hourglass/getting-started.html)
+
 ## Blog Posts
 
 * [Introducing DataFu](http://datafu.incubator.apache.org/blog/2012/01/10/introducing-datafu.html)

@@ -8,7 +8,7 @@ It consists of two libraries:
 * **Apache DataFu Pig**: a collection of user-defined functions for [Apache Pig](http://pig.apache.org/)
 * **Apache DataFu Hourglass**: an incremental processing framework for [Apache Hadoop](http://hadoop.apache.org/) in MapReduce
 
-Apache DataFu is currently undergoing incubation with Apache.  A mirror of the official git repository can be found on GitHub at [https://github.com/apache/incubator-datafu](https://github.com/apache/incubator-datafu).
+DataFu is currently undergoing incubation with Apache.  A mirror of the official git repository can be found on GitHub at [https://github.com/apache/incubator-datafu](https://github.com/apache/incubator-datafu).
 
 For more information please visit the website:
 

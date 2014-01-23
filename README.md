@@ -34,3 +34,20 @@ For more information please visit the website:
 ## Getting Help
 
 Bugs and feature requests can be filed [here](https://issues.apache.org/jira/browse/DATAFU).  For other help please see the [discussion group](http://groups.google.com/group/datafu).
+
+## Building the Code
+
+The Apache DataFu Pig library can be built by running the command below.  More information about working with the source
+code can be found in the [DataFu Pig Contributing Guide](http://datafu.incubator.apache.org/docs/datafu/contributing.html).
+
+```
+ant jar
+```
+
+The Apache DataFu Pig library can be built by running the commands below.  More information about working with the source
+code can be found in the [DataFu Hourglass Contributing Guide](http://datafu.incubator.apache.org/docs/hourglass/contributing.html).
+
+```
+cd contrib/hourglass
+ant jar
+```

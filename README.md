@@ -19,13 +19,13 @@ For more information please visit the website:
 * [Introducing DataFu](http://datafu.incubator.apache.org/blog/2012/01/10/introducing-datafu.html)
 * [DataFu: The WD-40 of Big Data](http://datafu.incubator.apache.org/blog/2013/01/24/datafu-the-wd-40-of-big-data.html)
 * [DataFu 1.0](http://datafu.incubator.apache.org/blog/2013/09/04/datafu-1-0.html)
-* [DataFu's Hourglass: Incremental Data Processing in Hadoop](http://engineering.linkedin.com/datafu/datafus-hourglass-incremental-data-processing-hadoop)
+* [DataFu's Hourglass: Incremental Data Processing in Hadoop](http://datafu.incubator.apache.org/blog/2013/10/03/datafus-hourglass-incremental-data-processing-in-hadoop.html)
 
 ## Presentations
 
 * [A Brief Tour of DataFu](http://www.slideshare.net/matthewterencehayes/datafu)
 * [Building Data Products at LinkedIn with DataFu](http://www.slideshare.net/matthewterencehayes/building-data-products-at-linkedin-with-datafu)
-* [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://datafu.incubator.apache.org/blog/2013/10/03/datafus-hourglass-incremental-data-processing-in-hadoop.html)
+* [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://www.slideshare.net/matthewterencehayes/hourglass-a-library-for-incremental-processing-on-hadoop)
 
 ## Papers
 

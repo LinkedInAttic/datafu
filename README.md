@@ -35,6 +35,20 @@ If you'd like to jump in and get started, check out the corresponding guides for
 * [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://www.slideshare.net/matthewterencehayes/hourglass-a-library-for-incremental-processing-on-hadoop)
 * [DataFu @ ApacheCon 2014](http://www.slideshare.net/williamgvaughan/datafu-apachecon-33420740)
 
+## Videos
+
+* [Introduction to Apache DataFu @ ApacheCon 2014](http://www.youtube.com/watch?v=JWI9tVsQ1cY)
+
+## Other Resources
+
+An interesting example of using Quantile from DataFu can be found in the [Hadoop Real-World Solutions Cookbook](http://packtlib.packtpub.com/library/hadoop-real-world-solutions-cookbook/ch06lvl1sec62).
+
+## From Around the Web
+
+* [DataFu Enters Incubation Status at Apache](http://www.infoq.com/news/2014/02/datafu-asf)
+* [DataFu: Open Source Apache Pig UDFs by LinkedIn](http://nosql.mypopescu.com/post/15734212877/datafu-open-source-apache-pig-udfs-by-linkedin)
+* [LinkedIn Opens DataFu: A Library for Working with Hadoop and Pig](http://readwrite.com/2012/01/12/linkedin-opens-datafu-a-librar)
+
 ## Papers
 
 * [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://www.slideshare.net/matthewterencehayes/hourglass-27038297)

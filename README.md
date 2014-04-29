@@ -31,6 +31,7 @@ If you'd like to jump in and get started, check out the corresponding guides for
 * [A Brief Tour of DataFu](http://www.slideshare.net/matthewterencehayes/datafu)
 * [Building Data Products at LinkedIn with DataFu](http://www.slideshare.net/matthewterencehayes/building-data-products-at-linkedin-with-datafu)
 * [Hourglass: a Library for Incremental Processing on Hadoop (IEEE BigData 2013)](http://www.slideshare.net/matthewterencehayes/hourglass-a-library-for-incremental-processing-on-hadoop)
+* [DataFu @ ApacheCon 2014](http://www.slideshare.net/williamgvaughan/datafu-apachecon-33420740)
 
 ## Papers
 

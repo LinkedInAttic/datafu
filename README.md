@@ -1,4 +1,5 @@
-# Apache DataFu
+<h1>Apache DataFu</h1> <a href="https://twitter.com/apachedatafu" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @apachedatafu</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 
 [Apache DataFu](http://datafu.incubator.apache.org) is a collection of libraries for working with large-scale data in Hadoop.
 The project was inspired by the need for stable, well-tested libraries for data mining and statistics.
